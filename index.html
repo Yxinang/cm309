@@ -332,6 +332,16 @@
         <input type="url" id="sheetsApiUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
         <button class="btn-submit" style="margin-top:8px; background:#059669;" onclick="saveSheetsUrl()">儲存連結</button>
       </div>
+
+      <!-- 新增：測試後的資料清除按鈕 -->
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-triangle-exclamation text-danger"></i> 進階資料清除 (測試後重置)</div>
+        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">如果您剛測試完系統，準備正式讓學生使用，可以在這裡一鍵清除寵物測試資料。</p>
+        <button class="btn-submit" style="background:#ef4444;" onclick="resetAllPets()">
+          <i class="fa-solid fa-trash-can"></i> 一鍵刪除全班寵物與寵物園
+        </button>
+      </div>
+
     </section>
 
   </main>
@@ -372,7 +382,6 @@
         <div id="petModalEmoji" style="margin:10px 0;">🥚</div>
         <h4 id="petModalName" style="color:#1e40af; margin-bottom:8px;">神秘的蛋 (第一階段：蛋)</h4>
         
-        <!-- 進度條區域 (滿等時隱藏) -->
         <div id="petModalProgressArea">
           <div style="text-align:left; font-size:0.8rem; color:#64748b; margin-top:10px;">升級進度：<span id="petModalXpText" style="float:right;">15 / 20</span></div>
           <div class="pet-progress-bg" style="height:12px; margin-bottom:20px;">
@@ -380,7 +389,6 @@
           </div>
         </div>
 
-        <!-- 滿等放生按鈕區域 (滿等時顯示) -->
         <div id="petModalCompleteArea" style="display:none; margin:20px 0;">
           <p style="font-size:0.9rem; color:#15803d; margin-bottom:12px; font-weight:700;">🎉 恭喜！寵物已經圓滿長大了！</p>
           <button class="btn-submit" style="background:#eab308; color:#fff;" onclick="moveToGarden()">
@@ -388,7 +396,6 @@
           </button>
         </div>
 
-        <!-- 手動加分區域 (滿等時隱藏) -->
         <div id="petModalActionArea" style="display:flex; gap:10px; margin-bottom:15px;">
           <button class="btn-submit" style="background:#10b981;" onclick="manualAddPetXp(1)">+1 獎勵分</button>
           <button class="btn-submit" style="background:#059669;" onclick="manualAddPetXp(5)">+5 獎勵分</button>
@@ -419,7 +426,7 @@
     </div>
   </div>
 
-  <!-- 照片上傳 Modal 與 公告 Modal 隱藏區 -->
+  <!-- 照片上傳 Modal / 公告 Modal -->
   <div id="photoUploadModal" class="modal-overlay">
     <div class="modal-box">
       <h3>上傳新照片</h3>
@@ -469,7 +476,7 @@
     let albums = JSON.parse(localStorage.getItem('cm309_albums')) || [];
     
     let petState = JSON.parse(localStorage.getItem('cm309_pets')) || {};
-    let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {}; // 儲存寵物園
+    let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
 
     let attendanceState = {}; 
     let interactiveHwState = {}; 
@@ -571,10 +578,8 @@
       document.getElementById('btnModalClose').onclick = closePetModal;
 
       if (!p) {
-        // 沒有寵物 -> 挑選盲盒
         selectView.style.display = 'block';
       } else {
-        // 養成中或已滿等
         manageView.style.display = 'block';
         const cat = PET_CATALOG.find(c => c.id === p.petId);
         const isMystery = p.stage === 1;
@@ -587,20 +592,14 @@
         let displayName = isMystery ? '神秘的蛋' : cat.name;
         document.getElementById('petModalName').textContent = `${displayName} (${stageName})`;
         
-        // 區域控制
         const progressArea = document.getElementById('petModalProgressArea');
         const actionArea = document.getElementById('petModalActionArea');
         const completeArea = document.getElementById('petModalCompleteArea');
 
         if(isCompleted) {
-           progressArea.style.display = 'none';
-           actionArea.style.display = 'none';
-           completeArea.style.display = 'block';
+           progressArea.style.display = 'none'; actionArea.style.display = 'none'; completeArea.style.display = 'block';
         } else {
-           progressArea.style.display = 'block';
-           actionArea.style.display = 'flex';
-           completeArea.style.display = 'none';
-           
+           progressArea.style.display = 'block'; actionArea.style.display = 'flex'; completeArea.style.display = 'none';
            let req = PET_REQ[p.stage - 1];
            document.getElementById('petModalXpText').textContent = `${p.xp} / ${req}`;
            document.getElementById('petModalProgressBar').style.width = `${(p.xp/req)*100}%`;
@@ -609,7 +608,6 @@
       document.getElementById('petManageModal').classList.add('active');
     }
 
-    // 隨機抽選一隻寵物作為盲盒
     function selectMysteryPet() {
       const seat = currentSelectedStudent.seat;
       const randomPet = PET_CATALOG[Math.floor(Math.random() * PET_CATALOG.length)];
@@ -620,41 +618,39 @@
 
     function manualAddPetXp(points) { addPetXp(currentSelectedStudent.seat, points); openPetModal(currentSelectedStudent.seat, currentSelectedStudent.name); }
     
-    // 送進寵物園
     function moveToGarden() {
-      const seat = currentSelectedStudent.seat;
-      const p = petState[seat];
+      const seat = currentSelectedStudent.seat; const p = petState[seat];
       if(!petCollection[seat]) petCollection[seat] = [];
-      petCollection[seat].push(p.petId); // 儲存該種類 ID
+      petCollection[seat].push(p.petId); 
       delete petState[seat];
       localStorage.setItem('cm309_pets', JSON.stringify(petState));
       localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
-      openPetModal(seat, currentSelectedStudent.name); // 會重新載入變成選盲盒畫面
+      openPetModal(seat, currentSelectedStudent.name); 
       renderPetsGrid();
     }
 
-    // 打開專屬寵物園
     function showPetGarden() {
-      document.getElementById('petManageView').style.display = 'none';
-      document.getElementById('petSelectView').style.display = 'none';
-      document.getElementById('petGardenView').style.display = 'block';
-      document.getElementById('btnViewGarden').style.display = 'none';
-      
+      document.getElementById('petManageView').style.display = 'none'; document.getElementById('petSelectView').style.display = 'none';
+      document.getElementById('petGardenView').style.display = 'block'; document.getElementById('btnViewGarden').style.display = 'none';
       document.getElementById('petModalTitle').textContent = `${currentSelectedStudent.name} 的專屬寵物園`;
       document.getElementById('btnModalClose').textContent = '🔙 返回上一頁';
       document.getElementById('btnModalClose').onclick = () => openPetModal(currentSelectedStudent.seat, currentSelectedStudent.name);
 
-      const grid = document.getElementById('gardenGrid');
-      grid.innerHTML = '';
+      const grid = document.getElementById('gardenGrid'); grid.innerHTML = '';
       const myPets = petCollection[currentSelectedStudent.seat] || [];
-      
-      if(myPets.length === 0) {
-         grid.innerHTML = '<p style="color:#64748b; text-align:center; grid-column:1/-1; padding:20px;">目前寵物園空空如也，趕快培育第一隻寵物吧！</p>';
-      } else {
-         myPets.forEach(petId => {
-            const cat = PET_CATALOG.find(c => c.id === petId);
-            grid.innerHTML += `<div class="garden-item"><div class="emoji">${cat.stages[2]}</div><div class="name">${cat.name}</div></div>`;
-         });
+      if(myPets.length === 0) { grid.innerHTML = '<p style="color:#64748b; text-align:center; grid-column:1/-1; padding:20px;">目前寵物園空空如也，趕快培育第一隻寵物吧！</p>'; } 
+      else { myPets.forEach(petId => { const cat = PET_CATALOG.find(c => c.id === petId); grid.innerHTML += `<div class="garden-item"><div class="emoji">${cat.stages[2]}</div><div class="name">${cat.name}</div></div>`; }); }
+    }
+
+    // ⚡ 一鍵重置所有寵物資料 (設定區用)
+    function resetAllPets() {
+      if(confirm("⚠️ 警告：確定要刪除「全班所有寵物」與「寵物園收藏」嗎？\n(此動作無法復原，適合測試後重新開始！)")) {
+        petState = {};
+        petCollection = {};
+        localStorage.removeItem('cm309_pets');
+        localStorage.removeItem('cm309_pet_collection');
+        alert("✅ 全班寵物紀錄已完全清除！");
+        if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
       }
     }
 
@@ -874,4 +870,5 @@
     function updateCloudBadge() { if(sheetsWebhookUrl) { document.getElementById('cloudStatus').classList.add('active'); document.getElementById('cloudStatusText').textContent='雲端已連線'; } }
   </script>
 </body>
+</html>
 </html>
