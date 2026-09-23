@@ -81,13 +81,13 @@
     .student-btn .name { font-size: 0.95rem; font-weight: 700; }
     .student-btn .status { font-size: 0.72rem; margin-top: 4px; border-radius: 4px; padding: 2px 6px; }
 
-    /* 狀態顏色 */
+    /* 狀態色彩 */
     .att-present { background-color: #ecfdf5; border-color: #34d399; color: #065f46; }
     .att-absent { background-color: #fef2f2; border-color: #f87171; color: #991b1b; }
     .att-sick { background-color: #fffbeb; border-color: #fbbf24; color: #92400e; }
     .att-late { background-color: #f5f3ff; border-color: #a78bfa; color: #5b21b6; }
 
-    /* 亮燈系統 */
+    /* 亮燈效果 */
     .indicator-lamp { width: 12px; height: 12px; border-radius: 50%; background: #cbd5e1; margin-bottom: 2px; }
     .is-lit { background: #f0fdf4 !important; border-color: #22c55e !important; box-shadow: 0 0 10px rgba(34, 197, 94, 0.3); }
     .is-lit .indicator-lamp { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
@@ -128,7 +128,7 @@
     .gallery-item .desc { padding: 8px; font-size: 0.8rem; line-height: 1.4; }
     .gallery-item .btn-del-img { position: absolute; top:4px; right:4px; background:rgba(0,0,0,0.6); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer;}
     
-    /* 公告樣式與圖片預覽 */
+    /* 公告列表樣式 */
     .bulletin-list { list-style: none; }
     .bulletin-item { padding: 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
     .bulletin-badge { font-size: 0.72rem; padding: 3px 6px; border-radius: 4px; background: #fee2e2; color: #b91c1c; margin-right: 6px; }
@@ -165,7 +165,7 @@
     .garden-item .emoji { font-size: 32px; }
     .garden-item .name { font-size: 0.75rem; font-weight: 700; color: #15803d; margin-top: 4px; }
 
-    /* 手機底部懸浮導航 */
+    /* 手機底部導航 */
     @media (max-width: 768px) {
       .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; z-index: 50; border-top: 1px solid var(--border); justify-content: space-around; padding: 6px 0; }
       .tab-btn { flex-direction: column; font-size: 0.68rem; gap: 3px; padding: 4px; }
@@ -206,7 +206,7 @@
           <div style="font-size:0.85rem; font-weight:600;" id="currentDateDisplay"></div>
           <div class="action-group">
             <button class="btn-reset" onclick="resetAttendance()"><i class="fa-solid fa-rotate-left"></i> 重整全到</button>
-            <button class="btn-upload" onclick="uploadAttendanceBatch()"><i class="fa-solid fa-cloud-arrow-up"></i> 彙整上傳</button>
+            <button class="btn-upload" onclick="uploadAttendanceBatch()"><i class="fa-solid fa-cloud-arrow-up"></i> 彙整上傳試算表</button>
           </div>
         </div>
         <div class="student-grid" id="attendanceGrid"></div>
@@ -228,13 +228,9 @@
           <span style="font-size:0.85rem; font-weight:600;" id="currentInteractiveTitleDisplay">目前項目：作業繳交</span>
           <div class="action-group">
             <button class="btn-reset" onclick="resetCurrentInteractive()"><i class="fa-solid fa-arrow-rotate-left"></i> 重整</button>
-            <button class="btn-upload" onclick="uploadInteractiveBatch()"><i class="fa-solid fa-cloud-arrow-up"></i> 上傳</button>
+            <button class="btn-upload" onclick="uploadInteractiveBatch()"><i class="fa-solid fa-cloud-arrow-up"></i> 上傳試算表</button>
           </div>
         </div>
-        <div style="font-size:0.8rem; color:#059669; font-weight:700; margin-bottom:14px; background:#dcfce7; padding:6px 10px; border-radius:6px; display:inline-block;">
-          <i class="fa-solid fa-circle-info"></i> 提示：所有亮燈狀態與假別皆會「全自動同步」至所有手機與電腦！
-        </div>
-        
         <div class="student-grid" id="interactiveGrid"></div>
 
         <div id="cleanKanban" style="display:none;">
@@ -282,7 +278,7 @@
           <div class="form-group"><select id="recordStudentSelect" class="form-control"></select></div>
           <div class="form-group"><textarea id="recordDetail" class="form-control" rows="3" placeholder="事由或情況說明..." required></textarea></div>
           <div class="form-group"><input type="text" id="recordFollowup" class="form-control" placeholder="處理方式 / 聯絡反饋"></div>
-          <button type="submit" class="btn-submit"><i class="fa-solid fa-cloud-arrow-up"></i> 儲存並上傳</button>
+          <button type="submit" class="btn-submit"><i class="fa-solid fa-cloud-arrow-up"></i> 儲存並上傳至 Google 試算表</button>
         </form>
       </div>
     </section>
@@ -310,7 +306,13 @@
     <!-- 第七部分：校園公告專區 -->
     <section id="tab-bulletin" class="page-section">
       <div class="card">
-        <div class="card-title"><span><i class="fa-solid fa-bullhorn text-danger"></i> 校園公告專區</span></div>
+        <div class="card-title" style="justify-content:space-between;">
+          <span><i class="fa-solid fa-bullhorn text-danger"></i> 校園重要公告專區</span>
+          <button onclick="fetchBulletinsFromCloud(false)" style="font-size:0.8rem; padding:4px 10px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; cursor:pointer; color:#2563eb;">
+            <i class="fa-solid fa-rotate"></i> 重新載入公告
+          </button>
+        </div>
+        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">直接點擊公告標題，即可查看完整內容與海報照片。</p>
         <ul class="bulletin-list" id="bulletinListContainer"></ul>
       </div>
     </section>
@@ -318,49 +320,55 @@
     <!-- 設定頁面 -->
     <section id="tab-settings" class="page-section">
       
-      <!-- 試算表 Webhook 設定 -->
-      <div class="card" style="border: 2px solid #2563eb;">
-        <div class="card-title"><i class="fa-solid fa-cloud-arrow-up text-primary"></i> 核心：Google 試算表中央資料庫</div>
-        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">填入 Web App 網址後，電腦與手機將會透過此試算表「全自動雙向同步（包含燈號與進度）」！</p>
-        <input type="url" id="sheetsApiUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
-        <div style="display:flex; gap:8px; margin-top:8px;">
-          <button class="btn-submit" style="background:#2563eb;" onclick="saveSheetsUrl()">儲存並立即從雲端同步</button>
-          <button class="btn-submit" style="background:#059669; width:auto; white-space:nowrap;" onclick="forcePushToCloud()">將此機資料推上雲端</button>
-        </div>
+      <!-- 📢 公告雲端專屬同步設定 (JSONBin) -->
+      <div class="card" style="border: 2px solid #ef4444;">
+        <div class="card-title"><i class="fa-solid fa-bullhorn text-danger"></i> 1. 公告專用雲端鑰匙 (JSONBin 跨裝置同步)</div>
+        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">
+          請至 <a href="https://jsonbin.io" target="_blank" style="color:#2563eb; font-weight:700;">jsonbin.io</a> 免費註冊，至「API Keys」複製 <strong>Master Key</strong> 貼在下方，公告即可完美跨手機與電腦同步（附圖也永不消失）！
+        </p>
+        <input type="text" id="jsonBinKeyInput" class="form-control" placeholder="貼上 Master Key (例如: $2a$10$xxxx...)">
+        <button class="btn-submit" style="margin-top:8px; background:#ef4444;" onclick="saveJsonBinKey()">
+          <i class="fa-solid fa-key"></i> 儲存公告雲端鑰匙
+        </button>
       </div>
 
-      <!-- 公告管理 (穩定文字 + 圖片網址支援) -->
+      <!-- 公告管理表單 -->
       <div class="card">
-        <div class="card-title"><i class="fa-solid fa-bullhorn text-danger"></i> 公告管理 (新增與刪除)</div>
+        <div class="card-title"><i class="fa-solid fa-pen-to-square text-danger"></i> 發佈新公告</div>
         <form onsubmit="handleCreateAnnouncement(event)" style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:12px;">
           <input type="text" id="newAnnoDept" class="form-control" style="margin-bottom:8px;" placeholder="單位標籤 (如:學務處、三年九班導師)" required>
-          <input type="text" id="newAnnoTitle" class="form-control" style="margin-bottom:8px;" placeholder="公告標題" required>
-          <textarea id="newAnnoContent" class="form-control" rows="2" style="margin-bottom:8px;" placeholder="詳細說明內容..." required></textarea>
+          <input type="text" id="newAnnoTitle" class="form-control" style="margin-bottom:8px;" placeholder="公告重要標題" required>
+          <textarea id="newAnnoContent" class="form-control" rows="3" style="margin-bottom:8px;" placeholder="詳細說明內容與注意事項..." required></textarea>
           
           <div class="form-group" style="margin-bottom:8px;">
-            <label style="font-size:0.8rem; font-weight:600; color:#475569;">📷 圖片網址 (選填，可跨裝置同步)：</label>
-            <input type="url" id="newAnnoImageUrl" class="form-control" placeholder="可填入學校網站海報連結、圖片網址等">
-          </div>
-
-          <div class="form-group" style="margin-bottom:8px;">
-            <label style="font-size:0.8rem; font-weight:600; color:#475569;">或從手機/電腦上傳圖片 (僅儲存於本機)：</label>
+            <label style="font-size:0.8rem; font-weight:600; color:#475569;">📷 附上海報或照片 (選填，自動壓縮同步)：</label>
             <input type="file" id="newAnnoImageFile" class="form-control" accept="image/*" style="padding:6px;">
           </div>
 
-          <button type="submit" class="btn-submit"><i class="fa-solid fa-plus"></i> 發佈公告並同步</button>
+          <button type="submit" class="btn-submit"><i class="fa-solid fa-cloud-arrow-up"></i> 發佈公告並立即同步至雲端</button>
         </form>
         <div id="manageBulletinList"></div>
       </div>
 
+      <!-- Google 試算表 Webhook 設定 -->
       <div class="card">
-        <div class="card-title"><i class="fa-solid fa-users-gear"></i> 學生名單設定</div>
-        <textarea id="studentRosterInput" class="form-control" rows="8" placeholder="每行一個名字..."></textarea>
-        <button class="btn-submit" style="margin-top:8px;" onclick="saveStudentRoster()">儲存名單至雲端</button>
+        <div class="card-title"><i class="fa-solid fa-table text-primary"></i> 2. Google 試算表 (記錄點名/作業/傷病日誌)</div>
+        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">填入 Google Apps Script 部署之 Web App 網址：</p>
+        <input type="url" id="sheetsApiUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
+        <button class="btn-submit" style="margin-top:8px; background:#059669;" onclick="saveSheetsUrl()">儲存試算表連結</button>
       </div>
 
+      <!-- 學生名單管理 -->
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-users-gear"></i> 3. 學生名單設定</div>
+        <textarea id="studentRosterInput" class="form-control" rows="8" placeholder="每行一個名字..."></textarea>
+        <button class="btn-submit" style="margin-top:8px;" onclick="saveStudentRoster()">儲存名單設定</button>
+      </div>
+
+      <!-- 進階資料清除 -->
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-triangle-exclamation text-danger"></i> 進階資料清除 (測試後重置)</div>
-        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">一鍵清除寵物測試資料，並同步清空雲端資料庫。</p>
+        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">一鍵清除寵物測試資料，重新開始養成。</p>
         <button class="btn-submit" style="background:#ef4444;" onclick="resetAllPets()">
           <i class="fa-solid fa-trash-can"></i> 一鍵刪除全班寵物與寵物園
         </button>
@@ -498,6 +506,9 @@
 
     let students = JSON.parse(localStorage.getItem('cm309_students')) || DEFAULT_STUDENTS;
     let sheetsWebhookUrl = localStorage.getItem('cm309_sheets_url') || "";
+    let jsonBinKey = localStorage.getItem('cm309_jsonbin_key') || "";
+    let jsonBinId = localStorage.getItem('cm309_jsonbin_binid') || "";
+
     let announcements = JSON.parse(localStorage.getItem('cm309_announcements')) || [];
     let albums = JSON.parse(localStorage.getItem('cm309_albums')) || [];
     let petState = JSON.parse(localStorage.getItem('cm309_pets')) || {};
@@ -514,23 +525,24 @@
     let currentInteractiveMode = 'hw';
     let clickTimeout = null;
     let lastClickedSeat = null;
-    let autoSyncTimer = null;
 
     // === 頁面初始化 ===
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('zh-TW');
       document.getElementById('studentRosterInput').value = students.join('\n');
       document.getElementById('sheetsApiUrlInput').value = sheetsWebhookUrl;
+      document.getElementById('jsonBinKeyInput').value = jsonBinKey;
+
       initSortables();
       renderAllGrids();
       renderBulletins();
       renderManageBulletins();
       renderAlbum('全部活動');
+      updateCloudBadge();
 
-      if (sheetsWebhookUrl) {
-        fetchFromCloud(true);
-      } else {
-        updateCloudBadge(false);
+      // 開啟時自動抓取最新雲端公告
+      if (jsonBinKey) {
+        fetchBulletinsFromCloud(true);
       }
     });
 
@@ -552,139 +564,211 @@
       students.forEach((name, i) => { select.add(new Option(`${i + 1}號 ${name}`, `${i + 1}號 ${name}`)); });
     }
 
-    // === ☁️ 雲端全自動雙向同步核心 ===
-    function autoSyncToCloud() {
-      localStorage.setItem('cm309_attState', JSON.stringify(attendanceState));
-      localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
-      localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState));
-      localStorage.setItem('cm309_mwState', JSON.stringify(mouthwashLampState));
-      localStorage.setItem('cm309_cleanState', JSON.stringify(cleanLampState));
-
-      if (!sheetsWebhookUrl) return;
-      clearTimeout(autoSyncTimer);
-      updateCloudBadge('syncing');
-      
-      autoSyncTimer = setTimeout(() => {
-        // 💡 關鍵修復：雲端備份時過濾掉肥大的照片代碼，保證同步永不爆表！
-        const safeAnnouncements = announcements.map(a => {
-          let copy = Object.assign({}, a);
-          if (copy.imgSrc && copy.imgSrc.startsWith('data:image')) {
-            delete copy.imgSrc; // 避免本機照片撐爆試算表
-          }
-          return copy;
-        });
-
-        const payload = {
-          students: students,
-          petState: petState,
-          petCollection: petCollection,
-          announcements: safeAnnouncements,
-          cleanAssignment: cleanAssignment,
-          attendanceState: attendanceState,
-          interactiveHwState: interactiveHwState,
-          teethLampState: teethLampState,
-          mouthwashLampState: mouthwashLampState,
-          cleanLampState: cleanLampState
-        };
-        
-        fetch(sheetsWebhookUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: "SYNC_BACKUP", payload: payload })
-        }).then(() => {
-          updateCloudBadge('active');
-        }).catch(err => {
-          console.error("雲端同步儲存失敗:", err);
-          updateCloudBadge('error');
-        });
-      }, 800);
-    }
-
-    function fetchFromCloud(silent = false) {
-      if (!sheetsWebhookUrl) return;
-      updateCloudBadge('syncing');
-      
-      fetch(sheetsWebhookUrl)
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.students) {
-            students = data.students;
-            petState = data.petState || {};
-            petCollection = data.petCollection || {};
-            cleanAssignment = data.cleanAssignment || {};
-            
-            // 💡 合併雲端公告與本機帶照片的公告，避免照片被吃掉
-            if (data.announcements && data.announcements.length > 0) {
-              announcements = data.announcements.map(cloudA => {
-                let localA = announcements.find(l => l.id === cloudA.id);
-                if (localA && localA.imgSrc) cloudA.imgSrc = localA.imgSrc;
-                return cloudA;
-              });
-            }
-            
-            attendanceState = data.attendanceState || {};
-            interactiveHwState = data.interactiveHwState || {};
-            teethLampState = data.teethLampState || {};
-            mouthwashLampState = data.mouthwashLampState || {};
-            cleanLampState = data.cleanLampState || {};
-
-            localStorage.setItem('cm309_students', JSON.stringify(students));
-            localStorage.setItem('cm309_pets', JSON.stringify(petState));
-            localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
-            localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
-            localStorage.setItem('cm309_cleanAssign', JSON.stringify(cleanAssignment));
-            localStorage.setItem('cm309_attState', JSON.stringify(attendanceState));
-            localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
-            localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState));
-            localStorage.setItem('cm309_mwState', JSON.stringify(mouthwashLampState));
-            localStorage.setItem('cm309_cleanState', JSON.stringify(cleanLampState));
-            
-            renderAllGrids();
-            renderPetsGrid();
-            renderBulletins();
-            renderManageBulletins();
-            document.getElementById('studentRosterInput').value = students.join('\n');
-            updateCloudBadge('active');
-            if (!silent) alert("✅ 已成功從雲端同步最新全班狀態與燈號！");
-          } else {
-            updateCloudBadge('active');
-            if (!silent) alert("雲端目前尚無資料，請先按『將此機資料推上雲端』進行初次備份。");
-          }
-        })
-        .catch(err => {
-          console.error("雲端讀取失敗:", err);
-          updateCloudBadge('error');
-          if (!silent) alert("❌ 從雲端讀取失敗，請確認 Apps Script 是否已重新部署為「新版本」。");
-        });
+    function updateCloudBadge() {
+      const badge = document.getElementById('cloudStatus');
+      const text = document.getElementById('cloudStatusText');
+      if (jsonBinKey) {
+        badge.classList.add('active');
+        text.textContent = '公告雲端已連線';
+      } else {
+        badge.classList.remove('active');
+        text.textContent = '公告未設定鑰匙';
+      }
     }
 
     function manualTriggerSync() {
-      if (!sheetsWebhookUrl) switchTab('tab-settings');
-      else fetchFromCloud(false);
+      if (!jsonBinKey) switchTab('tab-settings');
+      else fetchBulletinsFromCloud(false);
     }
 
-    function forcePushToCloud() {
-      if (!sheetsWebhookUrl) return alert("請先填寫試算表網址！");
-      autoSyncToCloud();
-      alert("✅ 已將目前這台設備的資料推上雲端！");
+    // === 📢 JSONBin 專屬雲端公告同步核心 (免試算表、永不消失) ===
+    function saveJsonBinKey() {
+      const key = document.getElementById('jsonBinKeyInput').value.trim();
+      if (!key) return alert("請輸入 Master Key！");
+      jsonBinKey = key;
+      localStorage.setItem('cm309_jsonbin_key', key);
+      updateCloudBadge();
+      alert("✅ 公告雲端鑰匙已儲存！正在檢查同步...");
+      fetchBulletinsFromCloud(false);
     }
 
-    function updateCloudBadge(state) {
-      const badge = document.getElementById('cloudStatus');
-      const text = document.getElementById('cloudStatusText');
-      badge.className = 'cloud-status';
-      
-      if (state === 'active') {
-        badge.classList.add('active');
-        text.textContent = '雲端已同步';
-      } else if (state === 'syncing') {
-        badge.classList.add('syncing');
-        text.textContent = '同步中...';
-      } else if (state === 'error') {
-        text.textContent = '連線失敗';
+    // 1. 從雲端抓取公告
+    function fetchBulletinsFromCloud(silent = false) {
+      if (!jsonBinKey) return;
+      if (!jsonBinId) {
+        // 如果還沒有 Bin ID，先上傳建立一個
+        syncBulletinsToCloud(true);
+        return;
+      }
+
+      fetch(`https://api.jsonbin.io/v3/b/${jsonBinId}/latest`, {
+        headers: { 'X-Master-Key': jsonBinKey }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.record && Array.isArray(data.record)) {
+          announcements = data.record;
+          localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
+          renderBulletins();
+          renderManageBulletins();
+          if (!silent) alert("✅ 已成功從雲端同步最新公告！");
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        if (!silent) alert("❌ 公告讀取失敗，請確認 Master Key 是否正確。");
+      });
+    }
+
+    // 2. 將最新公告推上雲端
+    function syncBulletinsToCloud(isFirstTime = false) {
+      if (!jsonBinKey) return;
+
+      if (!jsonBinId || isFirstTime) {
+        // 初次建立
+        fetch('https://api.jsonbin.io/v3/b', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': jsonBinKey,
+            'X-Bin-Name': 'cm309_announcements',
+            'X-Bin-Private': 'false'
+          },
+          body: JSON.stringify(announcements)
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.metadata && data.metadata.id) {
+            jsonBinId = data.metadata.id;
+            localStorage.setItem('cm309_jsonbin_binid', jsonBinId);
+            console.log("已建立專屬雲端 Bin ID:", jsonBinId);
+          }
+        });
       } else {
-        text.textContent = '雲端未連線 (點我設定)';
+        // 更新現有 Bin
+        fetch(`https://api.jsonbin.io/v3/b/${jsonBinId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': jsonBinKey
+          },
+          body: JSON.stringify(announcements)
+        })
+        .then(res => res.json())
+        .then(() => {
+          console.log("公告已即時推上雲端！");
+        });
+      }
+    }
+
+    // === 📢 公告管理與附圖壓縮 ===
+    function renderBulletins() {
+      const container = document.getElementById('bulletinListContainer'); container.innerHTML = '';
+      if (announcements.length === 0) return container.innerHTML = '<li style="padding:16px; color:#94a3b8; text-align:center;">目前尚無公告</li>';
+      
+      announcements.forEach((anno, index) => {
+        const hasImgIcon = anno.imgSrc ? `<span class="bulletin-has-img"><i class="fa-solid fa-image"></i> 附圖</span>` : '';
+        container.innerHTML += `
+          <li class="bulletin-item" onclick="viewAnnouncement(${index})">
+            <div>
+              <span class="bulletin-badge">${anno.dept}</span>
+              <strong>${anno.title}</strong>
+              ${hasImgIcon}
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color:#94a3b8;"></i>
+          </li>`;
+      });
+    }
+
+    function viewAnnouncement(index) {
+      const anno = announcements[index];
+      document.getElementById('annoTitle').textContent = anno.title;
+      document.getElementById('annoContent').textContent = anno.content;
+      
+      const imgContainer = document.getElementById('annoImgContainer');
+      const imgEl = document.getElementById('annoImg');
+      
+      if (anno.imgSrc) {
+        imgEl.src = anno.imgSrc;
+        imgContainer.style.display = 'block';
+      } else {
+        imgContainer.style.display = 'none';
+      }
+      
+      document.getElementById('announcementModal').classList.add('active');
+    }
+
+    function closeAnnouncementModal() { document.getElementById('announcementModal').classList.remove('active'); }
+
+    function renderManageBulletins() {
+      const list = document.getElementById('manageBulletinList'); list.innerHTML = '';
+      announcements.forEach((anno, index) => {
+        const hasImg = anno.imgSrc ? '<span style="font-size:0.75rem; color:#2563eb; margin-left:4px;">[附圖]</span>' : '';
+        list.innerHTML += `
+          <div class="manage-bulletin-item" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border:1px solid var(--border); border-radius:8px; margin-bottom:6px; background:#fff;">
+            <div><span class="bulletin-badge">${anno.dept}</span><strong>${anno.title}</strong>${hasImg}</div>
+            <button class="btn-del" onclick="deleteAnnouncement(${index})"><i class="fa-solid fa-trash-can"></i></button>
+          </div>`;
+      });
+    }
+
+    function handleCreateAnnouncement(e) {
+      e.preventDefault();
+      const dept = document.getElementById('newAnnoDept').value.trim();
+      const title = document.getElementById('newAnnoTitle').value.trim();
+      const content = document.getElementById('newAnnoContent').value.trim();
+      const file = document.getElementById('newAnnoImageFile').files[0];
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let w = img.width, h = img.height;
+            if (w > 600) { h *= 600 / w; w = 600; }
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            
+            const compressedImg = canvas.toDataURL('image/jpeg', 0.6);
+            saveAnnoAndSync(dept, title, content, compressedImg);
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        saveAnnoAndSync(dept, title, content, null);
+      }
+    }
+
+    function saveAnnoAndSync(dept, title, content, imgSrc) {
+      announcements.unshift({
+        id: Date.now(),
+        dept: dept,
+        title: title,
+        content: content,
+        imgSrc: imgSrc
+      });
+
+      localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
+      document.getElementById('newAnnoDept').value = '';
+      document.getElementById('newAnnoTitle').value = '';
+      document.getElementById('newAnnoContent').value = '';
+      document.getElementById('newAnnoImageFile').value = '';
+
+      renderBulletins();
+      renderManageBulletins();
+      alert('✅ 公告發佈成功！');
+      syncBulletinsToCloud();
+    }
+
+    function deleteAnnouncement(index) {
+      if (confirm(`確定刪除此公告？`)) {
+        announcements.splice(index, 1);
+        localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
+        renderBulletins();
+        renderManageBulletins();
+        syncBulletinsToCloud();
       }
     }
 
@@ -698,7 +782,6 @@
       if (p.xp < 0) { if (p.stage > 1) { p.stage--; p.xp = PET_REQ[p.stage - 1] + p.xp; } else { p.xp = 0; } }
       localStorage.setItem('cm309_pets', JSON.stringify(petState));
       if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
-      autoSyncToCloud();
     }
 
     function renderPetsGrid() {
@@ -780,7 +863,6 @@
       petState[seat] = { petId: randomPet.id, stage: 1, xp: 0 };
       localStorage.setItem('cm309_pets', JSON.stringify(petState));
       openPetModal(seat, currentSelectedStudent.name); renderPetsGrid();
-      autoSyncToCloud();
     }
 
     function manualAddPetXp(points) { addPetXp(currentSelectedStudent.seat, points); openPetModal(currentSelectedStudent.seat, currentSelectedStudent.name); }
@@ -794,7 +876,6 @@
       localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
       openPetModal(seat, currentSelectedStudent.name); 
       renderPetsGrid();
-      autoSyncToCloud();
     }
 
     function showPetGarden() {
@@ -811,12 +892,11 @@
     }
 
     function resetAllPets() {
-      if(confirm("⚠️ 警告：確定要刪除「全班所有寵物」與「寵物園收藏」嗎？\n(此動作會同步清空雲端記錄！)")) {
+      if(confirm("⚠️ 警告：確定要刪除「全班所有寵物」與「寵物園收藏」嗎？")) {
         petState = {}; petCollection = {};
         localStorage.removeItem('cm309_pets'); localStorage.removeItem('cm309_pet_collection');
-        alert("✅ 全班寵物紀錄已完全清除！");
+        alert("✅ 全班寵物紀錄已清除！");
         if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
-        autoSyncToCloud();
       }
     }
 
@@ -858,7 +938,7 @@
       if (clickTimeout && lastClickedSeat === seat) {
         clearTimeout(clickTimeout); clickTimeout = null; lastClickedSeat = null;
         if(interactiveHwState[seat] && interactiveHwState[seat].lightClass === 'hw-green') addPetXp(seat, -1);
-        delete interactiveHwState[seat]; renderInteractiveGrid(); autoSyncToCloud(); return;
+        delete interactiveHwState[seat]; renderInteractiveGrid(); return;
       }
       lastClickedSeat = seat;
       clickTimeout = setTimeout(() => {
@@ -875,14 +955,12 @@
       if (wasGreen && !isGreen) addPetXp(seat, -1);
       interactiveHwState[seat] = { status, lightClass: lightCls };
       closeHwModal(); renderInteractiveGrid();
-      autoSyncToCloud();
     }
     
     function resetSingleStudentHw() {
       const seat = currentSelectedStudent.seat;
       if(interactiveHwState[seat] && interactiveHwState[seat].lightClass === 'hw-green') addPetXp(seat, -1);
       delete interactiveHwState[seat]; closeHwModal(); renderInteractiveGrid(); 
-      autoSyncToCloud();
     }
     function showMissingInput() { document.getElementById('missingInputArea').style.display = 'block'; }
     function submitMissingHw() {
@@ -899,7 +977,6 @@
       else if (currentInteractiveMode === 'mouthwash') { mouthwashLampState[seat] = !mouthwashLampState[seat]; isOn = mouthwashLampState[seat]; }
       if (isOn) addPetXp(seat, 1); else addPetXp(seat, -1);
       renderInteractiveGrid();
-      autoSyncToCloud();
     }
 
     function initSortables() {
@@ -911,7 +988,6 @@
             const seat = evt.item.getAttribute('data-seat');
             cleanAssignment[seat] = evt.to.id;
             localStorage.setItem('cm309_cleanAssign', JSON.stringify(cleanAssignment));
-            autoSyncToCloud();
           }
         });
       });
@@ -934,7 +1010,6 @@
         if(currentInteractiveMode === 'hw') interactiveHwState = {}; else if(currentInteractiveMode === 'clean') cleanLampState = {}; 
         else if(currentInteractiveMode === 'teeth') teethLampState = {}; else mouthwashLampState = {};
         renderInteractiveGrid();
-        autoSyncToCloud();
       }
     }
 
@@ -959,7 +1034,7 @@
         detailText = notDone.length > 0 ? `未完成: ${notDone.join('、')}` : '全員完成！';
         sendToSheets({ category: actionMap[currentInteractiveMode], student: "全班", detail: detailText });
       }
-      alert(`已彙整上傳！\n\n${detailText}`);
+      alert(`已彙整上傳至 Google 試算表！\n\n${detailText}`);
     }
 
     // === 點名功能 ===
@@ -968,16 +1043,16 @@
       students.forEach((name, i) => {
         const id = i+1; const st = attendanceState[id] || '出席'; let cls = '';
         if(st==='出席') cls='att-present'; else if(st==='病假') cls='att-sick'; else if(st==='事假') cls='att-absent'; else cls='att-late';
-        container.innerHTML += `<div class="student-btn ${cls}" onclick="attendanceState[${id}] = ['出席','事假','病假','遲到'][ (['出席','事假','病假','遲到'].indexOf(attendanceState[${id}]||'出席')+1)%4 ]; renderAttendanceGrid(); autoSyncToCloud();">
+        container.innerHTML += `<div class="student-btn ${cls}" onclick="attendanceState[${id}] = ['出席','事假','病假','遲到'][ (['出席','事假','病假','遲到'].indexOf(attendanceState[${id}]||'出席')+1)%4 ]; renderAttendanceGrid();">
           <span class="seat">${id}號</span><span class="name">${name}</span><span class="status">${st}</span></div>`;
       });
     }
-    function resetAttendance() { if(confirm("確定重整為全數出席？")) { attendanceState = {}; renderAttendanceGrid(); autoSyncToCloud(); } }
+    function resetAttendance() { if(confirm("確定重整為全數出席？")) { attendanceState = {}; renderAttendanceGrid(); } }
     function uploadAttendanceBatch() {
       let abnormal = [], present = 0;
       students.forEach((n, i) => { let st = attendanceState[i+1] || '出席'; if(st === '出席') present++; else abnormal.push(`${i+1}號 ${n}(${st})`); });
       let txt = `應到${students.length}人，實到${present}人。${abnormal.length>0 ? '請假:'+abnormal.join('、') : '全班到齊！'}`;
-      sendToSheets({ category: "每日點名", student: "全班", detail: txt }); alert(`已上傳！\n${txt}`);
+      sendToSheets({ category: "每日點名", student: "全班", detail: txt }); alert(`已上傳至 Google 試算表！\n${txt}`);
     }
 
     // === 相簿功能 ===
@@ -1009,126 +1084,11 @@
       }; reader.readAsDataURL(file);
     }
 
-    // === 📢 校園公告專區 (穩定文字 + 圖片網址支援) ===
-    function renderBulletins() {
-      const container = document.getElementById('bulletinListContainer'); container.innerHTML = '';
-      if (announcements.length === 0) return container.innerHTML = '<li style="padding:16px; color:#94a3b8; text-align:center;">無公告</li>';
-      
-      announcements.forEach((anno, index) => {
-        const hasImgIcon = (anno.imgSrc || anno.imgUrl) ? `<span class="bulletin-has-img"><i class="fa-solid fa-image"></i> 附圖</span>` : '';
-        container.innerHTML += `
-          <li class="bulletin-item" onclick="viewAnnouncement(${index})">
-            <div>
-              <span class="bulletin-badge">${anno.dept}</span>
-              <strong>${anno.title}</strong>
-              ${hasImgIcon}
-            </div>
-            <i class="fa-solid fa-chevron-right" style="color:#94a3b8;"></i>
-          </li>`;
-      });
-    }
-
-    function viewAnnouncement(index) {
-      const anno = announcements[index];
-      document.getElementById('annoTitle').textContent = anno.title;
-      document.getElementById('annoContent').textContent = anno.content;
-      
-      const imgContainer = document.getElementById('annoImgContainer');
-      const imgEl = document.getElementById('annoImg');
-      
-      const targetImg = anno.imgUrl || anno.imgSrc;
-      if (targetImg) {
-        imgEl.src = targetImg;
-        imgContainer.style.display = 'block';
-      } else {
-        imgContainer.style.display = 'none';
-      }
-      
-      document.getElementById('announcementModal').classList.add('active');
-    }
-
-    function closeAnnouncementModal() { document.getElementById('announcementModal').classList.remove('active'); }
-
-    function renderManageBulletins() {
-      const list = document.getElementById('manageBulletinList'); list.innerHTML = '';
-      announcements.forEach((anno, index) => {
-        const hasImg = (anno.imgSrc || anno.imgUrl) ? '<span style="font-size:0.75rem; color:#2563eb; margin-left:4px;">[有圖]</span>' : '';
-        list.innerHTML += `
-          <div class="manage-bulletin-item" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border:1px solid var(--border); border-radius:8px; margin-bottom:6px; background:#fff;">
-            <div><span class="bulletin-badge">${anno.dept}</span><strong>${anno.title}</strong>${hasImg}</div>
-            <button class="btn-del" onclick="deleteAnnouncement(${index})"><i class="fa-solid fa-trash-can"></i></button>
-          </div>`;
-      });
-    }
-
-    function handleCreateAnnouncement(e) {
-      e.preventDefault();
-      const dept = document.getElementById('newAnnoDept').value.trim();
-      const title = document.getElementById('newAnnoTitle').value.trim();
-      const content = document.getElementById('newAnnoContent').value.trim();
-      const imgUrl = document.getElementById('newAnnoImageUrl').value.trim();
-      const file = document.getElementById('newAnnoImageFile').files[0];
-
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let w = img.width, h = img.height;
-            if (w > 500) { h *= 500 / w; w = 500; }
-            canvas.width = w; canvas.height = h;
-            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-            
-            const compressedImg = canvas.toDataURL('image/jpeg', 0.5);
-            saveAnnoAndSync(dept, title, content, imgUrl, compressedImg);
-          };
-          img.src = event.target.result;
-        };
-        reader.readAsDataURL(file);
-      } else {
-        saveAnnoAndSync(dept, title, content, imgUrl, null);
-      }
-    }
-
-    function saveAnnoAndSync(dept, title, content, imgUrl, imgSrc) {
-      announcements.unshift({
-        id: Date.now(),
-        dept: dept,
-        title: title,
-        content: content,
-        imgUrl: imgUrl || null,
-        imgSrc: imgSrc || null
-      });
-
-      localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
-      document.getElementById('newAnnoDept').value = '';
-      document.getElementById('newAnnoTitle').value = '';
-      document.getElementById('newAnnoContent').value = '';
-      document.getElementById('newAnnoImageUrl').value = '';
-      document.getElementById('newAnnoImageFile').value = '';
-
-      renderBulletins();
-      renderManageBulletins();
-      alert('✅ 公告發佈成功！');
-      autoSyncToCloud();
-    }
-
-    function deleteAnnouncement(index) {
-      if (confirm(`確定刪除此公告？`)) {
-        announcements.splice(index, 1);
-        localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
-        renderBulletins();
-        renderManageBulletins();
-        autoSyncToCloud();
-      }
-    }
-
-    // === 其他常規設定 ===
+    // === Google 試算表日常日誌寫入 ===
     function handleRecordSubmit(e) {
       e.preventDefault();
       sendToSheets({ category: document.getElementById('recordType').value, student: document.getElementById('recordStudentSelect').value, detail: document.getElementById('recordDetail').value, followup: document.getElementById('recordFollowup').value });
-      alert('已上傳！'); e.target.reset();
+      alert('已上傳至試算表！'); e.target.reset();
     }
     function sendToSheets(payload) {
       if(!sheetsWebhookUrl) return;
@@ -1138,14 +1098,12 @@
     function saveStudentRoster() {
       const txt = document.getElementById('studentRosterInput').value.trim(); if(!txt) return;
       students = txt.split('\n').map(s=>s.trim()).filter(s=>s.length>0); localStorage.setItem('cm309_students', JSON.stringify(students));
-      renderAllGrids(); alert("名單更新成功！"); autoSyncToCloud();
+      renderAllGrids(); alert("名單更新成功！");
     }
     function saveSheetsUrl() { 
       sheetsWebhookUrl = document.getElementById('sheetsApiUrlInput').value.trim(); 
       localStorage.setItem('cm309_sheets_url', sheetsWebhookUrl); 
-      updateCloudBadge('active'); 
-      alert("Webhook 已儲存！正在從雲端同步全班燈號與資料..."); 
-      fetchFromCloud(false);
+      alert("試算表 Webhook 已儲存！日誌功能已就緒。"); 
     }
   </script>
 </body>
