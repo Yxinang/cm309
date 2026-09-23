@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>崇明國小三年九班 - 班級管理與智慧互動系統</title>
+  
+  <!-- Google Fonts & Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- SortableJS 拖曳套件 (用於打掃排表) -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #2563eb; --primary-light: #eff6ff; --secondary: #10b981;
+      --warning: #f59e0b; --danger: #ef4444; --gray-bg: #f8fafc;
+      --card-bg: #ffffff; --text-main: #1e293b; --text-sub: #64748b;
+      --border: #e2e8f0; --radius: 12px;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; }
+    body { background-color: var(--gray-bg); color: var(--text-main); padding-bottom: 80px; }
+
+    /* 頂部導覽列 */
+    header {
+      background-color: var(--card-bg); border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 50; padding: 12px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    }
+    .header-title h1 { font-size: 1.15rem; font-weight: 700; color: #1e40af; }
+    .header-title p { font-size: 0.8rem; color: var(--text-sub); }
+    .cloud-status {
+      font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; cursor: pointer;
+      background: #e0f2fe; color: #0284c7; display: flex; align-items: center; gap: 5px;
+    }
+    .cloud-status.active { background: #dcfce7; color: #15803d; }
+
+    /* 導航切換列 */
+    .tab-bar {
+      display: flex; gap: 8px; background: #fff; padding: 8px 16px;
+      border-bottom: 1px solid var(--border); overflow-x: auto;
+      white-space: nowrap; scrollbar-width: none;
+    }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      padding: 8px 14px; border: none; border-radius: 8px; background: transparent;
+      color: var(--text-sub); font-size: 0.9rem; font-weight: 500; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+    }
+    .tab-btn.active { background: var(--primary-light); color: var(--primary); font-weight: 700; }
+
+    /* 內容容器與卡片 */
+    .container { max-width: 960px; margin: 20px auto; padding: 0 16px; }
+    .page-section { display: none; }
+    .page-section.active { display: block; animation: fadeIn 0.25s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card {
+      background: var(--card-bg); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 18px; margin-bottom: 20px; border: 1px solid var(--border);
+    }
+    .card-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; color: #334155; }
+
+    /* 操作控制列 */
+    .action-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 14px; padding: 10px 14px; background: #f1f5f9; border-radius: 8px; flex-wrap: wrap; gap: 8px;
+    }
+    .btn-upload {
+      background: #059669; color: #fff; border: none; border-radius: 6px;
+      padding: 7px 14px; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-reset {
+      background: #fff; color: #dc2626; border: 1.5px solid #fca5a5; border-radius: 6px;
+      padding: 6px 12px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px;
+    }
+
+    /* 基本網格與按鈕 */
+    .student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 10px; }
+    .student-btn {
+      background: #fff; border: 1.5px solid var(--border); border-radius: 10px;
+      padding: 10px 8px; text-align: center; cursor: pointer; transition: all 0.2s;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; touch-action: manipulation;
+    }
+    .student-btn .seat { font-size: 0.75rem; color: var(--text-sub); font-weight: 600; }
+    .student-btn .name { font-size: 0.95rem; font-weight: 700; }
+    .student-btn .status { font-size: 0.72rem; margin-top: 4px; border-radius: 4px; padding: 2px 6px; }
+
+    /* 狀態顏色 */
+    .att-present { background-color: #ecfdf5; border-color: #34d399; color: #065f46; }
+    .att-absent { background-color: #fef2f2; border-color: #f87171; color: #991b1b; }
+    .att-sick { background-color: #fffbeb; border-color: #fbbf24; color: #92400e; }
+    .att-late { background-color: #f5f3ff; border-color: #a78bfa; color: #5b21b6; }
+
+    /* 作業顏色：綠 紫 黃 藍 紅 + 橘(忘記帶來) + 青(缺項) */
+    .hw-green { background: #f0fdf4 !important; border-color: #16a34a !important; }
+    .hw-green .status { background: #dcfce7; color: #15803d; }
+    .hw-purple { background: #faf5ff !important; border-color: #9333ea !important; }
+    .hw-purple .status { background: #f3e8ff; color: #7e22ce; }
+    .hw-yellow { background: #fefce8 !important; border-color: #eab308 !important; }
+    .hw-yellow .status { background: #fef08a; color: #854d0e; }
+    .hw-blue { background: #eff6ff !important; border-color: #2563eb !important; }
+    .hw-blue .status { background: #dbeafe; color: #1d4ed8; }
+    .hw-red { background: #fef2f2 !important; border-color: #dc2626 !important; }
+    .hw-red .status { background: #fee2e2; color: #b91c1c; }
+    .hw-orange { background: #fff7ed !important; border-color: #ea580c !important; }
+    .hw-orange .status { background: #ffedd5; color: #c2410c; }
+    .hw-teal { background: #f0fdfa !important; border-color: #0d9488 !important; }
+    .hw-teal .status { background: #ccfbf1; color: #0f766e; }
+
+    /* 常規燈號 */
+    .indicator-lamp { width: 12px; height: 12px; border-radius: 50%; background: #cbd5e1; margin-bottom: 2px; }
+    .is-lit { background: #f0fdf4 !important; border-color: #22c55e !important; box-shadow: 0 0 10px rgba(34, 197, 94, 0.3); }
+    .is-lit .indicator-lamp { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+
+    /* 打掃看板專用網格 */
+    .clean-board { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top:14px; }
+    .clean-board.full { grid-template-columns: 1fr; } /* 未分配區佔滿整寬 */
+    .clean-col { background: #f8fafc; border: 1.5px dashed var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; }
+    .clean-col h4 { font-size: 0.9rem; color: #334155; margin-bottom: 8px; text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+    .clean-list { flex-grow: 1; min-height: 80px; display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
+    
+    /* 拖曳中的視覺回饋 */
+    .sortable-ghost { opacity: 0.4; background: #e2e8f0; }
+
+    /* 相簿與公告表單 */
+    .form-group { margin-bottom: 12px; }
+    .form-control { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; outline: none; }
+    .btn-submit { width: 100%; padding: 12px; background: var(--primary); color: #fff; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; }
+    
+    .album-category-list { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
+    .album-chip { padding: 6px 14px; background: #e2e8f0; border-radius: 20px; font-size: 0.85rem; cursor: pointer; border: none; white-space: nowrap; }
+    .album-chip.active { background: var(--primary); color: #fff; }
+    
+    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    .gallery-item { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: #fff; position: relative; }
+    .gallery-item img { width: 100%; height: 120px; object-fit: cover; background: #eee; }
+    .gallery-item .desc { padding: 8px; font-size: 0.8rem; line-height: 1.4; }
+    .gallery-item .btn-del-img { position: absolute; top:4px; right:4px; background:rgba(0,0,0,0.6); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer;}
+
+    .bulletin-list { list-style: none; }
+    .bulletin-item { padding: 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .bulletin-badge { font-size: 0.72rem; padding: 3px 6px; border-radius: 4px; background: #fee2e2; color: #b91c1c; margin-right: 6px; }
+
+    /* 彈跳視窗 Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; padding: 16px; }
+    .modal-overlay.active { display: flex; animation: fadeIn 0.15s; }
+    .modal-box { background: #fff; border-radius: var(--radius); width: 100%; max-width: 440px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto;}
+    .modal-options { display: flex; flex-direction: column; gap: 8px; }
+    .opt-btn { padding: 12px; border-radius: 8px; border: 1.5px solid var(--border); background: #fff; text-align: left; font-size: 0.95rem; cursor: pointer; font-weight: 500; }
+
+    /* 手機底部懸浮導航 */
+    @media (max-width: 768px) {
+      .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; z-index: 50; border-top: 1px solid var(--border); justify-content: space-around; padding: 6px 0; }
+      .tab-btn { flex-direction: column; font-size: 0.68rem; gap: 3px; padding: 4px; }
+      body { padding-bottom: 70px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 頁頭 -->
+  <header>
+    <div class="header-title">
+      <h1>崇明國小 三年九班</h1>
+      <p>班級管理與智慧互動系統</p>
+    </div>
+    <div id="cloudStatus" class="cloud-status" onclick="switchTab('tab-settings')">
+      <i class="fa-solid fa-cloud"></i>
+      <span id="cloudStatusText">雲端未連線</span>
+    </div>
+  </header>
+
+  <!-- 底部/頂部 導航切換列 -->
+  <nav class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('tab-attendance')"><i class="fa-solid fa-user-check"></i><span>點名</span></button>
+    <button class="tab-btn" onclick="switchTab('tab-records')"><i class="fa-solid fa-notes-medical"></i><span>傷病/親師</span></button>
+    <button class="tab-btn" onclick="switchTab('tab-album')"><i class="fa-solid fa-images"></i><span>相簿</span></button>
+    <button class="tab-btn" onclick="switchTab('tab-interactive')"><i class="fa-solid fa-chalkboard-user"></i><span>師生互動</span></button>
+    <button class="tab-btn" onclick="switchTab('tab-bulletin')"><i class="fa-solid fa-bullhorn"></i><span>公告</span></button>
+    <button class="tab-btn" onclick="switchTab('tab-settings')"><i class="fa-solid fa-gear"></i><span>設定</span></button>
+  </nav>
+
+  <main class="container">
+
+    <!-- 第一部分：到校點名 -->
+    <section id="tab-attendance" class="page-section active">
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-clock text-primary"></i> 每日到校點名</div>
+        <div class="action-bar">
+          <div style="font-size:0.85rem; font-weight:600;" id="currentDateDisplay"></div>
+          <div class="action-group">
+            <button class="btn-reset" onclick="resetAttendance()"><i class="fa-solid fa-rotate-left"></i> 重整全到</button>
+            <button class="btn-upload" onclick="uploadAttendanceBatch()"><i class="fa-solid fa-cloud-arrow-up"></i> 彙整上傳</button>
+          </div>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-sub); margin-bottom:12px;">點擊姓名挑選假別，全部完成後點選「彙整上傳」。</p>
+        <div class="student-grid" id="attendanceGrid"></div>
+      </div>
+    </section>
+
+    <!-- 第三部分：傷病與親師溝通 -->
+    <section id="tab-records" class="page-section">
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-file-waveform"></i> 新增傷病 / 親師溝通紀錄</div>
+        <form onsubmit="handleRecordSubmit(event)">
+          <div class="form-group">
+            <select id="recordType" class="form-control">
+              <option value="傷病通知">🏥 健康/傷病通知單</option>
+              <option value="親師溝通">📞 親師聯絡/溝通紀錄</option>
+            </select>
+          </div>
+          <div class="form-group"><select id="recordStudentSelect" class="form-control"></select></div>
+          <div class="form-group"><textarea id="recordDetail" class="form-control" rows="3" placeholder="事由或情況說明..." required></textarea></div>
+          <div class="form-group"><input type="text" id="recordFollowup" class="form-control" placeholder="處理方式 / 聯絡反饋"></div>
+          <button type="submit" class="btn-submit"><i class="fa-solid fa-cloud-arrow-up"></i> 儲存並上傳</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 第四部分：學生相簿 -->
+    <section id="tab-album" class="page-section">
+      <div class="card">
+        <div class="card-title" style="justify-content:space-between;">
+          <span><i class="fa-solid fa-photo-film"></i> 班級活動相簿</span>
+          <button class="btn-upload" onclick="openPhotoModal()" style="font-size:0.75rem; padding:6px 10px;">
+            <i class="fa-solid fa-plus"></i> 新增照片
+          </button>
+        </div>
+        <div class="album-category-list">
+          <button class="album-chip active" onclick="filterAlbum('全部活動')">全部</button>
+          <button class="album-chip" onclick="filterAlbum('體育運動會')">體育運動會</button>
+          <button class="album-chip" onclick="filterAlbum('特色課程')">特色課程</button>
+          <button class="album-chip" onclick="filterAlbum('日常學習')">日常學習</button>
+          <button class="album-chip" onclick="filterAlbum('掃除打掃')">掃除打掃</button>
+        </div>
+        <div class="gallery-grid" id="albumGallery">
+          <!-- JS 動態生成照片 -->
+        </div>
+        <p style="font-size:0.75rem; color:#94a3b8; text-align:center; margin-top:16px;">
+          * 照片上傳時會自動壓縮並儲存於本機瀏覽器。若容量已滿，請刪除舊照片。
+        </p>
+      </div>
+    </section>
+
+    <!-- 第五部分：師生互動版 -->
+    <section id="tab-interactive" class="page-section">
+      <div style="display:flex; gap:8px; margin-bottom:12px; overflow-x:auto;">
+        <button class="album-chip active" id="btn-sub-hw" onclick="switchInteractiveMode('hw')">1.作業繳交</button>
+        <button class="album-chip" id="btn-sub-clean" onclick="switchInteractiveMode('clean')">2.打掃工作</button>
+        <button class="album-chip" id="btn-sub-teeth" onclick="switchInteractiveMode('teeth')">3.潔牙高手</button>
+        <button class="album-chip" id="btn-sub-mouthwash" onclick="switchInteractiveMode('mouthwash')">4.漱口水</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title" id="interactiveTitle"><i class="fa-solid fa-hand-pointer"></i> 師生互動看板</div>
+        <div class="action-bar">
+          <span style="font-size:0.85rem; font-weight:600;" id="currentInteractiveTitleDisplay">目前項目：作業繳交</span>
+          <div class="action-group">
+            <button class="btn-reset" onclick="resetCurrentInteractive()"><i class="fa-solid fa-arrow-rotate-left"></i> 重整</button>
+            <button class="btn-upload" onclick="uploadInteractiveBatch()"><i class="fa-solid fa-cloud-arrow-up"></i> 上傳</button>
+          </div>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-sub); margin-bottom:14px;" id="interactiveSubDesc">
+          點擊姓名挑選狀態；若按錯可「連續點兩下」直接恢復未繳交！
+        </p>
+        
+        <!-- 作業繳交、潔牙、漱口水 使用預設 Grid -->
+        <div class="student-grid" id="interactiveGrid"></div>
+
+        <!-- 專屬的【打掃工作】看板 (Drag & Drop) -->
+        <div id="cleanKanban" style="display:none;">
+          <!-- 橫跨全寬的未分配區 -->
+          <div class="clean-board full">
+            <div class="clean-col" style="background:#f1f5f9; border-color:#cbd5e1;">
+              <h4>🧹 尚未分配打掃區 (拖曳分派)</h4>
+              <div class="clean-list" id="zone-unassigned"></div>
+            </div>
+          </div>
+          <!-- 下方 6 分區 -->
+          <div class="clean-board">
+            <div class="clean-col"><h4>教室內</h4><div class="clean-list" id="zone-classroom"></div></div>
+            <div class="clean-col"><h4>走廊</h4><div class="clean-list" id="zone-corridor"></div></div>
+            <div class="clean-col"><h4>拖地</h4><div class="clean-list" id="zone-mop"></div></div>
+            <div class="clean-col"><h4>窗戶</h4><div class="clean-list" id="zone-window"></div></div>
+            <div class="clean-col"><h4>黑板</h4><div class="clean-list" id="zone-blackboard"></div></div>
+            <div class="clean-col"><h4>倒垃圾/資源回收</h4><div class="clean-list" id="zone-trash"></div></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 第七部分：校園公告專區 -->
+    <section id="tab-bulletin" class="page-section">
+      <div class="card">
+        <div class="card-title"><span><i class="fa-solid fa-bullhorn text-danger"></i> 校園公告專區</span></div>
+        <ul class="bulletin-list" id="bulletinListContainer"></ul>
+      </div>
+    </section>
+
+    <!-- 設定頁面 -->
+    <section id="tab-settings" class="page-section">
+      <!-- 公告管理 -->
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-bullhorn text-danger"></i> 公告管理 (新增/刪除)</div>
+        <form onsubmit="handleCreateAnnouncement(event)" style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:12px;">
+          <input type="text" id="newAnnoDept" class="form-control" style="margin-bottom:8px;" placeholder="單位標籤 (如:學務處)" required>
+          <input type="text" id="newAnnoTitle" class="form-control" style="margin-bottom:8px;" placeholder="公告標題" required>
+          <textarea id="newAnnoContent" class="form-control" rows="2" style="margin-bottom:8px;" placeholder="詳細內容..." required></textarea>
+          <button type="submit" class="btn-submit"><i class="fa-solid fa-plus"></i> 發佈公告</button>
+        </form>
+        <div id="manageBulletinList"></div>
+      </div>
+
+      <!-- 學生名單 -->
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-users-gear"></i> 學生名單設定</div>
+        <textarea id="studentRosterInput" class="form-control" rows="8" placeholder="每行一個名字..."></textarea>
+        <button class="btn-submit" style="margin-top:8px;" onclick="saveStudentRoster()">儲存名單</button>
+      </div>
+
+      <!-- Webhook 設定 -->
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-link"></i> 試算表 Webhook 設定</div>
+        <input type="url" id="sheetsApiUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
+        <button class="btn-submit" style="margin-top:8px; background:#059669;" onclick="saveSheetsUrl()">儲存連結</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 照片上傳 Modal -->
+  <div id="photoUploadModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3>上傳新照片</h3>
+      <div class="form-group">
+        <label>選擇分類</label>
+        <select id="uploadPhotoCat" class="form-control">
+          <option value="體育運動會">體育運動會</option>
+          <option value="特色課程">特色課程</option>
+          <option value="日常學習">日常學習</option>
+          <option value="掃除打掃">掃除打掃</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>照片描述</label>
+        <input type="text" id="uploadPhotoDesc" class="form-control" placeholder="例如：大隊接力練習">
+      </div>
+      <div class="form-group">
+        <label>選擇檔案</label>
+        <input type="file" id="uploadPhotoFile" class="form-control" accept="image/*">
+      </div>
+      <button class="btn-submit" onclick="processAndSavePhoto()">壓縮並儲存</button>
+      <button class="btn-submit" style="margin-top:8px; background:#94a3b8;" onclick="document.getElementById('photoUploadModal').classList.remove('active')">取消</button>
+    </div>
+  </div>
+
+  <!-- 作業狀態 Modal (擴充) -->
+  <div id="hwStatusModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3 id="hwModalTitle">挑選作業狀態</h3>
+      <div class="modal-options">
+        <button class="opt-btn" onclick="applyHwStatus('已繳交', 'hw-green')"><span style="color:#16a34a;">🟢 1. 已繳交</span></button>
+        <button class="opt-btn" onclick="applyHwStatus('要訂正', 'hw-purple')"><span style="color:#9333ea;">🟣 2. 要訂正</span></button>
+        <button class="opt-btn" onclick="applyHwStatus('訂正完成', 'hw-yellow')"><span style="color:#ca8a04;">🟡 3. 訂正完成</span></button>
+        <button class="opt-btn" onclick="applyHwStatus('忘記帶回家', 'hw-blue')"><span style="color:#2563eb;">🔵 4. 忘記帶回家</span></button>
+        <button class="opt-btn" onclick="applyHwStatus('未完成', 'hw-red')"><span style="color:#dc2626;">🔴 5. 未完成</span></button>
+        <!-- 新增功能 -->
+        <button class="opt-btn" onclick="applyHwStatus('忘記帶來學校', 'hw-orange')"><span style="color:#ea580c;">🟠 6. 忘記帶來學校</span></button>
+        <button class="opt-btn" onclick="showMissingInput()"><span style="color:#0d9488;">✍️ 7. 缺項 (自訂輸入)</span></button>
+        
+        <!-- 缺項輸入框 (預設隱藏) -->
+        <div id="missingInputArea" style="display:none; padding:10px; background:#f0fdfa; border:1px dashed #0d9488; border-radius:8px;">
+          <input type="text" id="hwMissingText" class="form-control" placeholder="輸入缺漏項目(如:數習)">
+          <button class="btn-submit" style="margin-top:8px; background:#0d9488;" onclick="submitMissingHw()">確認儲存</button>
+        </div>
+
+        <button class="opt-btn" onclick="resetSingleStudentHw()" style="border-style:dashed; background:#f8fafc; justify-content:center;">
+          <span style="color:#64748b;">↺ 重設為「未登記」</span>
+        </button>
+      </div>
+      <button class="btn-submit" style="margin-top:14px; background:#94a3b8;" onclick="closeHwModal()">關閉</button>
+    </div>
+  </div>
+
+  <script>
+    /* ================= 資料初始化 ================= */
+    const DEFAULT_STUDENTS = [
+      "林品妍", "張宇帆", "陳柏宇", "黃子軒", "李承恩", 
+      "王羽涵", "趙晨曦", "孫立恩", "周子涵", "吳秉諺",
+      "蔡宗翰", "許庭瑋", "鄭晴文", "謝名翔", "洪詠晴"
+    ];
+    let students = JSON.parse(localStorage.getItem('cm309_students')) || DEFAULT_STUDENTS;
+    let sheetsWebhookUrl = localStorage.getItem('cm309_sheets_url') || "";
+    let announcements = JSON.parse(localStorage.getItem('cm309_announcements')) || [];
+    let albums = JSON.parse(localStorage.getItem('cm309_albums')) || [];
+
+    // 狀態
+    let attendanceState = {}; 
+    let interactiveHwState = {}; 
+    let teethLampState = {};  
+    let mouthwashLampState = {}; 
+    
+    // 打掃專用狀態 (紀錄座號與對應區域、燈號)
+    // 預設全在 'zone-unassigned'
+    let cleanAssignment = JSON.parse(localStorage.getItem('cm309_cleanAssign')) || {};
+    let cleanLampState = {}; 
+
+    let currentSelectedStudent = null;
+    let currentInteractiveMode = 'hw';
+    let clickTimeout = null;
+    let lastClickedSeat = null;
+    let sortableInstances = [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('zh-TW');
+      updateCloudBadge();
+      document.getElementById('studentRosterInput').value = students.join('\n');
+      document.getElementById('sheetsApiUrlInput').value = sheetsWebhookUrl;
+      
+      initSortables();
+      renderAllGrids();
+      renderBulletins();
+      renderManageBulletins();
+      renderAlbum('全部活動');
+    });
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+      window.scrollTo(0,0);
+    }
+
+    function renderAllGrids() {
+      renderAttendanceGrid();
+      renderInteractiveGrid();
+      
+      const select = document.getElementById('recordStudentSelect');
+      select.innerHTML = '';
+      students.forEach((name, i) => {
+        select.add(new Option(`${i + 1}號 ${name}`, `${i + 1}號 ${name}`));
+      });
+    }
+
+    /* ================= 1. 點名功能 ================= */
+    function renderAttendanceGrid() {
+      const container = document.getElementById('attendanceGrid');
+      container.innerHTML = '';
+      students.forEach((name, i) => {
+        const id = i+1;
+        const st = attendanceState[id] || '出席';
+        let cls = '';
+        if(st==='出席') cls='att-present'; else if(st==='病假') cls='att-sick';
+        else if(st==='事假') cls='att-absent'; else cls='att-late';
+        
+        container.innerHTML += `<div class="student-btn ${cls}" onclick="attendanceState[${id}] = ['出席','事假','病假','遲到'][ (['出席','事假','病假','遲到'].indexOf(attendanceState[${id}]||'出席')+1)%4 ]; renderAttendanceGrid();">
+          <span class="seat">${id}號</span><span class="name">${name}</span><span class="status">${st}</span></div>`;
+      });
+    }
+    function resetAttendance() { if(confirm("確定全班重整為出席？")) { attendanceState = {}; renderAttendanceGrid(); } }
+    function uploadAttendanceBatch() {
+      let abnormal = [], present = 0;
+      students.forEach((n, i) => {
+        let st = attendanceState[i+1] || '出席';
+        if(st === '出席') present++; else abnormal.push(`${i+1}號 ${n}(${st})`);
+      });
+      let txt = `應到${students.length}人，實到${present}人。${abnormal.length>0 ? '請假:'+abnormal.join('、') : '全班到齊！'}`;
+      sendToSheets({ category: "每日點名", student: "全班", detail: txt });
+      alert(`已上傳！\n${txt}`);
+    }
+
+    /* ================= 4. 相簿功能 (Canvas 壓縮) ================= */
+    function openPhotoModal() { document.getElementById('photoUploadModal').classList.add('active'); }
+    function filterAlbum(cat) {
+      document.querySelectorAll('.album-category-list .album-chip').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      renderAlbum(cat);
+    }
+    function renderAlbum(filterCat) {
+      const container = document.getElementById('albumGallery');
+      container.innerHTML = '';
+      albums.forEach((alb, idx) => {
+        if(filterCat === '全部活動' || alb.cat === filterCat) {
+          container.innerHTML += `
+            <div class="gallery-item">
+              <button class="btn-del-img" onclick="deletePhoto(${idx})"><i class="fa-solid fa-xmark"></i></button>
+              <img src="${alb.src}">
+              <div class="desc"><strong>${alb.desc||'未命名'}</strong><br><span style="color:#94a3b8;">${alb.cat}</span></div>
+            </div>`;
+        }
+      });
+    }
+    function deletePhoto(idx) {
+      if(confirm("確定刪除這張照片？")) { albums.splice(idx,1); localStorage.setItem('cm309_albums', JSON.stringify(albums)); renderAlbum('全部活動'); }
+    }
+    function processAndSavePhoto() {
+      const file = document.getElementById('uploadPhotoFile').files[0];
+      if(!file) return alert("請先選擇照片！");
+      const cat = document.getElementById('uploadPhotoCat').value;
+      const desc = document.getElementById('uploadPhotoDesc').value;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxW = 500, maxH = 500;
+          let w = img.width, h = img.height;
+          if(w > h) { if(w > maxW) { h *= maxW/w; w = maxW; } } 
+          else { if(h > maxH) { w *= maxH/h; h = maxH; } }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.6); // 壓縮率 60%
+          
+          try {
+            albums.unshift({ cat, desc, src: dataUrl });
+            localStorage.setItem('cm309_albums', JSON.stringify(albums));
+            document.getElementById('photoUploadModal').classList.remove('active');
+            renderAlbum('全部活動');
+            alert("照片已成功壓縮並儲存！");
+          } catch(err) {
+            alert("儲存失敗！可能是瀏覽器容量已滿，請先刪除舊照片。");
+            albums.shift(); // 移除剛塞入失敗的
+          }
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /* ================= 5. 師生互動版 (含打掃 Kanban) ================= */
+    function switchInteractiveMode(mode) {
+      currentInteractiveMode = mode;
+      document.querySelectorAll('#tab-interactive .album-chip').forEach(b => b.classList.remove('active'));
+      document.getElementById('btn-sub-'+mode).classList.add('active');
+
+      const title = document.getElementById('currentInteractiveTitleDisplay');
+      const desc = document.getElementById('interactiveSubDesc');
+      const grid = document.getElementById('interactiveGrid');
+      const kanban = document.getElementById('cleanKanban');
+
+      if(mode === 'hw') { title.textContent='目前：作業繳交'; desc.textContent='點擊名字挑選狀態；雙擊名字恢復未繳交！'; grid.style.display='grid'; kanban.style.display='none'; }
+      else if(mode === 'clean') { title.textContent='目前：打掃工作(拖曳分配)'; desc.textContent='長按卡片即可拖曳分配打掃區域；輕點卡片可點亮綠燈(已完成)！'; grid.style.display='none'; kanban.style.display='block'; }
+      else { title.textContent=(mode==='teeth'?'目前：潔牙高手':'目前：漱口水'); desc.textContent='輕點姓名亮起綠燈(已完成)。'; grid.style.display='grid'; kanban.style.display='none'; }
+      
+      renderInteractiveGrid();
+    }
+
+    function renderInteractiveGrid() {
+      if(currentInteractiveMode === 'clean') {
+        renderCleanKanban();
+        return;
+      }
+      
+      const container = document.getElementById('interactiveGrid');
+      container.innerHTML = '';
+      students.forEach((name, i) => {
+        const id = i+1;
+        const div = document.createElement('div');
+        div.className = 'student-btn';
+        
+        if(currentInteractiveMode === 'hw') {
+          const hw = interactiveHwState[id];
+          if(hw) div.classList.add(hw.lightClass);
+          div.innerHTML = `<div class="indicator-lamp"></div><span class="seat">${id}號</span><span class="name">${name}</span><span class="status">${hw ? hw.status : '未登記'}</span>`;
+          div.onclick = () => handleHwClick(id, name);
+        } else {
+          const isLit = (currentInteractiveMode === 'teeth' ? teethLampState[id] : mouthwashLampState[id]);
+          if(isLit) div.classList.add('is-lit');
+          div.innerHTML = `<div class="indicator-lamp"></div><span class="seat">${id}號</span><span class="name">${name}</span><span class="status">${isLit?'已完成':'未完成'}</span>`;
+          div.onclick = () => {
+            if(currentInteractiveMode === 'teeth') teethLampState[id] = !teethLampState[id];
+            else mouthwashLampState[id] = !mouthwashLampState[id];
+            renderInteractiveGrid();
+          };
+        }
+        container.appendChild(div);
+      });
+    }
+
+    /* ---- 作業雙擊與缺項邏輯 ---- */
+    function handleHwClick(seat, name) {
+      if (clickTimeout && lastClickedSeat === seat) {
+        clearTimeout(clickTimeout); clickTimeout = null; lastClickedSeat = null;
+        delete interactiveHwState[seat]; renderInteractiveGrid(); return;
+      }
+      lastClickedSeat = seat;
+      clickTimeout = setTimeout(() => {
+        clickTimeout = null; lastClickedSeat = null;
+        currentSelectedStudent = { seat, name };
+        document.getElementById('hwModalTitle').textContent = `${seat}號 ${name} - 挑選作業狀態`;
+        document.getElementById('missingInputArea').style.display = 'none'; // 重置缺項框
+        document.getElementById('hwMissingText').value = '';
+        document.getElementById('hwStatusModal').classList.add('active');
+      }, 250);
+    }
+    function closeHwModal() { document.getElementById('hwStatusModal').classList.remove('active'); }
+    function applyHwStatus(status, lightCls) {
+      interactiveHwState[currentSelectedStudent.seat] = { status, lightClass: lightCls };
+      closeHwModal(); renderInteractiveGrid();
+    }
+    function resetSingleStudentHw() { delete interactiveHwState[currentSelectedStudent.seat]; closeHwModal(); renderInteractiveGrid(); }
+    function showMissingInput() { document.getElementById('missingInputArea').style.display = 'block'; }
+    function submitMissingHw() {
+      const txt = document.getElementById('hwMissingText').value.trim();
+      if(!txt) return alert("請輸入缺交項目！");
+      applyHwStatus(`缺項(${txt})`, 'hw-teal');
+    }
+
+    /* ---- 打掃拖曳 Kanban 邏輯 ---- */
+    function initSortables() {
+      const zones = ['zone-unassigned', 'zone-classroom', 'zone-corridor', 'zone-mop', 'zone-window', 'zone-blackboard', 'zone-trash'];
+      zones.forEach(z => {
+        new Sortable(document.getElementById(z), {
+          group: 'clean', animation: 150, delay: 200, delayOnTouchOnly: true, // 手機長按才拖曳，留給點擊亮燈空間
+          onEnd: function(evt) {
+            const item = evt.item;
+            const newZone = evt.to.id;
+            const seat = item.getAttribute('data-seat');
+            cleanAssignment[seat] = newZone;
+            localStorage.setItem('cm309_cleanAssign', JSON.stringify(cleanAssignment));
+          }
+        });
+      });
+    }
+    function renderCleanKanban() {
+      // 清空所有清單
+      document.querySelectorAll('.clean-list').forEach(el => el.innerHTML = '');
+      
+      students.forEach((name, i) => {
+        const id = i+1;
+        const targetZone = cleanAssignment[id] || 'zone-unassigned';
+        const isLit = !!cleanLampState[id];
+        
+        const div = document.createElement('div');
+        div.className = `student-btn ${isLit ? 'is-lit' : ''}`;
+        div.style.padding = '8px';
+        div.style.width = '75px'; // 讓拖曳卡片小一點好排
+        div.setAttribute('data-seat', id);
+        
+        div.innerHTML = `<div class="indicator-lamp"></div><div class="name" style="font-size:0.9rem;">${name}</div>`;
+        div.onclick = (e) => {
+          // 防止拖曳時觸發點擊
+          if(e.detail === 0) return; 
+          cleanLampState[id] = !cleanLampState[id];
+          renderCleanKanban();
+        };
+        
+        const zoneEl = document.getElementById(targetZone);
+        if(zoneEl) zoneEl.appendChild(div);
+      });
+    }
+
+    function resetCurrentInteractive() {
+      if(confirm("確定要清除畫面上的登記/亮燈記錄嗎？")) {
+        if(currentInteractiveMode === 'hw') interactiveHwState = {};
+        else if(currentInteractiveMode === 'clean') cleanLampState = {}; // 不清空排表，只清空燈號
+        else if(currentInteractiveMode === 'teeth') teethLampState = {};
+        else mouthwashLampState = {};
+        renderInteractiveGrid();
+      }
+    }
+
+    function uploadInteractiveBatch() {
+      let detailText = "";
+      if(currentInteractiveMode === 'hw') {
+        let stats = {"已繳交":0, "要訂正":0, "訂正完成":0, "忘記帶回家":0, "未完成":0, "忘記帶來學校":0};
+        let missingList = [];
+        students.forEach((n,i) => {
+          const st = interactiveHwState[i+1] ? interactiveHwState[i+1].status : "未登記";
+          if(st.includes("缺項")) missingList.push(`${i+1}號 ${n}(${st})`);
+          else if(stats[st] !== undefined) stats[st]++;
+          else if(st !== "未登記") missingList.push(`${i+1}號 ${n}(${st})`);
+          
+          if(["要訂正", "忘記帶回家", "未完成", "忘記帶來學校"].includes(st)) missingList.push(`${i+1}號 ${n}(${st})`);
+        });
+        detailText = `已繳交:${stats["已繳交"]}、訂正完:${stats["訂正完成"]}、缺/未帶:${missingList.length}。 ${missingList.length>0 ? '需追蹤:'+missingList.join('、') : ''}`;
+        sendToSheets({ category: "作業繳交(總表)", student: "全班", detail: detailText });
+        
+      } else if(currentInteractiveMode === 'clean') {
+        // 彙整打掃狀態
+        const zonesMap = {
+          'zone-classroom': '教室內', 'zone-corridor': '走廊', 'zone-mop': '拖地', 
+          'zone-window': '窗戶', 'zone-blackboard': '黑板', 'zone-trash': '倒垃圾'
+        };
+        let reports = [];
+        for(let z in zonesMap) {
+          let studentsInZone = students.map((n,i)=>({id:i+1, name:n})).filter(s => cleanAssignment[s.id] === z);
+          if(studentsInZone.length === 0) continue;
+          let notDone = studentsInZone.filter(s => !cleanLampState[s.id]).map(s => `${s.id}號`);
+          if(notDone.length > 0) reports.push(`[${zonesMap[z]}] 未完成:${notDone.join(',')}`);
+        }
+        detailText = reports.length > 0 ? reports.join('； ') : '全班打掃皆已完成！';
+        sendToSheets({ category: "打掃工作(總表)", student: "全班", detail: detailText });
+        
+      } else {
+        let lamp = (currentInteractiveMode === 'teeth') ? teethLampState : mouthwashLampState;
+        let notDone = students.map((n,i)=>({id:i+1})).filter(s => !lamp[s.id]).map(s=>`${s.id}號`);
+        detailText = notDone.length > 0 ? `未完成: ${notDone.join('、')}` : '全員完成！';
+        sendToSheets({ category: (currentInteractiveMode === 'teeth'?"潔牙高手":"漱口水"), student: "全班", detail: detailText });
+      }
+      alert(`已彙整上傳！\n\n${detailText}`);
+    }
+
+    /* ================= 其他與雲端傳輸 ================= */
+    function handleRecordSubmit(e) {
+      e.preventDefault();
+      sendToSheets({
+        category: document.getElementById('recordType').value,
+        student: document.getElementById('recordStudentSelect').value,
+        detail: document.getElementById('recordDetail').value,
+        followup: document.getElementById('recordFollowup').value
+      });
+      alert('已上傳紀錄！'); e.target.reset();
+    }
+
+    function sendToSheets(payload) {
+      if(!sheetsWebhookUrl) return;
+      const data = { timestamp: new Date().toISOString(), timeDisplay: new Date().toLocaleString('zh-TW'), className: "三年九班", ...payload };
+      fetch(sheetsWebhookUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    }
+
+    function saveStudentRoster() {
+      const txt = document.getElementById('studentRosterInput').value.trim();
+      if(!txt) return;
+      students = txt.split('\n').map(s=>s.trim()).filter(s=>s.length>0);
+      localStorage.setItem('cm309_students', JSON.stringify(students));
+      renderAllGrids(); alert("名單更新成功！");
+    }
+    function saveSheetsUrl() {
+      sheetsWebhookUrl = document.getElementById('sheetsApiUrlInput').value.trim();
+      localStorage.setItem('cm309_sheets_url', sheetsWebhookUrl);
+      updateCloudBadge(); alert("Webhook 網址已儲存！");
+    }
+    function updateCloudBadge() {
+      const badge = document.getElementById('cloudStatus');
+      if(sheetsWebhookUrl) { badge.classList.add('active'); document.getElementById('cloudStatusText').textContent='雲端已連線'; }
+    }
+  </script>
+</body>
+</html>
