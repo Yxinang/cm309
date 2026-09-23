@@ -227,7 +227,7 @@
           </div>
         </div>
         <div style="font-size:0.8rem; color:#059669; font-weight:700; margin-bottom:14px; background:#dcfce7; padding:6px 10px; border-radius:6px; display:inline-block;">
-          <i class="fa-solid fa-circle-info"></i> 提示：完成任務並亮起綠燈，寵物蛋會自動加分，並立即全自動同步至雲端！
+          <i class="fa-solid fa-circle-info"></i> 提示：所有亮燈狀態與假別皆會「全自動同步」至所有手機與電腦！
         </div>
         
         <div class="student-grid" id="interactiveGrid"></div>
@@ -313,10 +313,10 @@
     <!-- 設定頁面 -->
     <section id="tab-settings" class="page-section">
       
-      <!-- 試算表 Webhook 設定 (優先重要) -->
+      <!-- 試算表 Webhook 設定 -->
       <div class="card" style="border: 2px solid #2563eb;">
         <div class="card-title"><i class="fa-solid fa-cloud-arrow-up text-primary"></i> 核心：Google 試算表中央資料庫</div>
-        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">填入 Web App 網址後，電腦與手機將會透過此試算表「全自動雙向同步」，完全不再需要複製任何代碼！</p>
+        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">填入 Web App 網址後，電腦與手機將會透過此試算表「全自動雙向同步（包含燈號與進度）」！</p>
         <input type="url" id="sheetsApiUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
         <div style="display:flex; gap:8px; margin-top:8px;">
           <button class="btn-submit" style="background:#2563eb;" onclick="saveSheetsUrl()">儲存並立即從雲端同步</button>
@@ -481,11 +481,12 @@
     let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
     let cleanAssignment = JSON.parse(localStorage.getItem('cm309_cleanAssign')) || {};
 
-    let attendanceState = {}; 
-    let interactiveHwState = {}; 
-    let teethLampState = {};  
-    let mouthwashLampState = {}; 
-    let cleanLampState = {}; 
+    // 💡 納入雲端同步的全班即時狀態
+    let attendanceState = JSON.parse(localStorage.getItem('cm309_attState')) || {}; 
+    let interactiveHwState = JSON.parse(localStorage.getItem('cm309_hwState')) || {}; 
+    let teethLampState = JSON.parse(localStorage.getItem('cm309_teethState')) || {};  
+    let mouthwashLampState = JSON.parse(localStorage.getItem('cm309_mwState')) || {}; 
+    let cleanLampState = JSON.parse(localStorage.getItem('cm309_cleanState')) || {}; 
 
     let currentSelectedStudent = null;
     let currentInteractiveMode = 'hw';
@@ -504,7 +505,7 @@
       renderManageBulletins();
       renderAlbum('全部活動');
 
-      // 每次開啟網頁，自動從雲端試算表拉取最新進度
+      // 每次開啟網頁自動讀取雲端狀態（含最新燈號）
       if (sheetsWebhookUrl) {
         fetchFromCloud(true);
       } else {
@@ -530,10 +531,17 @@
       students.forEach((name, i) => { select.add(new Option(`${i + 1}號 ${name}`, `${i + 1}號 ${name}`)); });
     }
 
-    // === ☁️ 雲端全自動雙向同步核心 ===
+    // === ☁️ 雲端全自動雙向同步核心（含燈號） ===
     
-    // 1. 自動把當前狀態備份到雲端試算表 (防抖延遲 1 秒，避免連續點擊卡頓)
+    // 1. 自動把當前全班狀態與燈號備份到雲端試算表
     function autoSyncToCloud() {
+      // 立即存入本機
+      localStorage.setItem('cm309_attState', JSON.stringify(attendanceState));
+      localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
+      localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState));
+      localStorage.setItem('cm309_mwState', JSON.stringify(mouthwashLampState));
+      localStorage.setItem('cm309_cleanState', JSON.stringify(cleanLampState));
+
       if (!sheetsWebhookUrl) return;
       clearTimeout(autoSyncTimer);
       updateCloudBadge('syncing');
@@ -544,7 +552,13 @@
           petState: petState,
           petCollection: petCollection,
           announcements: announcements,
-          cleanAssignment: cleanAssignment
+          cleanAssignment: cleanAssignment,
+          // 💡 同步全班所有燈號
+          attendanceState: attendanceState,
+          interactiveHwState: interactiveHwState,
+          teethLampState: teethLampState,
+          mouthwashLampState: mouthwashLampState,
+          cleanLampState: cleanLampState
         };
         
         fetch(sheetsWebhookUrl, {
@@ -558,10 +572,10 @@
           console.error("雲端同步儲存失敗:", err);
           updateCloudBadge('error');
         });
-      }, 1000);
+      }, 800); // 800ms 防抖
     }
 
-    // 2. 從雲端試算表讀取最新資料並覆蓋本機
+    // 2. 從雲端試算表讀取最新燈號與資料
     function fetchFromCloud(silent = false) {
       if (!sheetsWebhookUrl) return;
       updateCloudBadge('syncing');
@@ -576,30 +590,42 @@
             announcements = data.announcements || [];
             cleanAssignment = data.cleanAssignment || {};
             
+            // 💡 載入雲端燈號狀態
+            attendanceState = data.attendanceState || {};
+            interactiveHwState = data.interactiveHwState || {};
+            teethLampState = data.teethLampState || {};
+            mouthwashLampState = data.mouthwashLampState || {};
+            cleanLampState = data.cleanLampState || {};
+
             // 寫入本機快取
             localStorage.setItem('cm309_students', JSON.stringify(students));
             localStorage.setItem('cm309_pets', JSON.stringify(petState));
             localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
             localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
             localStorage.setItem('cm309_cleanAssign', JSON.stringify(cleanAssignment));
+            localStorage.setItem('cm309_attState', JSON.stringify(attendanceState));
+            localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
+            localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState));
+            localStorage.setItem('cm309_mwState', JSON.stringify(mouthwashLampState));
+            localStorage.setItem('cm309_cleanState', JSON.stringify(cleanLampState));
             
-            // 重繪介面
+            // 重繪介面（燈號瞬間點亮）
             renderAllGrids();
             renderPetsGrid();
             renderBulletins();
             renderManageBulletins();
             document.getElementById('studentRosterInput').value = students.join('\n');
             updateCloudBadge('active');
-            if (!silent) alert("✅ 已成功從雲端同步最新全班資料！");
+            if (!silent) alert("✅ 已成功從雲端同步最新全班狀態與燈號！");
           } else {
             updateCloudBadge('active');
-            if (!silent) alert("雲端試算表目前尚無資料，請先按『將此機資料推上雲端』進行初次備份。");
+            if (!silent) alert("雲端目前尚無資料，請先按『將此機資料推上雲端』進行初次備份。");
           }
         })
         .catch(err => {
           console.error("雲端讀取失敗:", err);
           updateCloudBadge('error');
-          if (!silent) alert("❌ 從雲端讀取失敗，請確認試算表網址是否正確，以及是否已重新部署為「新版本」。");
+          if (!silent) alert("❌ 從雲端讀取失敗，請確認 Apps Script 是否已重新部署為「新版本」。");
         });
     }
 
@@ -614,7 +640,7 @@
     function forcePushToCloud() {
       if (!sheetsWebhookUrl) return alert("請先填寫試算表網址！");
       autoSyncToCloud();
-      alert("✅ 已將目前這台設備的名單與寵物資料發送到雲端試算表！其他裝置打開時便會自動載入。");
+      alert("✅ 已將目前這台設備的「全部燈號」與寵物資料發送到雲端！另一台裝置打開時將即刻同步。");
     }
 
     function updateCloudBadge(state) {
@@ -645,7 +671,7 @@
       if (p.xp < 0) { if (p.stage > 1) { p.stage--; p.xp = PET_REQ[p.stage - 1] + p.xp; } else { p.xp = 0; } }
       localStorage.setItem('cm309_pets', JSON.stringify(petState));
       if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
-      autoSyncToCloud(); // 自動雲端同步
+      autoSyncToCloud();
     }
 
     function renderPetsGrid() {
@@ -769,7 +795,7 @@
 
     function closePetModal() { document.getElementById('petManageModal').classList.remove('active'); }
 
-    // === 師生互動區 ===
+    // === 師生互動區 (點擊即觸發雲端燈號同步) ===
     function switchInteractiveMode(mode) {
       currentInteractiveMode = mode;
       document.querySelectorAll('#tab-interactive .album-chip').forEach(b => b.classList.remove('active'));
@@ -805,7 +831,7 @@
       if (clickTimeout && lastClickedSeat === seat) {
         clearTimeout(clickTimeout); clickTimeout = null; lastClickedSeat = null;
         if(interactiveHwState[seat] && interactiveHwState[seat].lightClass === 'hw-green') addPetXp(seat, -1);
-        delete interactiveHwState[seat]; renderInteractiveGrid(); return;
+        delete interactiveHwState[seat]; renderInteractiveGrid(); autoSyncToCloud(); return;
       }
       lastClickedSeat = seat;
       clickTimeout = setTimeout(() => {
@@ -822,12 +848,14 @@
       if (wasGreen && !isGreen) addPetXp(seat, -1);
       interactiveHwState[seat] = { status, lightClass: lightCls };
       closeHwModal(); renderInteractiveGrid();
+      autoSyncToCloud(); // 💡 燈號同步到雲端
     }
     
     function resetSingleStudentHw() {
       const seat = currentSelectedStudent.seat;
       if(interactiveHwState[seat] && interactiveHwState[seat].lightClass === 'hw-green') addPetXp(seat, -1);
       delete interactiveHwState[seat]; closeHwModal(); renderInteractiveGrid(); 
+      autoSyncToCloud();
     }
     function showMissingInput() { document.getElementById('missingInputArea').style.display = 'block'; }
     function submitMissingHw() {
@@ -844,6 +872,7 @@
       else if (currentInteractiveMode === 'mouthwash') { mouthwashLampState[seat] = !mouthwashLampState[seat]; isOn = mouthwashLampState[seat]; }
       if (isOn) addPetXp(seat, 1); else addPetXp(seat, -1);
       renderInteractiveGrid();
+      autoSyncToCloud(); // 💡 燈號同步到雲端
     }
 
     function initSortables() {
@@ -878,6 +907,7 @@
         if(currentInteractiveMode === 'hw') interactiveHwState = {}; else if(currentInteractiveMode === 'clean') cleanLampState = {}; 
         else if(currentInteractiveMode === 'teeth') teethLampState = {}; else mouthwashLampState = {};
         renderInteractiveGrid();
+        autoSyncToCloud(); // 💡 清除燈號同步到雲端
       }
     }
 
@@ -905,17 +935,17 @@
       alert(`已彙整上傳！\n\n${detailText}`);
     }
 
-    // === 其他基礎功能 ===
+    // === 點名功能 (點擊即觸發雲端同步) ===
     function renderAttendanceGrid() {
       const container = document.getElementById('attendanceGrid'); container.innerHTML = '';
       students.forEach((name, i) => {
         const id = i+1; const st = attendanceState[id] || '出席'; let cls = '';
         if(st==='出席') cls='att-present'; else if(st==='病假') cls='att-sick'; else if(st==='事假') cls='att-absent'; else cls='att-late';
-        container.innerHTML += `<div class="student-btn ${cls}" onclick="attendanceState[${id}] = ['出席','事假','病假','遲到'][ (['出席','事假','病假','遲到'].indexOf(attendanceState[${id}]||'出席')+1)%4 ]; renderAttendanceGrid();">
+        container.innerHTML += `<div class="student-btn ${cls}" onclick="attendanceState[${id}] = ['出席','事假','病假','遲到'][ (['出席','事假','病假','遲到'].indexOf(attendanceState[${id}]||'出席')+1)%4 ]; renderAttendanceGrid(); autoSyncToCloud();">
           <span class="seat">${id}號</span><span class="name">${name}</span><span class="status">${st}</span></div>`;
       });
     }
-    function resetAttendance() { if(confirm("確定重整為全數出席？")) { attendanceState = {}; renderAttendanceGrid(); } }
+    function resetAttendance() { if(confirm("確定重整為全數出席？")) { attendanceState = {}; renderAttendanceGrid(); autoSyncToCloud(); } }
     function uploadAttendanceBatch() {
       let abnormal = [], present = 0;
       students.forEach((n, i) => { let st = attendanceState[i+1] || '出席'; if(st === '出席') present++; else abnormal.push(`${i+1}號 ${n}(${st})`); });
@@ -984,7 +1014,7 @@
       sheetsWebhookUrl = document.getElementById('sheetsApiUrlInput').value.trim(); 
       localStorage.setItem('cm309_sheets_url', sheetsWebhookUrl); 
       updateCloudBadge('active'); 
-      alert("Webhook 已儲存！正在從雲端同步..."); 
+      alert("Webhook 已儲存！正在從雲端同步全班燈號與資料..."); 
       fetchFromCloud(false);
     }
   </script>
