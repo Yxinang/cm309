@@ -24,7 +24,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; }
     body { background-color: var(--gray-bg); color: var(--text-main); padding-bottom: 80px; }
 
-    /* 頂部導覽列 */
     header {
       background-color: var(--card-bg); border-bottom: 1px solid var(--border);
       position: sticky; top: 0; z-index: 50; padding: 12px 20px;
@@ -41,7 +40,6 @@
     .cloud-status.active { background: #dcfce7; color: #15803d; }
     .cloud-status.syncing { background: #fef3c7; color: #b45309; }
 
-    /* 導航切換列 */
     .tab-bar {
       display: flex; gap: 8px; background: #fff; padding: 8px 16px;
       border-bottom: 1px solid var(--border); overflow-x: auto;
@@ -55,7 +53,6 @@
     }
     .tab-btn.active { background: var(--primary-light); color: var(--primary); font-weight: 700; }
 
-    /* 內容容器與卡片 */
     .container { max-width: 960px; margin: 20px auto; padding: 0 16px; }
     .page-section { display: none; }
     .page-section.active { display: block; animation: fadeIn 0.25s; }
@@ -64,12 +61,10 @@
     .card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; margin-bottom: 20px; border: 1px solid var(--border); }
     .card-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; color: #334155; }
 
-    /* 操作控制列 */
     .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding: 10px 14px; background: #f1f5f9; border-radius: 8px; flex-wrap: wrap; gap: 8px; }
     .btn-upload { background: #059669; color: #fff; border: none; border-radius: 6px; padding: 7px 14px; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; }
     .btn-reset { background: #fff; color: #dc2626; border: 1.5px solid #fca5a5; border-radius: 6px; padding: 6px 12px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; }
 
-    /* 學生網格與按鈕 */
     .student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 10px; }
     .student-btn {
       background: #fff; border: 1.5px solid var(--border); border-radius: 10px;
@@ -81,13 +76,11 @@
     .student-btn .name { font-size: 0.95rem; font-weight: 700; }
     .student-btn .status { font-size: 0.72rem; margin-top: 4px; border-radius: 4px; padding: 2px 6px; }
 
-    /* 狀態色彩 */
     .att-present { background-color: #ecfdf5; border-color: #34d399; color: #065f46; }
     .att-absent { background-color: #fef2f2; border-color: #f87171; color: #991b1b; }
     .att-sick { background-color: #fffbeb; border-color: #fbbf24; color: #92400e; }
     .att-late { background-color: #f5f3ff; border-color: #a78bfa; color: #5b21b6; }
 
-    /* 亮燈效果 */
     .indicator-lamp { width: 12px; height: 12px; border-radius: 50%; background: #cbd5e1; margin-bottom: 2px; }
     .is-lit { background: #f0fdf4 !important; border-color: #22c55e !important; box-shadow: 0 0 10px rgba(34, 197, 94, 0.3); }
     .is-lit .indicator-lamp { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
@@ -107,7 +100,6 @@
     .hw-teal { background: #f0fdfa !important; border-color: #0d9488 !important; }
     .hw-teal .status { background: #ccfbf1; color: #0f766e; }
 
-    /* Kanban 打掃 */
     .clean-board { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top:14px; }
     .clean-board.full { grid-template-columns: 1fr; } 
     .clean-col { background: #f8fafc; border: 1.5px dashed var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; }
@@ -115,7 +107,6 @@
     .clean-list { flex-grow: 1; min-height: 80px; display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
     .sortable-ghost { opacity: 0.4; background: #e2e8f0; }
 
-    /* 表單與相簿 */
     .form-group { margin-bottom: 12px; }
     .form-control { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; outline: none; }
     .btn-submit { width: 100%; padding: 12px; background: var(--primary); color: #fff; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; }
@@ -128,7 +119,6 @@
     .gallery-item .desc { padding: 8px; font-size: 0.8rem; line-height: 1.4; }
     .gallery-item .btn-del-img { position: absolute; top:4px; right:4px; background:rgba(0,0,0,0.6); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer;}
     
-    /* 公告列表樣式 */
     .bulletin-list { list-style: none; }
     .bulletin-item { padding: 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
     .bulletin-badge { font-size: 0.72rem; padding: 3px 6px; border-radius: 4px; background: #fee2e2; color: #b91c1c; margin-right: 6px; }
@@ -136,14 +126,12 @@
     .anno-img-container { width: 100%; max-height: 260px; border-radius: 8px; overflow: hidden; margin-bottom: 12px; border: 1px solid var(--border); }
     .anno-img-container img { width: 100%; height: 100%; object-fit: contain; background: #f8fafc; }
 
-    /* 彈跳視窗 Modal */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; padding: 16px; }
     .modal-overlay.active { display: flex; animation: fadeIn 0.15s; }
     .modal-box { background: #fff; border-radius: var(--radius); width: 100%; max-width: 440px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto;}
     .modal-options { display: flex; flex-direction: column; gap: 8px; }
     .opt-btn { padding: 12px; border-radius: 8px; border: 1.5px solid var(--border); background: #fff; text-align: left; font-size: 0.95rem; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px; }
 
-    /* 寵物養成樣式 */
     .pet-emoji { display: block; text-align: center; margin: 4px 0; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .pet-emoji.s1 { font-size: 24px; }
     .pet-emoji.s2 { font-size: 32px; transform: scale(1.1); }
@@ -159,13 +147,11 @@
     .pet-card .emoji { font-size: 36px; margin-bottom: 4px; }
     .pet-card .name { font-size: 0.95rem; font-weight: 700; color: #1e293b; }
 
-    /* 寵物園網格 */
     .garden-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 15px; }
     .garden-item { border: 1.5px dashed var(--border); border-radius: 10px; padding: 10px; text-align: center; background:#f0fdf4; border-color:#86efac; }
     .garden-item .emoji { font-size: 32px; }
     .garden-item .name { font-size: 0.75rem; font-weight: 700; color: #15803d; margin-top: 4px; }
 
-    /* 手機底部導航 */
     @media (max-width: 768px) {
       .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; z-index: 50; border-top: 1px solid var(--border); justify-content: space-around; padding: 6px 0; }
       .tab-btn { flex-direction: column; font-size: 0.68rem; gap: 3px; padding: 4px; }
@@ -182,7 +168,7 @@
     </div>
     <div id="cloudStatus" class="cloud-status" onclick="manualTriggerSync()">
       <i class="fa-solid fa-cloud"></i>
-      <span id="cloudStatusText">雲端未連線</span>
+      <span id="cloudStatusText">公告未連線</span>
     </div>
   </header>
 
@@ -309,10 +295,10 @@
         <div class="card-title" style="justify-content:space-between;">
           <span><i class="fa-solid fa-bullhorn text-danger"></i> 校園重要公告專區</span>
           <button onclick="fetchBulletinsFromCloud(false)" style="font-size:0.8rem; padding:4px 10px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; cursor:pointer; color:#2563eb;">
-            <i class="fa-solid fa-rotate"></i> 重新載入公告
+            <i class="fa-solid fa-rotate"></i> 重新整理公告
           </button>
         </div>
-        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">直接點擊公告標題，即可查看完整內容與海報照片。</p>
+        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">點擊公告標題即可查看詳細內容與海報照片。</p>
         <ul class="bulletin-list" id="bulletinListContainer"></ul>
       </div>
     </section>
@@ -320,15 +306,22 @@
     <!-- 設定頁面 -->
     <section id="tab-settings" class="page-section">
       
-      <!-- 📢 公告雲端專屬同步設定 (JSONBin) -->
+      <!-- 📢 公告雲端同步設定 (JSONBin) -->
       <div class="card" style="border: 2px solid #ef4444;">
-        <div class="card-title"><i class="fa-solid fa-bullhorn text-danger"></i> 1. 公告專用雲端鑰匙 (JSONBin 跨裝置同步)</div>
+        <div class="card-title"><i class="fa-solid fa-bullhorn text-danger"></i> 1. 公告雲端同步設定 (JSONBin)</div>
         <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">
-          請至 <a href="https://jsonbin.io" target="_blank" style="color:#2563eb; font-weight:700;">jsonbin.io</a> 免費註冊，至「API Keys」複製 <strong>Master Key</strong> 貼在下方，公告即可完美跨手機與電腦同步（附圖也永不消失）！
+          請確保手機與電腦填寫<strong>「相同的 Master Key」與「相同的 Bin ID」</strong>，公告便能即時跨裝置雙向同步！
         </p>
-        <input type="text" id="jsonBinKeyInput" class="form-control" placeholder="貼上 Master Key (例如: $2a$10$xxxx...)">
-        <button class="btn-submit" style="margin-top:8px; background:#ef4444;" onclick="saveJsonBinKey()">
-          <i class="fa-solid fa-key"></i> 儲存公告雲端鑰匙
+        <div class="form-group">
+          <label style="font-size:0.8rem; font-weight:600;">Master Key：</label>
+          <input type="text" id="jsonBinKeyInput" class="form-control" placeholder="貼上 Master Key (例如: $2a$10$xxxx...)">
+        </div>
+        <div class="form-group">
+          <label style="font-size:0.8rem; font-weight:600;">Bin ID (容器編號)：</label>
+          <input type="text" id="jsonBinIdInput" class="form-control" placeholder="貼上 Bin ID (例如: 66f1234abcd...)">
+        </div>
+        <button class="btn-submit" style="background:#ef4444;" onclick="saveJsonBinConfig()">
+          <i class="fa-solid fa-check"></i> 儲存並立即連線同步公告
         </button>
       </div>
 
@@ -337,23 +330,22 @@
         <div class="card-title"><i class="fa-solid fa-pen-to-square text-danger"></i> 發佈新公告</div>
         <form onsubmit="handleCreateAnnouncement(event)" style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:12px;">
           <input type="text" id="newAnnoDept" class="form-control" style="margin-bottom:8px;" placeholder="單位標籤 (如:學務處、三年九班導師)" required>
-          <input type="text" id="newAnnoTitle" class="form-control" style="margin-bottom:8px;" placeholder="公告重要標題" required>
-          <textarea id="newAnnoContent" class="form-control" rows="3" style="margin-bottom:8px;" placeholder="詳細說明內容與注意事項..." required></textarea>
+          <input type="text" id="newAnnoTitle" class="form-control" style="margin-bottom:8px;" placeholder="公告標題" required>
+          <textarea id="newAnnoContent" class="form-control" rows="3" style="margin-bottom:8px;" placeholder="詳細說明內容..." required></textarea>
           
           <div class="form-group" style="margin-bottom:8px;">
-            <label style="font-size:0.8rem; font-weight:600; color:#475569;">📷 附上海報或照片 (選填，自動壓縮同步)：</label>
+            <label style="font-size:0.8rem; font-weight:600; color:#475569;">📷 附上海報或照片 (選填，自動壓縮)：</label>
             <input type="file" id="newAnnoImageFile" class="form-control" accept="image/*" style="padding:6px;">
           </div>
 
-          <button type="submit" class="btn-submit"><i class="fa-solid fa-cloud-arrow-up"></i> 發佈公告並立即同步至雲端</button>
+          <button type="submit" class="btn-submit"><i class="fa-solid fa-cloud-arrow-up"></i> 發佈公告並同步至雲端</button>
         </form>
         <div id="manageBulletinList"></div>
       </div>
 
       <!-- Google 試算表 Webhook 設定 -->
       <div class="card">
-        <div class="card-title"><i class="fa-solid fa-table text-primary"></i> 2. Google 試算表 (記錄點名/作業/傷病日誌)</div>
-        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">填入 Google Apps Script 部署之 Web App 網址：</p>
+        <div class="card-title"><i class="fa-solid fa-table text-primary"></i> 2. Google 試算表 (記錄點名/作業/傷病)</div>
         <input type="url" id="sheetsApiUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
         <button class="btn-submit" style="margin-top:8px; background:#059669;" onclick="saveSheetsUrl()">儲存試算表連結</button>
       </div>
@@ -362,13 +354,12 @@
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-users-gear"></i> 3. 學生名單設定</div>
         <textarea id="studentRosterInput" class="form-control" rows="8" placeholder="每行一個名字..."></textarea>
-        <button class="btn-submit" style="margin-top:8px;" onclick="saveStudentRoster()">儲存名單設定</button>
+        <button class="btn-submit" style="margin-top:8px;" onclick="saveStudentRoster()">儲存名單</button>
       </div>
 
       <!-- 進階資料清除 -->
       <div class="card">
-        <div class="card-title"><i class="fa-solid fa-triangle-exclamation text-danger"></i> 進階資料清除 (測試後重置)</div>
-        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">一鍵清除寵物測試資料，重新開始養成。</p>
+        <div class="card-title"><i class="fa-solid fa-triangle-exclamation text-danger"></i> 進階資料清除</div>
         <button class="btn-submit" style="background:#ef4444;" onclick="resetAllPets()">
           <i class="fa-solid fa-trash-can"></i> 一鍵刪除全班寵物與寵物園
         </button>
@@ -404,7 +395,7 @@
     </div>
   </div>
 
-  <!-- 寵物操作 / 盲盒挑選 / 寵物園 Modal -->
+  <!-- 寵物操作 Modal -->
   <div id="petManageModal" class="modal-overlay">
     <div class="modal-box" style="text-align:center;">
       <h3 id="petModalTitle">寵物狀態</h3>
@@ -436,7 +427,6 @@
 
       <div id="petSelectView" style="display:none; text-align:left;">
         <p style="font-size:0.9rem; margin-bottom:10px; color:#1e40af; font-weight:700;">請挑選一顆神秘的蛋來孵化：</p>
-        <p style="font-size:0.8rem; margin-bottom:15px; color:var(--text-sub);">蛋孵化後（20分）才會揭曉真正的品種喔！</p>
         <div class="pet-select-grid" id="petSelectGrid">
           <div class="pet-card" onclick="selectMysteryPet()"><div class="emoji" style="font-size:40px;">🥚</div><div class="name">純白之蛋</div></div>
           <div class="pet-card" onclick="selectMysteryPet()"><div class="emoji" style="font-size:40px;">🎁</div><div class="name">驚喜禮盒</div></div>
@@ -478,11 +468,9 @@
   <div id="announcementModal" class="modal-overlay">
     <div class="modal-box">
       <h3 id="annoTitle" style="margin-bottom:10px;">公告標題</h3>
-      
       <div id="annoImgContainer" class="anno-img-container" style="display:none;">
         <img id="annoImg" src="" alt="公告附圖">
       </div>
-
       <p id="annoContent" style="margin:14px 0; font-size:0.95rem; line-height:1.6; color:#475569; white-space:pre-wrap;"></p>
       <button class="btn-submit" onclick="closeAnnouncementModal()">了解關閉</button>
     </div>
@@ -506,6 +494,8 @@
 
     let students = JSON.parse(localStorage.getItem('cm309_students')) || DEFAULT_STUDENTS;
     let sheetsWebhookUrl = localStorage.getItem('cm309_sheets_url') || "";
+    
+    // JSONBin 專用設定
     let jsonBinKey = localStorage.getItem('cm309_jsonbin_key') || "";
     let jsonBinId = localStorage.getItem('cm309_jsonbin_binid') || "";
 
@@ -532,6 +522,7 @@
       document.getElementById('studentRosterInput').value = students.join('\n');
       document.getElementById('sheetsApiUrlInput').value = sheetsWebhookUrl;
       document.getElementById('jsonBinKeyInput').value = jsonBinKey;
+      document.getElementById('jsonBinIdInput').value = jsonBinId;
 
       initSortables();
       renderAllGrids();
@@ -540,8 +531,8 @@
       renderAlbum('全部活動');
       updateCloudBadge();
 
-      // 開啟時自動抓取最新雲端公告
-      if (jsonBinKey) {
+      // 自動讀取公告
+      if (jsonBinKey && jsonBinId) {
         fetchBulletinsFromCloud(true);
       }
     });
@@ -567,39 +558,39 @@
     function updateCloudBadge() {
       const badge = document.getElementById('cloudStatus');
       const text = document.getElementById('cloudStatusText');
-      if (jsonBinKey) {
+      if (jsonBinKey && jsonBinId) {
         badge.classList.add('active');
-        text.textContent = '公告雲端已連線';
+        text.textContent = '公告已連線';
       } else {
         badge.classList.remove('active');
-        text.textContent = '公告未設定鑰匙';
+        text.textContent = '公告未設定';
       }
     }
 
     function manualTriggerSync() {
-      if (!jsonBinKey) switchTab('tab-settings');
+      if (!jsonBinKey || !jsonBinId) switchTab('tab-settings');
       else fetchBulletinsFromCloud(false);
     }
 
-    // === 📢 JSONBin 專屬雲端公告同步核心 (免試算表、永不消失) ===
-    function saveJsonBinKey() {
+    // === 📢 JSONBin 專屬雙向同步 (確保兩台裝置同一個 ID) ===
+    function saveJsonBinConfig() {
       const key = document.getElementById('jsonBinKeyInput').value.trim();
-      if (!key) return alert("請輸入 Master Key！");
+      const binId = document.getElementById('jsonBinIdInput').value.trim();
+      
+      if (!key || !binId) return alert("請同時輸入 Master Key 與 Bin ID！");
+      
       jsonBinKey = key;
+      jsonBinId = binId;
       localStorage.setItem('cm309_jsonbin_key', key);
+      localStorage.setItem('cm309_jsonbin_binid', binId);
       updateCloudBadge();
-      alert("✅ 公告雲端鑰匙已儲存！正在檢查同步...");
+      
+      alert("✅ 設定已儲存！正在從雲端載入公告...");
       fetchBulletinsFromCloud(false);
     }
 
-    // 1. 從雲端抓取公告
     function fetchBulletinsFromCloud(silent = false) {
-      if (!jsonBinKey) return;
-      if (!jsonBinId) {
-        // 如果還沒有 Bin ID，先上傳建立一個
-        syncBulletinsToCloud(true);
-        return;
-      }
+      if (!jsonBinKey || !jsonBinId) return;
 
       fetch(`https://api.jsonbin.io/v3/b/${jsonBinId}/latest`, {
         headers: { 'X-Master-Key': jsonBinKey }
@@ -616,52 +607,28 @@
       })
       .catch(err => {
         console.error(err);
-        if (!silent) alert("❌ 公告讀取失敗，請確認 Master Key 是否正確。");
+        if (!silent) alert("❌ 公告讀取失敗，請確認 Master Key 與 Bin ID 是否正確。");
       });
     }
 
-    // 2. 將最新公告推上雲端
-    function syncBulletinsToCloud(isFirstTime = false) {
-      if (!jsonBinKey) return;
+    function syncBulletinsToCloud() {
+      if (!jsonBinKey || !jsonBinId) return;
 
-      if (!jsonBinId || isFirstTime) {
-        // 初次建立
-        fetch('https://api.jsonbin.io/v3/b', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Master-Key': jsonBinKey,
-            'X-Bin-Name': 'cm309_announcements',
-            'X-Bin-Private': 'false'
-          },
-          body: JSON.stringify(announcements)
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data.metadata && data.metadata.id) {
-            jsonBinId = data.metadata.id;
-            localStorage.setItem('cm309_jsonbin_binid', jsonBinId);
-            console.log("已建立專屬雲端 Bin ID:", jsonBinId);
-          }
-        });
-      } else {
-        // 更新現有 Bin
-        fetch(`https://api.jsonbin.io/v3/b/${jsonBinId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Master-Key': jsonBinKey
-          },
-          body: JSON.stringify(announcements)
-        })
-        .then(res => res.json())
-        .then(() => {
-          console.log("公告已即時推上雲端！");
-        });
-      }
+      fetch(`https://api.jsonbin.io/v3/b/${jsonBinId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': jsonBinKey
+        },
+        body: JSON.stringify(announcements)
+      })
+      .then(res => res.json())
+      .then(() => {
+        console.log("公告已推上共用雲端！");
+      });
     }
 
-    // === 📢 公告管理與附圖壓縮 ===
+    // === 📢 公告管理 ===
     function renderBulletins() {
       const container = document.getElementById('bulletinListContainer'); container.innerHTML = '';
       if (announcements.length === 0) return container.innerHTML = '<li style="padding:16px; color:#94a3b8; text-align:center;">目前尚無公告</li>';
@@ -772,7 +739,7 @@
       }
     }
 
-    // === 🐾 寵物系統 ===
+    // === 🐾 寵物養成系統 ===
     function addPetXp(seat, amount) {
       if (!petState[seat]) return; 
       let p = petState[seat];
@@ -892,7 +859,7 @@
     }
 
     function resetAllPets() {
-      if(confirm("⚠️ 警告：確定要刪除「全班所有寵物」與「寵物園收藏」嗎？")) {
+      if(confirm("⚠️ 警告：確定要刪除全班寵物與寵物園嗎？")) {
         petState = {}; petCollection = {};
         localStorage.removeItem('cm309_pets'); localStorage.removeItem('cm309_pet_collection');
         alert("✅ 全班寵物紀錄已清除！");
@@ -938,7 +905,9 @@
       if (clickTimeout && lastClickedSeat === seat) {
         clearTimeout(clickTimeout); clickTimeout = null; lastClickedSeat = null;
         if(interactiveHwState[seat] && interactiveHwState[seat].lightClass === 'hw-green') addPetXp(seat, -1);
-        delete interactiveHwState[seat]; renderInteractiveGrid(); return;
+        delete interactiveHwState[seat]; 
+        localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
+        renderInteractiveGrid(); return;
       }
       lastClickedSeat = seat;
       clickTimeout = setTimeout(() => {
@@ -954,13 +923,16 @@
       if (!wasGreen && isGreen) addPetXp(seat, 1);
       if (wasGreen && !isGreen) addPetXp(seat, -1);
       interactiveHwState[seat] = { status, lightClass: lightCls };
+      localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
       closeHwModal(); renderInteractiveGrid();
     }
     
     function resetSingleStudentHw() {
       const seat = currentSelectedStudent.seat;
       if(interactiveHwState[seat] && interactiveHwState[seat].lightClass === 'hw-green') addPetXp(seat, -1);
-      delete interactiveHwState[seat]; closeHwModal(); renderInteractiveGrid(); 
+      delete interactiveHwState[seat]; 
+      localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
+      closeHwModal(); renderInteractiveGrid(); 
     }
     function showMissingInput() { document.getElementById('missingInputArea').style.display = 'block'; }
     function submitMissingHw() {
@@ -972,9 +944,9 @@
 
     function toggleLamp(seat) {
       let isOn = false;
-      if (currentInteractiveMode === 'clean') { cleanLampState[seat] = !cleanLampState[seat]; isOn = cleanLampState[seat]; }
-      else if (currentInteractiveMode === 'teeth') { teethLampState[seat] = !teethLampState[seat]; isOn = teethLampState[seat]; }
-      else if (currentInteractiveMode === 'mouthwash') { mouthwashLampState[seat] = !mouthwashLampState[seat]; isOn = mouthwashLampState[seat]; }
+      if (currentInteractiveMode === 'clean') { cleanLampState[seat] = !cleanLampState[seat]; isOn = cleanLampState[seat]; localStorage.setItem('cm309_cleanState', JSON.stringify(cleanLampState)); }
+      else if (currentInteractiveMode === 'teeth') { teethLampState[seat] = !teethLampState[seat]; isOn = teethLampState[seat]; localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState)); }
+      else if (currentInteractiveMode === 'mouthwash') { mouthwashLampState[seat] = !mouthwashLampState[seat]; isOn = mouthwashLampState[seat]; localStorage.setItem('cm309_mwState', JSON.stringify(mouthwashLampState)); }
       if (isOn) addPetXp(seat, 1); else addPetXp(seat, -1);
       renderInteractiveGrid();
     }
@@ -1006,9 +978,11 @@
     }
 
     function resetCurrentInteractive() {
-      if(confirm("清除畫面亮燈記錄？(已加給寵物的分數不會被收回)")) {
-        if(currentInteractiveMode === 'hw') interactiveHwState = {}; else if(currentInteractiveMode === 'clean') cleanLampState = {}; 
-        else if(currentInteractiveMode === 'teeth') teethLampState = {}; else mouthwashLampState = {};
+      if(confirm("清除畫面亮燈記錄？")) {
+        if(currentInteractiveMode === 'hw') { interactiveHwState = {}; localStorage.setItem('cm309_hwState', '{}'); }
+        else if(currentInteractiveMode === 'clean') { cleanLampState = {}; localStorage.setItem('cm309_cleanState', '{}'); }
+        else if(currentInteractiveMode === 'teeth') { teethLampState = {}; localStorage.setItem('cm309_teethState', '{}'); }
+        else { mouthwashLampState = {}; localStorage.setItem('cm309_mwState', '{}'); }
         renderInteractiveGrid();
       }
     }
@@ -1043,11 +1017,11 @@
       students.forEach((name, i) => {
         const id = i+1; const st = attendanceState[id] || '出席'; let cls = '';
         if(st==='出席') cls='att-present'; else if(st==='病假') cls='att-sick'; else if(st==='事假') cls='att-absent'; else cls='att-late';
-        container.innerHTML += `<div class="student-btn ${cls}" onclick="attendanceState[${id}] = ['出席','事假','病假','遲到'][ (['出席','事假','病假','遲到'].indexOf(attendanceState[${id}]||'出席')+1)%4 ]; renderAttendanceGrid();">
+        container.innerHTML += `<div class="student-btn ${cls}" onclick="attendanceState[${id}] = ['出席','事假','病假','遲到'][ (['出席','事假','病假','遲到'].indexOf(attendanceState[${id}]||'出席')+1)%4 ]; localStorage.setItem('cm309_attState', JSON.stringify(attendanceState)); renderAttendanceGrid();">
           <span class="seat">${id}號</span><span class="name">${name}</span><span class="status">${st}</span></div>`;
       });
     }
-    function resetAttendance() { if(confirm("確定重整為全數出席？")) { attendanceState = {}; renderAttendanceGrid(); } }
+    function resetAttendance() { if(confirm("確定重整為全數出席？")) { attendanceState = {}; localStorage.setItem('cm309_attState', '{}'); renderAttendanceGrid(); } }
     function uploadAttendanceBatch() {
       let abnormal = [], present = 0;
       students.forEach((n, i) => { let st = attendanceState[i+1] || '出席'; if(st === '出席') present++; else abnormal.push(`${i+1}號 ${n}(${st})`); });
@@ -1084,7 +1058,7 @@
       }; reader.readAsDataURL(file);
     }
 
-    // === Google 試算表日常日誌寫入 ===
+    // === Google 試算表日誌寫入 ===
     function handleRecordSubmit(e) {
       e.preventDefault();
       sendToSheets({ category: document.getElementById('recordType').value, student: document.getElementById('recordStudentSelect').value, detail: document.getElementById('recordDetail').value, followup: document.getElementById('recordFollowup').value });
