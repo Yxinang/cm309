@@ -291,7 +291,7 @@
       <div class="card">
         <div class="card-title" style="justify-content:space-between;">
           <span><i class="fa-solid fa-bullhorn text-danger"></i> 校園重要公告專區</span>
-          <button onclick="fetchBulletinsFromCloud(false)" style="font-size:0.8rem; padding:4px 10px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; cursor:pointer; color:#2563eb;">
+          <button onclick="fetchFromFirebase(false)" style="font-size:0.8rem; padding:4px 10px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; cursor:pointer; color:#2563eb;">
             <i class="fa-solid fa-rotate"></i> 重新整理公告
           </button>
         </div>
@@ -305,15 +305,15 @@
       
       <!-- 📢 Google Firebase 即時同步通道 -->
       <div class="card" style="border: 2px solid #2563eb;">
-        <div class="card-title"><i class="fa-solid fa-database text-primary"></i> 1. Google 官方即時資料庫 (Firebase)</div>
+        <div class="card-title"><i class="fa-solid fa-database text-primary"></i> 1. 全班即時資料庫 (Firebase 雙向同步)</div>
         <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">
-          請將 Firebase Realtime Database 資料庫網址貼在下方，手機與電腦雙向即時通訊，不會被跨域攔截：
+          請確保手機與電腦填寫相同的 Firebase Realtime Database 網址，<strong>所有亮燈、點名、寵物、公告將全自動同步</strong>：
         </p>
         <div class="form-group">
           <input type="url" id="firebaseDbUrlInput" class="form-control" placeholder="例如: https://cm309-default-rtdb.firebaseio.com">
         </div>
         <button class="btn-submit" style="background:#2563eb;" onclick="saveFirebaseDbUrl()">
-          <i class="fa-solid fa-link"></i> 儲存資料庫網址並連線
+          <i class="fa-solid fa-link"></i> 儲存並立即全域同步
         </button>
       </div>
 
@@ -337,7 +337,7 @@
 
       <!-- Google 試算表 Webhook 設定 -->
       <div class="card">
-        <div class="card-title"><i class="fa-solid fa-table text-primary"></i> 2. Google 試算表 (記錄點名/作業/傷病)</div>
+        <div class="card-title"><i class="fa-solid fa-table text-primary"></i> 2. Google 試算表 (記錄點名/作業/傷病日誌)</div>
         <input type="url" id="sheetsApiUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
         <button class="btn-submit" style="margin-top:8px; background:#059669;" onclick="saveSheetsUrl()">儲存試算表連結</button>
       </div>
@@ -346,7 +346,7 @@
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-users-gear"></i> 3. 學生名單設定</div>
         <textarea id="studentRosterInput" class="form-control" rows="8" placeholder="每行一個名字..."></textarea>
-        <button class="btn-submit" style="margin-top:8px;" onclick="saveStudentRoster()">儲存名單</button>
+        <button class="btn-submit" style="margin-top:8px;" onclick="saveStudentRoster()">儲存名單設定</button>
       </div>
 
       <!-- 進階資料清除 -->
@@ -494,6 +494,7 @@
     let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
     let cleanAssignment = JSON.parse(localStorage.getItem('cm309_cleanAssign')) || {};
 
+    // 💡 全局即時亮燈與狀態
     let attendanceState = JSON.parse(localStorage.getItem('cm309_attState')) || {}; 
     let interactiveHwState = JSON.parse(localStorage.getItem('cm309_hwState')) || {}; 
     let teethLampState = JSON.parse(localStorage.getItem('cm309_teethState')) || {};  
@@ -504,6 +505,7 @@
     let currentInteractiveMode = 'hw';
     let clickTimeout = null;
     let lastClickedSeat = null;
+    let syncDebounceTimer = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('zh-TW');
@@ -518,8 +520,9 @@
       renderAlbum('全部活動');
       updateCloudBadge();
 
+      // 每次開啟網頁，自動連線 Firebase 載入最新全班燈號與公告
       if (firebaseDbUrl) {
-        fetchBulletinsFromCloud(true);
+        fetchFromFirebase(true);
       }
     });
 
@@ -541,24 +544,28 @@
       students.forEach((name, i) => { select.add(new Option(`${i + 1}號 ${name}`, `${i + 1}號 ${name}`)); });
     }
 
-    function updateCloudBadge() {
+    function updateCloudBadge(status) {
       const badge = document.getElementById('cloudStatus');
       const text = document.getElementById('cloudStatusText');
-      if (firebaseDbUrl) {
+      badge.className = 'cloud-status';
+      
+      if (status === 'syncing') {
+        badge.classList.add('syncing');
+        text.textContent = '同步中...';
+      } else if (firebaseDbUrl) {
         badge.classList.add('active');
         text.textContent = 'Firebase 連線就緒';
       } else {
-        badge.classList.remove('active');
         text.textContent = '未連線 (點我設定)';
       }
     }
 
     function manualTriggerSync() {
       if (!firebaseDbUrl) switchTab('tab-settings');
-      else fetchBulletinsFromCloud(false);
+      else fetchFromFirebase(false);
     }
 
-    // === 🔥 Google Firebase 專屬即時同步核心 ===
+    // === 🔥 Firebase 全自動即時同步（燈號 + 點名 + 寵物 + 公告） ===
     function cleanFirebaseUrl(url) {
       let u = url.trim();
       if (u.endsWith('/')) u = u.slice(0, -1);
@@ -572,49 +579,109 @@
       firebaseDbUrl = url;
       localStorage.setItem('cm309_firebase_url', url);
       updateCloudBadge();
-      alert("✅ Firebase 資料庫網址已儲存！正在測試同步...");
-      fetchBulletinsFromCloud(false);
+      alert("✅ Firebase 網址已儲存！正在同步所有資料與燈號...");
+      fetchFromFirebase(false);
     }
 
-    function fetchBulletinsFromCloud(silent = false) {
-      if (!firebaseDbUrl) return;
-      const targetUrl = `${cleanFirebaseUrl(firebaseDbUrl)}/announcements.json`;
+    // 1. 將當前狀態（包含所有亮燈）推上 Firebase
+    function syncToFirebase() {
+      // 本機先立即快取
+      localStorage.setItem('cm309_attState', JSON.stringify(attendanceState));
+      localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
+      localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState));
+      localStorage.setItem('cm309_mwState', JSON.stringify(mouthwashLampState));
+      localStorage.setItem('cm309_cleanState', JSON.stringify(cleanLampState));
+      localStorage.setItem('cm309_pets', JSON.stringify(petState));
+      localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
+      localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
+      localStorage.setItem('cm309_cleanAssign', JSON.stringify(cleanAssignment));
 
-      fetch(targetUrl)
+      if (!firebaseDbUrl) return;
+
+      clearTimeout(syncDebounceTimer);
+      updateCloudBadge('syncing');
+
+      // 600ms 防抖，讓老師連續快速點擊時不會頻繁發送請求
+      syncDebounceTimer = setTimeout(() => {
+        const payload = {
+          attendanceState,
+          interactiveHwState,
+          teethLampState,
+          mouthwashLampState,
+          cleanLampState,
+          petState,
+          petCollection,
+          announcements,
+          cleanAssignment,
+          students
+        };
+
+        fetch(`${cleanFirebaseUrl(firebaseDbUrl)}/classroomData.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(() => {
+          updateCloudBadge();
+        })
+        .catch(err => {
+          console.error("Firebase 上傳失敗:", err);
+          updateCloudBadge();
+        });
+      }, 600);
+    }
+
+    // 2. 從 Firebase 抓取全班資料（包含所有亮燈與假別）
+    function fetchFromFirebase(silent = false) {
+      if (!firebaseDbUrl) return;
+      updateCloudBadge('syncing');
+
+      fetch(`${cleanFirebaseUrl(firebaseDbUrl)}/classroomData.json`)
         .then(res => res.json())
         .then(data => {
-          if (data && Array.isArray(data)) {
-            announcements = data;
+          if (data) {
+            if (data.students) students = data.students;
+            attendanceState = data.attendanceState || {};
+            interactiveHwState = data.interactiveHwState || {};
+            teethLampState = data.teethLampState || {};
+            mouthwashLampState = data.mouthwashLampState || {};
+            cleanLampState = data.cleanLampState || {};
+            petState = data.petState || {};
+            petCollection = data.petCollection || {};
+            announcements = data.announcements || [];
+            cleanAssignment = data.cleanAssignment || {};
+
+            // 寫入本機快取
+            localStorage.setItem('cm309_students', JSON.stringify(students));
+            localStorage.setItem('cm309_attState', JSON.stringify(attendanceState));
+            localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
+            localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState));
+            localStorage.setItem('cm309_mwState', JSON.stringify(mouthwashLampState));
+            localStorage.setItem('cm309_cleanState', JSON.stringify(cleanLampState));
+            localStorage.setItem('cm309_pets', JSON.stringify(petState));
+            localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
             localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
+            localStorage.setItem('cm309_cleanAssign', JSON.stringify(cleanAssignment));
+
+            // 即刻重繪介面（燈號瞬間點亮）
+            renderAllGrids();
+            renderPetsGrid();
             renderBulletins();
             renderManageBulletins();
-            if (!silent) alert("✅ 已成功從 Firebase 同步最新公告！");
-          } else if (data === null) {
-            if (!silent) alert("Firebase 資料庫目前尚無公告，請在任一裝置發佈第一則！");
+            document.getElementById('studentRosterInput').value = students.join('\n');
+            updateCloudBadge();
+            if (!silent) alert("✅ 已成功從 Firebase 同步最新狀態與亮燈！");
+          } else {
+            updateCloudBadge();
+            if (!silent) alert("Firebase 資料庫尚為空，請在任一設備點擊燈號或發布公告，將自動建立雲端資料庫！");
           }
         })
         .catch(err => {
           console.error(err);
+          updateCloudBadge();
           if (!silent) alert("連線失敗！請確認 Firebase 規則是否設定為「測試模式」（read 與 write 為 true）。");
         });
-    }
-
-    function syncBulletinsToCloud() {
-      if (!firebaseDbUrl) return;
-      const targetUrl = `${cleanFirebaseUrl(firebaseDbUrl)}/announcements.json`;
-
-      fetch(targetUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(announcements)
-      })
-      .then(res => res.json())
-      .then(() => {
-        console.log("公告已推上 Firebase 雲端！");
-      })
-      .catch(err => {
-        console.error("Firebase 上傳失敗:", err);
-      });
     }
 
     // === 📢 公告管理 ===
@@ -706,7 +773,6 @@
         imgSrc: imgSrc
       });
 
-      localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
       document.getElementById('newAnnoDept').value = '';
       document.getElementById('newAnnoTitle').value = '';
       document.getElementById('newAnnoContent').value = '';
@@ -715,16 +781,15 @@
       renderBulletins();
       renderManageBulletins();
       alert('✅ 公告發佈成功！');
-      syncBulletinsToCloud();
+      syncToFirebase();
     }
 
     function deleteAnnouncement(index) {
       if (confirm(`確定刪除此公告？`)) {
         announcements.splice(index, 1);
-        localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
         renderBulletins();
         renderManageBulletins();
-        syncBulletinsToCloud();
+        syncToFirebase();
       }
     }
 
@@ -736,8 +801,8 @@
       p.xp += amount;
       while (p.stage <= 3 && p.xp >= PET_REQ[p.stage - 1]) { p.xp -= PET_REQ[p.stage - 1]; p.stage++; }
       if (p.xp < 0) { if (p.stage > 1) { p.stage--; p.xp = PET_REQ[p.stage - 1] + p.xp; } else { p.xp = 0; } }
-      localStorage.setItem('cm309_pets', JSON.stringify(petState));
       if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
+      syncToFirebase();
     }
 
     function renderPetsGrid() {
@@ -817,8 +882,9 @@
       const seat = currentSelectedStudent.seat;
       const randomPet = PET_CATALOG[Math.floor(Math.random() * PET_CATALOG.length)];
       petState[seat] = { petId: randomPet.id, stage: 1, xp: 0 };
-      localStorage.setItem('cm309_pets', JSON.stringify(petState));
-      openPetModal(seat, currentSelectedStudent.name); renderPetsGrid();
+      openPetModal(seat, currentSelectedStudent.name); 
+      renderPetsGrid();
+      syncToFirebase();
     }
 
     function manualAddPetXp(points) { addPetXp(currentSelectedStudent.seat, points); openPetModal(currentSelectedStudent.seat, currentSelectedStudent.name); }
@@ -828,10 +894,9 @@
       if(!petCollection[seat]) petCollection[seat] = [];
       petCollection[seat].push(p.petId); 
       delete petState[seat];
-      localStorage.setItem('cm309_pets', JSON.stringify(petState));
-      localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
       openPetModal(seat, currentSelectedStudent.name); 
       renderPetsGrid();
+      syncToFirebase();
     }
 
     function showPetGarden() {
@@ -850,15 +915,15 @@
     function resetAllPets() {
       if(confirm("⚠️ 警告：確定要刪除全班寵物與寵物園嗎？")) {
         petState = {}; petCollection = {};
-        localStorage.removeItem('cm309_pets'); localStorage.removeItem('cm309_pet_collection');
         alert("✅ 全班寵物紀錄已清除！");
         if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
+        syncToFirebase();
       }
     }
 
     function closePetModal() { document.getElementById('petManageModal').classList.remove('active'); }
 
-    // === 師生互動區 ===
+    // === 師生互動區 (點擊即觸發 Firebase 燈號同步) ===
     function switchInteractiveMode(mode) {
       currentInteractiveMode = mode;
       document.querySelectorAll('#tab-interactive .album-chip').forEach(b => b.classList.remove('active'));
@@ -895,8 +960,9 @@
         clearTimeout(clickTimeout); clickTimeout = null; lastClickedSeat = null;
         if(interactiveHwState[seat] && interactiveHwState[seat].lightClass === 'hw-green') addPetXp(seat, -1);
         delete interactiveHwState[seat]; 
-        localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
-        renderInteractiveGrid(); return;
+        renderInteractiveGrid(); 
+        syncToFirebase(); // 💡 觸發燈號同步
+        return;
       }
       lastClickedSeat = seat;
       clickTimeout = setTimeout(() => {
@@ -912,16 +978,18 @@
       if (!wasGreen && isGreen) addPetXp(seat, 1);
       if (wasGreen && !isGreen) addPetXp(seat, -1);
       interactiveHwState[seat] = { status, lightClass: lightCls };
-      localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
-      closeHwModal(); renderInteractiveGrid();
+      closeHwModal(); 
+      renderInteractiveGrid();
+      syncToFirebase(); // 💡 觸發燈號同步
     }
     
     function resetSingleStudentHw() {
       const seat = currentSelectedStudent.seat;
       if(interactiveHwState[seat] && interactiveHwState[seat].lightClass === 'hw-green') addPetXp(seat, -1);
       delete interactiveHwState[seat]; 
-      localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
-      closeHwModal(); renderInteractiveGrid(); 
+      closeHwModal(); 
+      renderInteractiveGrid(); 
+      syncToFirebase();
     }
     function showMissingInput() { document.getElementById('missingInputArea').style.display = 'block'; }
     function submitMissingHw() {
@@ -933,11 +1001,12 @@
 
     function toggleLamp(seat) {
       let isOn = false;
-      if (currentInteractiveMode === 'clean') { cleanLampState[seat] = !cleanLampState[seat]; isOn = cleanLampState[seat]; localStorage.setItem('cm309_cleanState', JSON.stringify(cleanLampState)); }
-      else if (currentInteractiveMode === 'teeth') { teethLampState[seat] = !teethLampState[seat]; isOn = teethLampState[seat]; localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState)); }
-      else if (currentInteractiveMode === 'mouthwash') { mouthwashLampState[seat] = !mouthwashLampState[seat]; isOn = mouthwashLampState[seat]; localStorage.setItem('cm309_mwState', JSON.stringify(mouthwashLampState)); }
+      if (currentInteractiveMode === 'clean') { cleanLampState[seat] = !cleanLampState[seat]; isOn = cleanLampState[seat]; }
+      else if (currentInteractiveMode === 'teeth') { teethLampState[seat] = !teethLampState[seat]; isOn = teethLampState[seat]; }
+      else if (currentInteractiveMode === 'mouthwash') { mouthwashLampState[seat] = !mouthwashLampState[seat]; isOn = mouthwashLampState[seat]; }
       if (isOn) addPetXp(seat, 1); else addPetXp(seat, -1);
       renderInteractiveGrid();
+      syncToFirebase(); // 💡 觸發燈號同步
     }
 
     function initSortables() {
@@ -948,7 +1017,7 @@
           onEnd: function(evt) {
             const seat = evt.item.getAttribute('data-seat');
             cleanAssignment[seat] = evt.to.id;
-            localStorage.setItem('cm309_cleanAssign', JSON.stringify(cleanAssignment));
+            syncToFirebase();
           }
         });
       });
@@ -968,11 +1037,12 @@
 
     function resetCurrentInteractive() {
       if(confirm("清除畫面亮燈記錄？")) {
-        if(currentInteractiveMode === 'hw') { interactiveHwState = {}; localStorage.setItem('cm309_hwState', '{}'); }
-        else if(currentInteractiveMode === 'clean') { cleanLampState = {}; localStorage.setItem('cm309_cleanState', '{}'); }
-        else if(currentInteractiveMode === 'teeth') { teethLampState = {}; localStorage.setItem('cm309_teethState', '{}'); }
-        else { mouthwashLampState = {}; localStorage.setItem('cm309_mwState', '{}'); }
+        if(currentInteractiveMode === 'hw') interactiveHwState = {};
+        else if(currentInteractiveMode === 'clean') cleanLampState = {};
+        else if(currentInteractiveMode === 'teeth') teethLampState = {};
+        else mouthwashLampState = {};
         renderInteractiveGrid();
+        syncToFirebase();
       }
     }
 
@@ -1000,17 +1070,17 @@
       alert(`已彙整上傳至 Google 試算表！\n\n${detailText}`);
     }
 
-    // === 點名功能 ===
+    // === 點名功能 (點擊即觸發 Firebase 燈號同步) ===
     function renderAttendanceGrid() {
       const container = document.getElementById('attendanceGrid'); container.innerHTML = '';
       students.forEach((name, i) => {
         const id = i+1; const st = attendanceState[id] || '出席'; let cls = '';
         if(st==='出席') cls='att-present'; else if(st==='病假') cls='att-sick'; else if(st==='事假') cls='att-absent'; else cls='att-late';
-        container.innerHTML += `<div class="student-btn ${cls}" onclick="attendanceState[${id}] = ['出席','事假','病假','遲到'][ (['出席','事假','病假','遲到'].indexOf(attendanceState[${id}]||'出席')+1)%4 ]; localStorage.setItem('cm309_attState', JSON.stringify(attendanceState)); renderAttendanceGrid();">
+        container.innerHTML += `<div class="student-btn ${cls}" onclick="attendanceState[${id}] = ['出席','事假','病假','遲到'][ (['出席','事假','病假','遲到'].indexOf(attendanceState[${id}]||'出席')+1)%4 ]; renderAttendanceGrid(); syncToFirebase();">
           <span class="seat">${id}號</span><span class="name">${name}</span><span class="status">${st}</span></div>`;
       });
     }
-    function resetAttendance() { if(confirm("確定重整為全數出席？")) { attendanceState = {}; localStorage.setItem('cm309_attState', '{}'); renderAttendanceGrid(); } }
+    function resetAttendance() { if(confirm("確定重整為全數出席？")) { attendanceState = {}; renderAttendanceGrid(); syncToFirebase(); } }
     function uploadAttendanceBatch() {
       let abnormal = [], present = 0;
       students.forEach((n, i) => { let st = attendanceState[i+1] || '出席'; if(st === '出席') present++; else abnormal.push(`${i+1}號 ${n}(${st})`); });
@@ -1060,8 +1130,10 @@
     }
     function saveStudentRoster() {
       const txt = document.getElementById('studentRosterInput').value.trim(); if(!txt) return;
-      students = txt.split('\n').map(s=>s.trim()).filter(s=>s.length>0); localStorage.setItem('cm309_students', JSON.stringify(students));
-      renderAllGrids(); alert("名單更新成功！");
+      students = txt.split('\n').map(s=>s.trim()).filter(s=>s.length>0); 
+      renderAllGrids(); 
+      alert("名單更新成功！");
+      syncToFirebase();
     }
     function saveSheetsUrl() { 
       sheetsWebhookUrl = document.getElementById('sheetsApiUrlInput').value.trim(); 
