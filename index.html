@@ -306,26 +306,21 @@
     <!-- 設定頁面 -->
     <section id="tab-settings" class="page-section">
       
-      <!-- 📢 公告雲端同步設定 (JSONBin) -->
+      <!-- 📢 公告雲端同步 (完全免註冊免金鑰) -->
       <div class="card" style="border: 2px solid #ef4444;">
-        <div class="card-title"><i class="fa-solid fa-bullhorn text-danger"></i> 1. 公告雲端同步設定 (JSONBin)</div>
+        <div class="card-title"><i class="fa-solid fa-bullhorn text-danger"></i> 1. 班級公告同步頻道 (免註冊)</div>
         <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">
-          請確保手機與電腦填寫<strong>「相同的 Master Key」與「相同的 Bin ID」</strong>，公告便能即時跨裝置雙向同步！
+          請在手機與電腦填寫<strong>「相同的班級自訂代號」</strong>（例如：<code>cm309_class</code>），公告與海報照片就能自動跨裝置同步！
         </p>
         <div class="form-group">
-          <label style="font-size:0.8rem; font-weight:600;">Master Key：</label>
-          <input type="text" id="jsonBinKeyInput" class="form-control" placeholder="貼上 Master Key (例如: $2a$10$xxxx...)">
+          <input type="text" id="syncChannelInput" class="form-control" placeholder="自訂頻道代號 (例如: cm309_class)">
         </div>
-        <div class="form-group">
-          <label style="font-size:0.8rem; font-weight:600;">Bin ID (容器編號)：</label>
-          <input type="text" id="jsonBinIdInput" class="form-control" placeholder="貼上 Bin ID (例如: 66f1234abcd...)">
-        </div>
-        <button class="btn-submit" style="background:#ef4444;" onclick="saveJsonBinConfig()">
-          <i class="fa-solid fa-check"></i> 儲存並立即連線同步公告
+        <button class="btn-submit" style="background:#ef4444;" onclick="saveSyncChannel()">
+          <i class="fa-solid fa-check"></i> 儲存並立刻同步公告
         </button>
       </div>
 
-      <!-- 公告管理表單 -->
+      <!-- 公告發布表單 -->
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-pen-to-square text-danger"></i> 發佈新公告</div>
         <form onsubmit="handleCreateAnnouncement(event)" style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:12px;">
@@ -488,16 +483,15 @@
       { id: 'dragon', name: '飛龍', stages: ['🥚', '🦎', '🐉'], desc: '傳說生物' },
       { id: 'parrot', name: '鸚鵡', stages: ['🥚', '🐤', '🦜'], desc: '鳥禽類' },
       { id: 'penguin', name: '企鵝', stages: ['🥚', '🐧', '🐧'], desc: '動物園' },
-      { id: 'fish', name: '熱帶魚', stages: ['🫧', '🐠', '🦈'], desc: '水族館' }
+      { id: 'fish', name: '熱帶魚', stages: ['🫧', '🐠', '鯊'], desc: '水族館' }
     ];
     const PET_REQ = [20, 30, 40]; 
 
     let students = JSON.parse(localStorage.getItem('cm309_students')) || DEFAULT_STUDENTS;
     let sheetsWebhookUrl = localStorage.getItem('cm309_sheets_url') || "";
     
-    // JSONBin 專用設定
-    let jsonBinKey = localStorage.getItem('cm309_jsonbin_key') || "";
-    let jsonBinId = localStorage.getItem('cm309_jsonbin_binid') || "";
+    // 💡 免註冊、免金鑰的自訂同步頻道
+    let syncChannel = localStorage.getItem('cm309_sync_channel') || "cm309_class";
 
     let announcements = JSON.parse(localStorage.getItem('cm309_announcements')) || [];
     let albums = JSON.parse(localStorage.getItem('cm309_albums')) || [];
@@ -521,8 +515,7 @@
       document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('zh-TW');
       document.getElementById('studentRosterInput').value = students.join('\n');
       document.getElementById('sheetsApiUrlInput').value = sheetsWebhookUrl;
-      document.getElementById('jsonBinKeyInput').value = jsonBinKey;
-      document.getElementById('jsonBinIdInput').value = jsonBinId;
+      document.getElementById('syncChannelInput').value = syncChannel;
 
       initSortables();
       renderAllGrids();
@@ -531,8 +524,8 @@
       renderAlbum('全部活動');
       updateCloudBadge();
 
-      // 自動讀取公告
-      if (jsonBinKey && jsonBinId) {
+      // 開啟網頁即自動同步
+      if (syncChannel) {
         fetchBulletinsFromCloud(true);
       }
     });
@@ -558,73 +551,77 @@
     function updateCloudBadge() {
       const badge = document.getElementById('cloudStatus');
       const text = document.getElementById('cloudStatusText');
-      if (jsonBinKey && jsonBinId) {
+      if (syncChannel) {
         badge.classList.add('active');
-        text.textContent = '公告已連線';
+        text.textContent = `頻道: ${syncChannel}`;
       } else {
         badge.classList.remove('active');
-        text.textContent = '公告未設定';
+        text.textContent = '未設同步頻道';
       }
     }
 
     function manualTriggerSync() {
-      if (!jsonBinKey || !jsonBinId) switchTab('tab-settings');
+      if (!syncChannel) switchTab('tab-settings');
       else fetchBulletinsFromCloud(false);
     }
 
-    // === 📢 JSONBin 專屬雙向同步 (確保兩台裝置同一個 ID) ===
-    function saveJsonBinConfig() {
-      const key = document.getElementById('jsonBinKeyInput').value.trim();
-      const binId = document.getElementById('jsonBinIdInput').value.trim();
-      
-      if (!key || !binId) return alert("請同時輸入 Master Key 與 Bin ID！");
-      
-      jsonBinKey = key;
-      jsonBinId = binId;
-      localStorage.setItem('cm309_jsonbin_key', key);
-      localStorage.setItem('cm309_jsonbin_binid', binId);
+    // === 📢 免註冊、免金鑰的全新公共雲端同步核心 ===
+    function saveSyncChannel() {
+      const channel = document.getElementById('syncChannelInput').value.trim();
+      if (!channel) return alert("請輸入自訂頻道代號！");
+      syncChannel = channel;
+      localStorage.setItem('cm309_sync_channel', channel);
       updateCloudBadge();
-      
-      alert("✅ 設定已儲存！正在從雲端載入公告...");
+      alert(`✅ 頻道【${channel}】已設定！正在同步...`);
       fetchBulletinsFromCloud(false);
     }
 
+    // 1. 從公共雲端讀取公告 (透過 keyvalue 雲端服務)
     function fetchBulletinsFromCloud(silent = false) {
-      if (!jsonBinKey || !jsonBinId) return;
+      if (!syncChannel) return;
 
-      fetch(`https://api.jsonbin.io/v3/b/${jsonBinId}/latest`, {
-        headers: { 'X-Master-Key': jsonBinKey }
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.record && Array.isArray(data.record)) {
-          announcements = data.record;
-          localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
-          renderBulletins();
-          renderManageBulletins();
-          if (!silent) alert("✅ 已成功從雲端同步最新公告！");
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        if (!silent) alert("❌ 公告讀取失敗，請確認 Master Key 與 Bin ID 是否正確。");
-      });
+      fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://api.keyval.org/get/${syncChannel}`)}`)
+        .then(res => res.text())
+        .then(text => {
+          if (text && text !== "null" && text !== "") {
+            try {
+              const data = JSON.parse(text);
+              if (Array.isArray(data)) {
+                announcements = data;
+                localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
+                renderBulletins();
+                renderManageBulletins();
+                if (!silent) alert("✅ 已成功從雲端同步最新公告！");
+              }
+            } catch(e) {
+              console.log("解析資料:", text);
+            }
+          } else {
+            if (!silent) alert("目前該頻道尚無雲端公告，請在任一裝置發佈第一則公告！");
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          if (!silent) alert("同步線路稍微繁忙，請稍候再試一次。");
+        });
     }
 
+    // 2. 將最新公告推上公共雲端
     function syncBulletinsToCloud() {
-      if (!jsonBinKey || !jsonBinId) return;
+      if (!syncChannel) return;
 
-      fetch(`https://api.jsonbin.io/v3/b/${jsonBinId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Master-Key': jsonBinKey
-        },
-        body: JSON.stringify(announcements)
+      const payloadStr = JSON.stringify(announcements);
+
+      fetch(`https://api.keyval.org/set/${syncChannel}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: payloadStr
       })
-      .then(res => res.json())
       .then(() => {
-        console.log("公告已推上共用雲端！");
+        console.log("公告已成功推上雲端頻道！");
+      })
+      .catch(err => {
+        console.error("雲端發布失敗:", err);
       });
     }
 
@@ -693,11 +690,12 @@
           img.onload = () => {
             const canvas = document.createElement('canvas');
             let w = img.width, h = img.height;
-            if (w > 600) { h *= 600 / w; w = 600; }
+            // 自動輕量化壓縮，確保傳輸速度
+            if (w > 450) { h *= 450 / w; w = 450; }
             canvas.width = w; canvas.height = h;
             canvas.getContext('2d').drawImage(img, 0, 0, w, h);
             
-            const compressedImg = canvas.toDataURL('image/jpeg', 0.6);
+            const compressedImg = canvas.toDataURL('image/jpeg', 0.55);
             saveAnnoAndSync(dept, title, content, compressedImg);
           };
           img.src = event.target.result;
