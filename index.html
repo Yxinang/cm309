@@ -329,7 +329,7 @@
         </div>
       </div>
 
-      <!-- 公告管理 (新增圖片上傳) -->
+      <!-- 公告管理 (穩定文字 + 圖片網址支援) -->
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-bullhorn text-danger"></i> 公告管理 (新增與刪除)</div>
         <form onsubmit="handleCreateAnnouncement(event)" style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:12px;">
@@ -338,7 +338,12 @@
           <textarea id="newAnnoContent" class="form-control" rows="2" style="margin-bottom:8px;" placeholder="詳細說明內容..." required></textarea>
           
           <div class="form-group" style="margin-bottom:8px;">
-            <label style="font-size:0.8rem; font-weight:600; color:#475569;">📷 附上公告海報或照片 (選填)：</label>
+            <label style="font-size:0.8rem; font-weight:600; color:#475569;">📷 圖片網址 (選填，可跨裝置同步)：</label>
+            <input type="url" id="newAnnoImageUrl" class="form-control" placeholder="可填入學校網站海報連結、圖片網址等">
+          </div>
+
+          <div class="form-group" style="margin-bottom:8px;">
+            <label style="font-size:0.8rem; font-weight:600; color:#475569;">或從手機/電腦上傳圖片 (僅儲存於本機)：</label>
             <input type="file" id="newAnnoImageFile" class="form-control" accept="image/*" style="padding:6px;">
           </div>
 
@@ -461,7 +466,7 @@
     </div>
   </div>
 
-  <!-- 公告詳情 Modal (支援圖片呈現) -->
+  <!-- 公告詳情 Modal -->
   <div id="announcementModal" class="modal-overlay">
     <div class="modal-box">
       <h3 id="annoTitle" style="margin-bottom:10px;">公告標題</h3>
@@ -560,11 +565,20 @@
       updateCloudBadge('syncing');
       
       autoSyncTimer = setTimeout(() => {
+        // 💡 關鍵修復：雲端備份時過濾掉肥大的照片代碼，保證同步永不爆表！
+        const safeAnnouncements = announcements.map(a => {
+          let copy = Object.assign({}, a);
+          if (copy.imgSrc && copy.imgSrc.startsWith('data:image')) {
+            delete copy.imgSrc; // 避免本機照片撐爆試算表
+          }
+          return copy;
+        });
+
         const payload = {
           students: students,
           petState: petState,
           petCollection: petCollection,
-          announcements: announcements,
+          announcements: safeAnnouncements,
           cleanAssignment: cleanAssignment,
           attendanceState: attendanceState,
           interactiveHwState: interactiveHwState,
@@ -598,8 +612,16 @@
             students = data.students;
             petState = data.petState || {};
             petCollection = data.petCollection || {};
-            announcements = data.announcements || [];
             cleanAssignment = data.cleanAssignment || {};
+            
+            // 💡 合併雲端公告與本機帶照片的公告，避免照片被吃掉
+            if (data.announcements && data.announcements.length > 0) {
+              announcements = data.announcements.map(cloudA => {
+                let localA = announcements.find(l => l.id === cloudA.id);
+                if (localA && localA.imgSrc) cloudA.imgSrc = localA.imgSrc;
+                return cloudA;
+              });
+            }
             
             attendanceState = data.attendanceState || {};
             interactiveHwState = data.interactiveHwState || {};
@@ -645,7 +667,7 @@
     function forcePushToCloud() {
       if (!sheetsWebhookUrl) return alert("請先填寫試算表網址！");
       autoSyncToCloud();
-      alert("✅ 已將目前這台設備的資料與照片公告推上雲端！");
+      alert("✅ 已將目前這台設備的資料推上雲端！");
     }
 
     function updateCloudBadge(state) {
@@ -666,7 +688,7 @@
       }
     }
 
-    // === 🐾 寵物與盲盒系統 ===
+    // === 🐾 寵物系統 ===
     function addPetXp(seat, amount) {
       if (!petState[seat]) return; 
       let p = petState[seat];
@@ -987,13 +1009,13 @@
       }; reader.readAsDataURL(file);
     }
 
-    // === 📢 校園公告專區 (支援圖片展示與壓縮發布) ===
+    // === 📢 校園公告專區 (穩定文字 + 圖片網址支援) ===
     function renderBulletins() {
       const container = document.getElementById('bulletinListContainer'); container.innerHTML = '';
       if (announcements.length === 0) return container.innerHTML = '<li style="padding:16px; color:#94a3b8; text-align:center;">無公告</li>';
       
       announcements.forEach((anno, index) => {
-        const hasImgIcon = anno.imgSrc ? `<span class="bulletin-has-img"><i class="fa-solid fa-image"></i> 附圖</span>` : '';
+        const hasImgIcon = (anno.imgSrc || anno.imgUrl) ? `<span class="bulletin-has-img"><i class="fa-solid fa-image"></i> 附圖</span>` : '';
         container.innerHTML += `
           <li class="bulletin-item" onclick="viewAnnouncement(${index})">
             <div>
@@ -1014,8 +1036,9 @@
       const imgContainer = document.getElementById('annoImgContainer');
       const imgEl = document.getElementById('annoImg');
       
-      if (anno.imgSrc) {
-        imgEl.src = anno.imgSrc;
+      const targetImg = anno.imgUrl || anno.imgSrc;
+      if (targetImg) {
+        imgEl.src = targetImg;
         imgContainer.style.display = 'block';
       } else {
         imgContainer.style.display = 'none';
@@ -1029,7 +1052,7 @@
     function renderManageBulletins() {
       const list = document.getElementById('manageBulletinList'); list.innerHTML = '';
       announcements.forEach((anno, index) => {
-        const hasImg = anno.imgSrc ? '<span style="font-size:0.75rem; color:#2563eb; margin-left:4px;">[有圖]</span>' : '';
+        const hasImg = (anno.imgSrc || anno.imgUrl) ? '<span style="font-size:0.75rem; color:#2563eb; margin-left:4px;">[有圖]</span>' : '';
         list.innerHTML += `
           <div class="manage-bulletin-item" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border:1px solid var(--border); border-radius:8px; margin-bottom:6px; background:#fff;">
             <div><span class="bulletin-badge">${anno.dept}</span><strong>${anno.title}</strong>${hasImg}</div>
@@ -1043,44 +1066,46 @@
       const dept = document.getElementById('newAnnoDept').value.trim();
       const title = document.getElementById('newAnnoTitle').value.trim();
       const content = document.getElementById('newAnnoContent').value.trim();
+      const imgUrl = document.getElementById('newAnnoImageUrl').value.trim();
       const file = document.getElementById('newAnnoImageFile').files[0];
 
       if (file) {
-        // 圖片壓縮後儲存
         const reader = new FileReader();
         reader.onload = (event) => {
           const img = new Image();
           img.onload = () => {
             const canvas = document.createElement('canvas');
             let w = img.width, h = img.height;
-            if (w > 600) { h *= 600 / w; w = 600; }
+            if (w > 500) { h *= 500 / w; w = 500; }
             canvas.width = w; canvas.height = h;
             canvas.getContext('2d').drawImage(img, 0, 0, w, h);
             
-            const compressedImg = canvas.toDataURL('image/jpeg', 0.65);
-            saveAnnoAndSync(dept, title, content, compressedImg);
+            const compressedImg = canvas.toDataURL('image/jpeg', 0.5);
+            saveAnnoAndSync(dept, title, content, imgUrl, compressedImg);
           };
           img.src = event.target.result;
         };
         reader.readAsDataURL(file);
       } else {
-        saveAnnoAndSync(dept, title, content, null);
+        saveAnnoAndSync(dept, title, content, imgUrl, null);
       }
     }
 
-    function saveAnnoAndSync(dept, title, content, imgSrc) {
+    function saveAnnoAndSync(dept, title, content, imgUrl, imgSrc) {
       announcements.unshift({
         id: Date.now(),
         dept: dept,
         title: title,
         content: content,
-        imgSrc: imgSrc
+        imgUrl: imgUrl || null,
+        imgSrc: imgSrc || null
       });
 
       localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
       document.getElementById('newAnnoDept').value = '';
       document.getElementById('newAnnoTitle').value = '';
       document.getElementById('newAnnoContent').value = '';
+      document.getElementById('newAnnoImageUrl').value = '';
       document.getElementById('newAnnoImageFile').value = '';
 
       renderBulletins();
