@@ -5,11 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>崇明國小三年九班 - 班級管理與智慧互動系統</title>
   
-  <!-- Google Fonts & Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-  
-  <!-- SortableJS 拖曳套件 -->
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 
   <style>
@@ -168,7 +165,7 @@
     </div>
     <div id="cloudStatus" class="cloud-status" onclick="manualTriggerSync()">
       <i class="fa-solid fa-cloud"></i>
-      <span id="cloudStatusText">公告未連線</span>
+      <span id="cloudStatusText">未連線至雲端</span>
     </div>
   </header>
 
@@ -306,17 +303,17 @@
     <!-- 設定頁面 -->
     <section id="tab-settings" class="page-section">
       
-      <!-- 📢 公告雲端同步 (完全免註冊免金鑰) -->
-      <div class="card" style="border: 2px solid #ef4444;">
-        <div class="card-title"><i class="fa-solid fa-bullhorn text-danger"></i> 1. 班級公告同步頻道 (免註冊)</div>
+      <!-- 📢 Google Firebase 即時同步通道 -->
+      <div class="card" style="border: 2px solid #2563eb;">
+        <div class="card-title"><i class="fa-solid fa-database text-primary"></i> 1. Google 官方即時資料庫 (Firebase)</div>
         <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">
-          請在手機與電腦填寫<strong>「相同的班級自訂代號」</strong>（例如：<code>cm309_class</code>），公告與海報照片就能自動跨裝置同步！
+          請將 Firebase Realtime Database 資料庫網址貼在下方，手機與電腦雙向即時通訊，不會被跨域攔截：
         </p>
         <div class="form-group">
-          <input type="text" id="syncChannelInput" class="form-control" placeholder="自訂頻道代號 (例如: cm309_class)">
+          <input type="url" id="firebaseDbUrlInput" class="form-control" placeholder="例如: https://cm309-default-rtdb.firebaseio.com">
         </div>
-        <button class="btn-submit" style="background:#ef4444;" onclick="saveSyncChannel()">
-          <i class="fa-solid fa-check"></i> 儲存並立刻同步公告
+        <button class="btn-submit" style="background:#2563eb;" onclick="saveFirebaseDbUrl()">
+          <i class="fa-solid fa-link"></i> 儲存資料庫網址並連線
         </button>
       </div>
 
@@ -483,15 +480,13 @@
       { id: 'dragon', name: '飛龍', stages: ['🥚', '🦎', '🐉'], desc: '傳說生物' },
       { id: 'parrot', name: '鸚鵡', stages: ['🥚', '🐤', '🦜'], desc: '鳥禽類' },
       { id: 'penguin', name: '企鵝', stages: ['🥚', '🐧', '🐧'], desc: '動物園' },
-      { id: 'fish', name: '熱帶魚', stages: ['🫧', '🐠', '鯊'], desc: '水族館' }
+      { id: 'fish', name: '熱帶魚', stages: ['🫧', '🐠', '🦈'], desc: '水族館' }
     ];
     const PET_REQ = [20, 30, 40]; 
 
     let students = JSON.parse(localStorage.getItem('cm309_students')) || DEFAULT_STUDENTS;
     let sheetsWebhookUrl = localStorage.getItem('cm309_sheets_url') || "";
-    
-    // 💡 免註冊、免金鑰的自訂同步頻道
-    let syncChannel = localStorage.getItem('cm309_sync_channel') || "cm309_class";
+    let firebaseDbUrl = localStorage.getItem('cm309_firebase_url') || "";
 
     let announcements = JSON.parse(localStorage.getItem('cm309_announcements')) || [];
     let albums = JSON.parse(localStorage.getItem('cm309_albums')) || [];
@@ -510,12 +505,11 @@
     let clickTimeout = null;
     let lastClickedSeat = null;
 
-    // === 頁面初始化 ===
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('zh-TW');
       document.getElementById('studentRosterInput').value = students.join('\n');
       document.getElementById('sheetsApiUrlInput').value = sheetsWebhookUrl;
-      document.getElementById('syncChannelInput').value = syncChannel;
+      document.getElementById('firebaseDbUrlInput').value = firebaseDbUrl;
 
       initSortables();
       renderAllGrids();
@@ -524,8 +518,7 @@
       renderAlbum('全部活動');
       updateCloudBadge();
 
-      // 開啟網頁即自動同步
-      if (syncChannel) {
+      if (firebaseDbUrl) {
         fetchBulletinsFromCloud(true);
       }
     });
@@ -551,77 +544,76 @@
     function updateCloudBadge() {
       const badge = document.getElementById('cloudStatus');
       const text = document.getElementById('cloudStatusText');
-      if (syncChannel) {
+      if (firebaseDbUrl) {
         badge.classList.add('active');
-        text.textContent = `頻道: ${syncChannel}`;
+        text.textContent = 'Firebase 連線就緒';
       } else {
         badge.classList.remove('active');
-        text.textContent = '未設同步頻道';
+        text.textContent = '未連線 (點我設定)';
       }
     }
 
     function manualTriggerSync() {
-      if (!syncChannel) switchTab('tab-settings');
+      if (!firebaseDbUrl) switchTab('tab-settings');
       else fetchBulletinsFromCloud(false);
     }
 
-    // === 📢 免註冊、免金鑰的全新公共雲端同步核心 ===
-    function saveSyncChannel() {
-      const channel = document.getElementById('syncChannelInput').value.trim();
-      if (!channel) return alert("請輸入自訂頻道代號！");
-      syncChannel = channel;
-      localStorage.setItem('cm309_sync_channel', channel);
+    // === 🔥 Google Firebase 專屬即時同步核心 ===
+    function cleanFirebaseUrl(url) {
+      let u = url.trim();
+      if (u.endsWith('/')) u = u.slice(0, -1);
+      return u;
+    }
+
+    function saveFirebaseDbUrl() {
+      let url = document.getElementById('firebaseDbUrlInput').value.trim();
+      if (!url) return alert("請輸入 Firebase Realtime Database 網址！");
+      url = cleanFirebaseUrl(url);
+      firebaseDbUrl = url;
+      localStorage.setItem('cm309_firebase_url', url);
       updateCloudBadge();
-      alert(`✅ 頻道【${channel}】已設定！正在同步...`);
+      alert("✅ Firebase 資料庫網址已儲存！正在測試同步...");
       fetchBulletinsFromCloud(false);
     }
 
-    // 1. 從公共雲端讀取公告 (透過 keyvalue 雲端服務)
     function fetchBulletinsFromCloud(silent = false) {
-      if (!syncChannel) return;
+      if (!firebaseDbUrl) return;
+      const targetUrl = `${cleanFirebaseUrl(firebaseDbUrl)}/announcements.json`;
 
-      fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://api.keyval.org/get/${syncChannel}`)}`)
-        .then(res => res.text())
-        .then(text => {
-          if (text && text !== "null" && text !== "") {
-            try {
-              const data = JSON.parse(text);
-              if (Array.isArray(data)) {
-                announcements = data;
-                localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
-                renderBulletins();
-                renderManageBulletins();
-                if (!silent) alert("✅ 已成功從雲端同步最新公告！");
-              }
-            } catch(e) {
-              console.log("解析資料:", text);
-            }
-          } else {
-            if (!silent) alert("目前該頻道尚無雲端公告，請在任一裝置發佈第一則公告！");
+      fetch(targetUrl)
+        .then(res => res.json())
+        .then(data => {
+          if (data && Array.isArray(data)) {
+            announcements = data;
+            localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
+            renderBulletins();
+            renderManageBulletins();
+            if (!silent) alert("✅ 已成功從 Firebase 同步最新公告！");
+          } else if (data === null) {
+            if (!silent) alert("Firebase 資料庫目前尚無公告，請在任一裝置發佈第一則！");
           }
         })
         .catch(err => {
           console.error(err);
-          if (!silent) alert("同步線路稍微繁忙，請稍候再試一次。");
+          if (!silent) alert("連線失敗！請確認 Firebase 規則是否設定為「測試模式」（read 與 write 為 true）。");
         });
     }
 
-    // 2. 將最新公告推上公共雲端
     function syncBulletinsToCloud() {
-      if (!syncChannel) return;
+      if (!firebaseDbUrl) return;
+      const targetUrl = `${cleanFirebaseUrl(firebaseDbUrl)}/announcements.json`;
 
-      const payloadStr = JSON.stringify(announcements);
-
-      fetch(`https://api.keyval.org/set/${syncChannel}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: payloadStr
+      fetch(targetUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(announcements)
       })
+      .then(res => res.json())
       .then(() => {
-        console.log("公告已成功推上雲端頻道！");
+        console.log("公告已推上 Firebase 雲端！");
       })
       .catch(err => {
-        console.error("雲端發布失敗:", err);
+        console.error("Firebase 上傳失敗:", err);
       });
     }
 
@@ -690,12 +682,11 @@
           img.onload = () => {
             const canvas = document.createElement('canvas');
             let w = img.width, h = img.height;
-            // 自動輕量化壓縮，確保傳輸速度
-            if (w > 450) { h *= 450 / w; w = 450; }
+            if (w > 500) { h *= 500 / w; w = 500; }
             canvas.width = w; canvas.height = h;
             canvas.getContext('2d').drawImage(img, 0, 0, w, h);
             
-            const compressedImg = canvas.toDataURL('image/jpeg', 0.55);
+            const compressedImg = canvas.toDataURL('image/jpeg', 0.6);
             saveAnnoAndSync(dept, title, content, compressedImg);
           };
           img.src = event.target.result;
