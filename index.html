@@ -78,9 +78,10 @@
     .att-sick { background-color: #fffbeb; border-color: #fbbf24; color: #92400e; }
     .att-late { background-color: #f5f3ff; border-color: #a78bfa; color: #5b21b6; }
 
+    /* 亮燈效果 */
     .indicator-lamp { width: 12px; height: 12px; border-radius: 50%; background: #cbd5e1; margin-bottom: 2px; }
     .is-lit { background: #f0fdf4 !important; border-color: #22c55e !important; box-shadow: 0 0 10px rgba(34, 197, 94, 0.3); }
-    .is-lit .indicator-lamp { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+    .is-lit .indicator-lamp { background: #22c55e !important; box-shadow: 0 0 8px #22c55e; }
     
     .hw-green { background: #f0fdf4 !important; border-color: #16a34a !important; }
     .hw-green .status { background: #dcfce7; color: #15803d; }
@@ -109,7 +110,6 @@
     }
     .drag-tag .btn-remove-tag { color: #ef4444; cursor: pointer; font-size: 0.75rem; margin-left: 2px; }
     
-    /* 訂正完成綠燈狀態 */
     .drag-tag.is-corrected {
       background: #dcfce7 !important; border-color: #16a34a !important; color: #15803d !important;
       box-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
@@ -270,8 +270,11 @@
           </div>
         </div>
 
-        <!-- 4. 打掃工作看板 -->
+        <!-- 4. 打掃工作看板 (加強點擊發光) -->
         <div id="cleanKanban" style="display:none;">
+          <div style="font-size:0.8rem; color:#059669; font-weight:700; margin-bottom:10px; background:#dcfce7; padding:6px 10px; border-radius:6px;">
+            <i class="fa-solid fa-hand-pointer"></i> 提示：<strong>直接點擊學生標籤即可「亮綠燈 / 關閉綠燈」</strong>，完成打掃的孩子寵物自動 +1 分！
+          </div>
           <div class="clean-board full">
             <div class="clean-col" style="background:#f1f5f9; border-color:#cbd5e1;">
               <h4>🧹 尚未分配打掃區 (拖曳分派)</h4>
@@ -409,7 +412,7 @@
 
   </main>
 
-  <!-- 作業狀態 Modal (已精簡移除要訂正與已訂正) -->
+  <!-- 作業狀態 Modal -->
   <div id="hwStatusModal" class="modal-overlay">
     <div class="modal-box">
       <h3 id="hwModalTitle">挑選作業狀態</h3>
@@ -418,7 +421,7 @@
         <button class="opt-btn" onclick="applyHwStatus('忘記帶回家', 'hw-blue')"><span style="color:#2563eb;">🔵 2. 忘記帶回家</span></button>
         <button class="opt-btn" onclick="applyHwStatus('未完成', 'hw-red')"><span style="color:#dc2626;">🔴 3. 未完成</span></button>
         <button class="opt-btn" onclick="applyHwStatus('忘記帶來學校', 'hw-orange')"><span style="color:#ea580c;">🟠 4. 忘記帶來學校</span></button>
-        <button class="opt-btn" onclick="showMissingInput()"><span style="color:#0d9488;">✍️ 5. 缺項 (自訂輸入)</span></button>
+        <button class="opt-btn" onclick="showMissingInput()"><span style="color:#0d9488;">✍️️ 5. 缺項 (自訂輸入)</span></button>
         
         <div id="missingInputArea" style="display:none; padding:10px; background:#f0fdfa; border:1px dashed #0d9488; border-radius:8px;">
           <input type="text" id="hwMissingText" class="form-control" placeholder="輸入缺漏項目(如:數習)">
@@ -514,10 +517,42 @@
   </div>
 
   <script>
+    // 💡 內建您照片中最新的 25 位學生標準名冊
     const DEFAULT_STUDENTS = [
-      "林品妍", "張宇帆", "陳柏宇", "黃子軒", "李承恩", "王羽涵", "趙晨曦", "孫立恩", "周子涵", "吳秉諺",
-      "蔡宗翰", "許庭瑋", "鄭晴文", "謝名翔", "洪詠晴"
+      "黃琨翔", "陳秉軒", "杜晨翔", "劉景碩", "王宇童", "吳立翔", "陳宇恩", "林楷諾", "李柏衡", "林晉翰",
+      "徐堉綸", "紀孟希", "徐晟瀚", "王知言", "蔡沛穎", "鄖詠心", "郭聿芸", "楊茲甯", "王岑芝", "吳涵儒",
+      "洪瑀晴", "林芷萱", "潘若穎", "馮語霓", "蘇唯心"
     ];
+
+    // 💡 內建最新寵物分數保底庫
+    const INITIAL_PETS = {
+      1: { petId: 'cat', stage: 1, xp: 12 },
+      2: { petId: 'dog', stage: 1, xp: 11 },
+      3: { petId: 'turtle', stage: 1, xp: 11 },
+      4: { petId: 'dragon', stage: 1, xp: 10 },
+      5: { petId: 'parrot', stage: 1, xp: 10 },
+      6: { petId: 'penguin', stage: 1, xp: 11 },
+      7: { petId: 'fish', stage: 1, xp: 8 },
+      8: { petId: 'cat', stage: 1, xp: 9 },
+      9: { petId: 'dog', stage: 1, xp: 9 },
+      10: { petId: 'turtle', stage: 1, xp: 10 },
+      11: { petId: 'dragon', stage: 1, xp: 10 },
+      12: { petId: 'parrot', stage: 1, xp: 10 },
+      13: { petId: 'penguin', stage: 1, xp: 8 },
+      14: { petId: 'fish', stage: 1, xp: 10 },
+      15: { petId: 'cat', stage: 1, xp: 11 },
+      16: { petId: 'dog', stage: 1, xp: 10 },
+      17: { petId: 'turtle', stage: 1, xp: 9 },
+      18: { petId: 'dragon', stage: 1, xp: 11 },
+      19: { petId: 'parrot', stage: 1, xp: 10 },
+      20: { petId: 'penguin', stage: 1, xp: 12 },
+      21: { petId: 'fish', stage: 1, xp: 11 },
+      22: { petId: 'cat', stage: 1, xp: 12 },
+      23: { petId: 'dog', stage: 1, xp: 6 },
+      24: { petId: 'turtle', stage: 1, xp: 10 },
+      25: { petId: 'dragon', stage: 1, xp: 10 }
+    };
+
     const PET_CATALOG = [
       { id: 'cat', name: '橘貓', stages: ['🥚', '🐱', '🐈'], desc: '常見寵物' },
       { id: 'dog', name: '柴犬', stages: ['🥚', '🐶', '🐕'], desc: '常見寵物' },
@@ -535,11 +570,12 @@
 
     let announcements = JSON.parse(localStorage.getItem('cm309_announcements')) || [];
     let albums = JSON.parse(localStorage.getItem('cm309_albums')) || [];
-    let petState = JSON.parse(localStorage.getItem('cm309_pets')) || {};
+    
+    // 若本機無資料，自動載入最新 25 人的保底進度
+    let petState = JSON.parse(localStorage.getItem('cm309_pets')) || INITIAL_PETS;
     let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
     let cleanAssignment = JSON.parse(localStorage.getItem('cm309_cleanAssign')) || {};
 
-    // 💡 訂正看板資料庫 (每個學生對象增加 done 標記)
     let correctionBoxes = JSON.parse(localStorage.getItem('cm309_corrBoxes')) || [
       { id: 'box_1', title: '國語甲本', students: [] },
       { id: 'box_2', title: '數學習作', students: [] }
@@ -693,13 +729,17 @@
         .then(res => res.json())
         .then(data => {
           if (data) {
-            if (data.students) students = data.students;
+            if (data.students && data.students.length > 0) students = data.students;
             attendanceState = data.attendanceState || {};
             interactiveHwState = data.interactiveHwState || {};
             teethLampState = data.teethLampState || {};
             mouthwashLampState = data.mouthwashLampState || {};
             cleanLampState = data.cleanLampState || {};
-            petState = data.petState || {};
+            
+            // 若雲端有寵物紀錄則讀取，否則保留目前分數
+            if (data.petState && Object.keys(data.petState).length > 0) {
+              petState = data.petState;
+            }
             petCollection = data.petCollection || {};
             announcements = data.announcements || [];
             cleanAssignment = data.cleanAssignment || {};
@@ -759,7 +799,7 @@
         title.textContent = '目前項目：作業繳交';
         grid.style.display = 'grid';
       } else if (mode === 'correction') {
-        title.textContent = '目前項目：作業訂正追蹤 (點擊亮綠燈完成)';
+        title.textContent = '目前項目：作業訂正追蹤 (點擊切換綠燈)';
         corrSec.style.display = 'block';
         renderCorrectionBoard();
       } else if (mode === 'cleanliness') {
@@ -777,7 +817,7 @@
       renderInteractiveGrid();
     }
 
-    // === 2. 作業訂正專區 (點擊切換綠燈) ===
+    // === 2. 作業訂正專區 ===
     function renderCorrectionBoard() {
       const pool = document.getElementById('correctionPool');
       pool.innerHTML = '';
@@ -842,7 +882,6 @@
       });
     }
 
-    // 💡 點擊切換訂正綠燈狀態（不參與寵物加減分）
     function toggleStudentCorrDone(boxIdx, stIdx) {
       correctionBoxes[boxIdx].students[stIdx].done = !correctionBoxes[boxIdx].students[stIdx].done;
       renderCorrectionBoard();
@@ -926,6 +965,69 @@
       });
     }
 
+    // === 4. 打掃看板與亮燈（完全修復點擊切換） ===
+    function initSortables() {
+      const zones = ['zone-unassigned', 'zone-classroom', 'zone-corridor', 'zone-mop', 'zone-window', 'zone-blackboard', 'zone-trash'];
+      zones.forEach(z => {
+        const el = document.getElementById(z);
+        if (!el) return;
+        new Sortable(el, {
+          group: 'clean',
+          animation: 150,
+          delay: 150, // 增加微小延遲，確保「點擊」與「拖曳」互不干擾
+          delayOnTouchOnly: true,
+          onEnd: function(evt) {
+            const seat = evt.item.getAttribute('data-seat');
+            cleanAssignment[seat] = evt.to.id;
+            syncToFirebase();
+          }
+        });
+      });
+    }
+
+    function renderCleanKanban() {
+      const zones = ['zone-unassigned', 'zone-classroom', 'zone-corridor', 'zone-mop', 'zone-window', 'zone-blackboard', 'zone-trash'];
+      zones.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
+      });
+
+      students.forEach((name, i) => {
+        const id = i+1;
+        const targetZone = cleanAssignment[id] || 'zone-unassigned';
+        const isLit = !!cleanLampState[id];
+
+        const div = document.createElement('div');
+        div.className = `student-btn ${isLit ? 'is-lit' : ''}`;
+        div.style.padding = '8px 6px';
+        div.style.width = '78px';
+        div.setAttribute('data-seat', id);
+        
+        div.innerHTML = `
+          <div class="indicator-lamp"></div>
+          <div class="name" style="font-size:0.88rem; pointer-events:none;">${name}</div>
+          <div style="font-size:0.65rem; color:${isLit?'#15803d':'#94a3b8'}; pointer-events:none;">${isLit?'已完成':'未完成'}</div>
+        `;
+        
+        // 點擊事件監聽
+        div.onmouseup = function(e) {
+          toggleCleanLamp(id);
+        };
+
+        const zoneEl = document.getElementById(targetZone);
+        if (zoneEl) zoneEl.appendChild(div);
+      });
+    }
+
+    function toggleCleanLamp(seat) {
+      cleanLampState[seat] = !cleanLampState[seat];
+      const isOn = cleanLampState[seat];
+      if (isOn) addPetXp(seat, 1);
+      else addPetXp(seat, -1);
+      renderCleanKanban();
+      syncToFirebase();
+    }
+
     // === 師生互動看板網格與點名 ===
     function renderInteractiveGrid() {
       if (currentInteractiveMode === 'clean' || currentInteractiveMode === 'correction' || currentInteractiveMode === 'cleanliness') return;
@@ -993,45 +1095,11 @@
 
     function toggleLamp(seat) {
       let isOn = false;
-      if (currentInteractiveMode === 'clean') { cleanLampState[seat] = !cleanLampState[seat]; isOn = cleanLampState[seat]; }
-      else if (currentInteractiveMode === 'teeth') { teethLampState[seat] = !teethLampState[seat]; isOn = teethLampState[seat]; }
+      if (currentInteractiveMode === 'teeth') { teethLampState[seat] = !teethLampState[seat]; isOn = teethLampState[seat]; }
       else if (currentInteractiveMode === 'mouthwash') { mouthwashLampState[seat] = !mouthwashLampState[seat]; isOn = mouthwashLampState[seat]; }
       if (isOn) addPetXp(seat, 1); else addPetXp(seat, -1);
       renderInteractiveGrid();
       syncToFirebase();
-    }
-
-    function initSortables() {
-      const zones = ['zone-unassigned', 'zone-classroom', 'zone-corridor', 'zone-mop', 'zone-window', 'zone-blackboard', 'zone-trash'];
-      zones.forEach(z => {
-        const el = document.getElementById(z);
-        if (!el) return;
-        new Sortable(el, {
-          group: 'clean', animation: 150, delay: 200, delayOnTouchOnly: true,
-          onEnd: function(evt) {
-            const seat = evt.item.getAttribute('data-seat');
-            cleanAssignment[seat] = evt.to.id;
-            syncToFirebase();
-          }
-        });
-      });
-    }
-
-    function renderCleanKanban() {
-      const zones = ['zone-unassigned', 'zone-classroom', 'zone-corridor', 'zone-mop', 'zone-window', 'zone-blackboard', 'zone-trash'];
-      zones.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = '';
-      });
-
-      students.forEach((name, i) => {
-        const id = i+1; const targetZone = cleanAssignment[id] || 'zone-unassigned'; const isLit = !!cleanLampState[id];
-        const div = document.createElement('div'); div.className = `student-btn ${isLit ? 'is-lit' : ''}`;
-        div.style.padding = '8px'; div.style.width = '75px'; div.setAttribute('data-seat', id);
-        div.innerHTML = `<div class="indicator-lamp"></div><div class="name" style="font-size:0.9rem;">${name}</div>`;
-        div.onclick = (e) => { if(e.detail === 0) return; toggleLamp(id); }; 
-        const zoneEl = document.getElementById(targetZone); if(zoneEl) zoneEl.appendChild(div);
-      });
     }
 
     function resetCurrentInteractive() {
@@ -1049,6 +1117,7 @@
           renderCleanlinessBoard();
         }
         renderInteractiveGrid();
+        if(currentInteractiveMode === 'clean') renderCleanKanban();
         syncToFirebase();
       }
     }
@@ -1220,22 +1289,20 @@
       const container = document.getElementById('petsGrid');
       container.innerHTML = '';
       students.forEach((name, i) => {
-        const id = i+1; const p = petState[id];
+        const id = i+1; const p = petState[id] || { stage: 1, xp: 0 };
         const div = document.createElement('div');
         div.className = 'student-btn pet-btn'; div.style.padding = '12px 8px';
-        if (!p) {
-          div.innerHTML = `<span class="seat">${id}號</span><span class="name">${name}</span><div class="pet-emoji s1" style="color:#cbd5e1; font-size:24px;">➕</div><span class="status" style="background:#f1f5f9;">未領養</span>`;
-        } else {
-          const cat = PET_CATALOG.find(c => c.id === p.petId);
-          const isMystery = p.stage === 1;
-          const isCompleted = p.stage > 3;
-          const emoji = isMystery ? '🥚' : cat.stages[Math.min(p.stage - 1, 2)];
-          let stageName = isCompleted ? '圓滿成長' : (p.stage===1?'蛋':(p.stage===2?'幼體':'成體'));
-          let progressPercent = isCompleted ? 100 : Math.floor((p.xp / PET_REQ[p.stage - 1]) * 100);
-          
-          div.innerHTML = `<span class="seat">${id}號</span><span class="name">${name}</span><div class="pet-emoji s${p.stage}">${emoji}</div><div class="pet-progress-bg"><div class="pet-progress-fill" style="width:${progressPercent}%;"></div></div><div class="pet-info"><span>${stageName}</span><span>${isCompleted ? 'MAX' : p.xp}</span></div>`;
-          if (isCompleted) div.style.borderColor = '#eab308';
-        }
+        
+        const cat = PET_CATALOG.find(c => c.id === p.petId) || PET_CATALOG[0];
+        const isMystery = p.stage === 1;
+        const isCompleted = p.stage > 3;
+        const emoji = isMystery ? '🥚' : cat.stages[Math.min(p.stage - 1, 2)];
+        let stageName = isCompleted ? '圓滿成長' : (p.stage===1?'蛋':(p.stage===2?'幼體':'成體'));
+        let progressPercent = isCompleted ? 100 : Math.floor((p.xp / PET_REQ[p.stage - 1]) * 100);
+        
+        div.innerHTML = `<span class="seat">${id}號</span><span class="name">${name}</span><div class="pet-emoji s${p.stage}">${emoji}</div><div class="pet-progress-bg"><div class="pet-progress-fill" style="width:${progressPercent}%;"></div></div><div class="pet-info"><span>${stageName}</span><span>${isCompleted ? 'MAX' : p.xp}</span></div>`;
+        if (isCompleted) div.style.borderColor = '#eab308';
+
         div.onclick = () => openPetModal(id, name);
         container.appendChild(div);
       });
@@ -1243,45 +1310,40 @@
 
     function openPetModal(seat, name) {
       currentSelectedStudent = { seat, name };
-      const p = petState[seat];
+      const p = petState[seat] || { stage: 1, xp: 0, petId: 'cat' };
       document.getElementById('petModalTitle').textContent = `${seat}號 ${name} 的寵物`;
       const manageView = document.getElementById('petManageView');
       const selectView = document.getElementById('petSelectView');
       const gardenView = document.getElementById('petGardenView');
       
-      manageView.style.display = 'none';
+      manageView.style.display = 'block';
       selectView.style.display = 'none';
       gardenView.style.display = 'none';
       document.getElementById('btnViewGarden').style.display = 'block';
       document.getElementById('btnModalClose').textContent = '關閉視窗';
       document.getElementById('btnModalClose').onclick = closePetModal;
 
-      if (!p) {
-        selectView.style.display = 'block';
-      } else {
-        manageView.style.display = 'block';
-        const cat = PET_CATALOG.find(c => c.id === p.petId);
-        const isMystery = p.stage === 1;
-        const isCompleted = p.stage > 3;
-        document.getElementById('petModalEmoji').textContent = isMystery ? '🥚' : cat.stages[Math.min(p.stage - 1, 2)];
-        document.getElementById('petModalEmoji').className = `pet-emoji s${Math.min(p.stage, 4)}`;
-        
-        let stageName = isCompleted ? '圓滿成長' : (p.stage===1?'第一階段：蛋':(p.stage===2?'第二階段：幼體':'第三階段：成體'));
-        let displayName = isMystery ? '神秘的蛋' : cat.name;
-        document.getElementById('petModalName').textContent = `${displayName} (${stageName})`;
-        
-        const progressArea = document.getElementById('petModalProgressArea');
-        const actionArea = document.getElementById('petModalActionArea');
-        const completeArea = document.getElementById('petModalCompleteArea');
+      const cat = PET_CATALOG.find(c => c.id === p.petId) || PET_CATALOG[0];
+      const isMystery = p.stage === 1;
+      const isCompleted = p.stage > 3;
+      document.getElementById('petModalEmoji').textContent = isMystery ? '🥚' : cat.stages[Math.min(p.stage - 1, 2)];
+      document.getElementById('petModalEmoji').className = `pet-emoji s${Math.min(p.stage, 4)}`;
+      
+      let stageName = isCompleted ? '圓滿成長' : (p.stage===1?'第一階段：蛋':(p.stage===2?'第二階段：幼體':'第三階段：成體'));
+      let displayName = isMystery ? '神秘的蛋' : cat.name;
+      document.getElementById('petModalName').textContent = `${displayName} (${stageName})`;
+      
+      const progressArea = document.getElementById('petModalProgressArea');
+      const actionArea = document.getElementById('petModalActionArea');
+      const completeArea = document.getElementById('petModalCompleteArea');
 
-        if(isCompleted) {
-           progressArea.style.display = 'none'; actionArea.style.display = 'none'; completeArea.style.display = 'block';
-        } else {
-           progressArea.style.display = 'block'; actionArea.style.display = 'flex'; completeArea.style.display = 'none';
-           let req = PET_REQ[p.stage - 1];
-           document.getElementById('petModalXpText').textContent = `${p.xp} / ${req}`;
-           document.getElementById('petModalProgressBar').style.width = `${(p.xp/req)*100}%`;
-        }
+      if(isCompleted) {
+         progressArea.style.display = 'none'; actionArea.style.display = 'none'; completeArea.style.display = 'block';
+      } else {
+         progressArea.style.display = 'block'; actionArea.style.display = 'flex'; completeArea.style.display = 'none';
+         let req = PET_REQ[p.stage - 1];
+         document.getElementById('petModalXpText').textContent = `${p.xp} / ${req}`;
+         document.getElementById('petModalProgressBar').style.width = `${(p.xp/req)*100}%`;
       }
       document.getElementById('petManageModal').classList.add('active');
     }
@@ -1321,7 +1383,7 @@
     }
 
     function resetAllPets() {
-      if(confirm("⚠️️ 警告：確定要刪除全班寵物與寵物園嗎？")) {
+      if(confirm("⚠️ 警告：確定要刪除全班寵物與寵物園嗎？")) {
         petState = {}; petCollection = {};
         alert("✅ 全班寵物紀錄已清除！");
         if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
