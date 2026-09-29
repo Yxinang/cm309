@@ -84,10 +84,6 @@
     
     .hw-green { background: #f0fdf4 !important; border-color: #16a34a !important; }
     .hw-green .status { background: #dcfce7; color: #15803d; }
-    .hw-purple { background: #faf5ff !important; border-color: #9333ea !important; }
-    .hw-purple .status { background: #f3e8ff; color: #7e22ce; }
-    .hw-yellow { background: #fefce8 !important; border-color: #eab308 !important; }
-    .hw-yellow .status { background: #fef08a; color: #854d0e; }
     .hw-blue { background: #eff6ff !important; border-color: #2563eb !important; }
     .hw-blue .status { background: #dbeafe; color: #1d4ed8; }
     .hw-red { background: #fef2f2 !important; border-color: #dc2626 !important; }
@@ -97,12 +93,27 @@
     .hw-teal { background: #f0fdfa !important; border-color: #0d9488 !important; }
     .hw-teal .status { background: #ccfbf1; color: #0f766e; }
 
-    .clean-board { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top:14px; }
+    /* 看板通用樣式 */
+    .clean-board { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 14px; }
     .clean-board.full { grid-template-columns: 1fr; } 
-    .clean-col { background: #f8fafc; border: 1.5px dashed var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; }
-    .clean-col h4 { font-size: 0.9rem; color: #334155; margin-bottom: 8px; text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+    .clean-col { background: #f8fafc; border: 1.5px dashed var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; min-height: 140px; }
+    .clean-col h4 { font-size: 0.9rem; color: #334155; margin-bottom: 8px; text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
     .clean-list { flex-grow: 1; min-height: 80px; display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
     .sortable-ghost { opacity: 0.4; background: #e2e8f0; }
+
+    /* 拖曳標籤樣式 */
+    .drag-tag {
+      background: #fff; border: 1px solid var(--border); border-radius: 6px;
+      padding: 6px 10px; font-size: 0.85rem; font-weight: 600; display: inline-flex;
+      align-items: center; gap: 6px; cursor: grab; user-select: none; transition: all 0.15s;
+    }
+    .drag-tag .btn-remove-tag { color: #ef4444; cursor: pointer; font-size: 0.75rem; margin-left: 2px; }
+    
+    /* 訂正完成綠燈狀態 */
+    .drag-tag.is-corrected {
+      background: #dcfce7 !important; border-color: #16a34a !important; color: #15803d !important;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+    }
 
     .form-group { margin-bottom: 12px; }
     .form-control { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; outline: none; }
@@ -200,9 +211,11 @@
     <section id="tab-interactive" class="page-section">
       <div style="display:flex; gap:8px; margin-bottom:12px; overflow-x:auto;">
         <button class="album-chip active" id="btn-sub-hw" onclick="switchInteractiveMode('hw')">1.作業繳交</button>
-        <button class="album-chip" id="btn-sub-clean" onclick="switchInteractiveMode('clean')">2.打掃工作</button>
-        <button class="album-chip" id="btn-sub-teeth" onclick="switchInteractiveMode('teeth')">3.潔牙高手</button>
-        <button class="album-chip" id="btn-sub-mouthwash" onclick="switchInteractiveMode('mouthwash')">4.漱口水</button>
+        <button class="album-chip" id="btn-sub-correction" onclick="switchInteractiveMode('correction')">2.作業訂正</button>
+        <button class="album-chip" id="btn-sub-cleanliness" onclick="switchInteractiveMode('cleanliness')">3.整潔大師</button>
+        <button class="album-chip" id="btn-sub-clean" onclick="switchInteractiveMode('clean')">4.打掃工作</button>
+        <button class="album-chip" id="btn-sub-teeth" onclick="switchInteractiveMode('teeth')">5.潔牙高手</button>
+        <button class="album-chip" id="btn-sub-mouthwash" onclick="switchInteractiveMode('mouthwash')">6.漱口水</button>
       </div>
 
       <div class="card">
@@ -214,8 +227,50 @@
             <button class="btn-upload" onclick="uploadInteractiveBatch()"><i class="fa-solid fa-cloud-arrow-up"></i> 上傳試算表</button>
           </div>
         </div>
+
         <div class="student-grid" id="interactiveGrid"></div>
 
+        <!-- 2. 作業訂正看板 -->
+        <div id="correctionBoardSection" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+            <p style="font-size:0.85rem; color:#64748b;">
+              <i class="fa-solid fa-circle-info"></i> 從下方拖曳學生至各訂正項目。<strong>點擊學生名字可切換綠燈（已訂正完成）</strong>，不影響寵物分數。
+            </p>
+            <button class="btn-upload" style="background:#2563eb; font-size:0.8rem; padding:5px 12px;" onclick="addCorrectionBox()"><i class="fa-solid fa-plus"></i> 新增訂正分類框</button>
+          </div>
+          <div class="clean-board full" style="margin-bottom:12px;">
+            <div class="clean-col" style="background:#eff6ff; border-color:#93c5fd; min-height:80px;">
+              <h4 style="color:#1e40af; border-bottom-color:#bfdbfe;">📋 全班學生名單池 (可重複拖出)</h4>
+              <div class="clean-list" id="correctionPool"></div>
+            </div>
+          </div>
+          <div class="clean-board" id="correctionBoxesContainer"></div>
+        </div>
+
+        <!-- 3. 整潔大師看板 -->
+        <div id="cleanlinessBoardSection" style="display:none;">
+          <p style="font-size:0.85rem; color:#15803d; font-weight:700; margin-bottom:10px; background:#dcfce7; padding:6px 10px; border-radius:6px;">
+            <i class="fa-solid fa-sparkles"></i> 規則：拖入【整潔】的孩子立即獲得寵物加分（+1），其餘未達標項目不扣分！
+          </p>
+          <div class="clean-board full" style="margin-bottom:12px;">
+            <div class="clean-col" style="background:#f1f5f9; border-color:#cbd5e1; min-height:80px;">
+              <h4>👥 待檢查學生池 (拖曳分派)</h4>
+              <div class="clean-list" id="cleanlinessPool"></div>
+            </div>
+          </div>
+          <div class="clean-board">
+            <div class="clean-col" style="background:#f0fdf4; border-color:#86efac;">
+              <h4 style="color:#15803d; font-weight:700;">✨ 整潔 (加 1 分)</h4>
+              <div class="clean-list" id="zone-clean-tidy"></div>
+            </div>
+            <div class="clean-col"><h4>🪑 沒靠椅子</h4><div class="clean-list" id="zone-clean-chair"></div></div>
+            <div class="clean-col"><h4>📦 座位凌亂</h4><div class="clean-list" id="zone-clean-messy"></div></div>
+            <div class="clean-col"><h4>🎒 棉被書包未歸位</h4><div class="clean-list" id="zone-clean-bag"></div></div>
+            <div class="clean-col"><h4>📐 桌椅沒有對齊</h4><div class="clean-list" id="zone-clean-align"></div></div>
+          </div>
+        </div>
+
+        <!-- 4. 打掃工作看板 -->
         <div id="cleanKanban" style="display:none;">
           <div class="clean-board full">
             <div class="clean-col" style="background:#f1f5f9; border-color:#cbd5e1;">
@@ -302,12 +357,10 @@
 
     <!-- 設定頁面 -->
     <section id="tab-settings" class="page-section">
-      
-      <!-- 📢 Google Firebase 即時同步通道 -->
       <div class="card" style="border: 2px solid #2563eb;">
         <div class="card-title"><i class="fa-solid fa-database text-primary"></i> 1. 全班即時資料庫 (Firebase 雙向同步)</div>
         <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">
-          請確保手機與電腦填寫相同的 Firebase Realtime Database 網址，<strong>所有亮燈、點名、寵物、公告將全自動同步</strong>：
+          請確保手機與電腦填寫相同的 Firebase Realtime Database 網址：
         </p>
         <div class="form-group">
           <input type="url" id="firebaseDbUrlInput" class="form-control" placeholder="例如: https://cm309-default-rtdb.firebaseio.com">
@@ -317,7 +370,6 @@
         </button>
       </div>
 
-      <!-- 公告發布表單 -->
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-pen-to-square text-danger"></i> 發佈新公告</div>
         <form onsubmit="handleCreateAnnouncement(event)" style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:12px;">
@@ -335,44 +387,38 @@
         <div id="manageBulletinList"></div>
       </div>
 
-      <!-- Google 試算表 Webhook 設定 -->
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-table text-primary"></i> 2. Google 試算表 (記錄點名/作業/傷病日誌)</div>
         <input type="url" id="sheetsApiUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
         <button class="btn-submit" style="margin-top:8px; background:#059669;" onclick="saveSheetsUrl()">儲存試算表連結</button>
       </div>
 
-      <!-- 學生名單管理 -->
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-users-gear"></i> 3. 學生名單設定</div>
         <textarea id="studentRosterInput" class="form-control" rows="8" placeholder="每行一個名字..."></textarea>
         <button class="btn-submit" style="margin-top:8px;" onclick="saveStudentRoster()">儲存名單設定</button>
       </div>
 
-      <!-- 進階資料清除 -->
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-triangle-exclamation text-danger"></i> 進階資料清除</div>
         <button class="btn-submit" style="background:#ef4444;" onclick="resetAllPets()">
           <i class="fa-solid fa-trash-can"></i> 一鍵刪除全班寵物與寵物園
         </button>
       </div>
-
     </section>
 
   </main>
 
-  <!-- 作業狀態 Modal -->
+  <!-- 作業狀態 Modal (已精簡移除要訂正與已訂正) -->
   <div id="hwStatusModal" class="modal-overlay">
     <div class="modal-box">
       <h3 id="hwModalTitle">挑選作業狀態</h3>
       <div class="modal-options">
         <button class="opt-btn" onclick="applyHwStatus('已繳交', 'hw-green')"><span style="color:#16a34a;">🟢 1. 已繳交 (+1分)</span></button>
-        <button class="opt-btn" onclick="applyHwStatus('要訂正', 'hw-purple')"><span style="color:#9333ea;">🟣 2. 要訂正</span></button>
-        <button class="opt-btn" onclick="applyHwStatus('訂正完成', 'hw-yellow')"><span style="color:#ca8a04;">🟡 3. 訂正完成</span></button>
-        <button class="opt-btn" onclick="applyHwStatus('忘記帶回家', 'hw-blue')"><span style="color:#2563eb;">🔵 4. 忘記帶回家</span></button>
-        <button class="opt-btn" onclick="applyHwStatus('未完成', 'hw-red')"><span style="color:#dc2626;">🔴 5. 未完成</span></button>
-        <button class="opt-btn" onclick="applyHwStatus('忘記帶來學校', 'hw-orange')"><span style="color:#ea580c;">🟠 6. 忘記帶來學校</span></button>
-        <button class="opt-btn" onclick="showMissingInput()"><span style="color:#0d9488;">✍️ 7. 缺項 (自訂輸入)</span></button>
+        <button class="opt-btn" onclick="applyHwStatus('忘記帶回家', 'hw-blue')"><span style="color:#2563eb;">🔵 2. 忘記帶回家</span></button>
+        <button class="opt-btn" onclick="applyHwStatus('未完成', 'hw-red')"><span style="color:#dc2626;">🔴 3. 未完成</span></button>
+        <button class="opt-btn" onclick="applyHwStatus('忘記帶來學校', 'hw-orange')"><span style="color:#ea580c;">🟠 4. 忘記帶來學校</span></button>
+        <button class="opt-btn" onclick="showMissingInput()"><span style="color:#0d9488;">✍️ 5. 缺項 (自訂輸入)</span></button>
         
         <div id="missingInputArea" style="display:none; padding:10px; background:#f0fdfa; border:1px dashed #0d9488; border-radius:8px;">
           <input type="text" id="hwMissingText" class="form-control" placeholder="輸入缺漏項目(如:數習)">
@@ -391,7 +437,6 @@
   <div id="petManageModal" class="modal-overlay">
     <div class="modal-box" style="text-align:center;">
       <h3 id="petModalTitle">寵物狀態</h3>
-      
       <div id="petManageView">
         <div id="petModalEmoji" style="margin:10px 0;">🥚</div>
         <h4 id="petModalName" style="color:#1e40af; margin-bottom:8px;">神秘的蛋 (第一階段：蛋)</h4>
@@ -494,7 +539,15 @@
     let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
     let cleanAssignment = JSON.parse(localStorage.getItem('cm309_cleanAssign')) || {};
 
-    // 💡 全局即時亮燈與狀態
+    // 💡 訂正看板資料庫 (每個學生對象增加 done 標記)
+    let correctionBoxes = JSON.parse(localStorage.getItem('cm309_corrBoxes')) || [
+      { id: 'box_1', title: '國語甲本', students: [] },
+      { id: 'box_2', title: '數學習作', students: [] }
+    ];
+
+    let cleanlinessAssignment = JSON.parse(localStorage.getItem('cm309_cleanlinessAssign')) || {};
+    let cleanlinessAwarded = JSON.parse(localStorage.getItem('cm309_cleanlinessAwarded')) || {};
+
     let attendanceState = JSON.parse(localStorage.getItem('cm309_attState')) || {}; 
     let interactiveHwState = JSON.parse(localStorage.getItem('cm309_hwState')) || {}; 
     let teethLampState = JSON.parse(localStorage.getItem('cm309_teethState')) || {};  
@@ -514,13 +567,13 @@
       document.getElementById('firebaseDbUrlInput').value = firebaseDbUrl;
 
       initSortables();
+      initCleanlinessSortables();
       renderAllGrids();
       renderBulletins();
       renderManageBulletins();
       renderAlbum('全部活動');
       updateCloudBadge();
 
-      // 每次開啟網頁，自動連線 Firebase 載入最新全班燈號與公告
       if (firebaseDbUrl) {
         fetchFromFirebase(true);
       }
@@ -565,7 +618,6 @@
       else fetchFromFirebase(false);
     }
 
-    // === 🔥 Firebase 全自動即時同步（燈號 + 點名 + 寵物 + 公告） ===
     function cleanFirebaseUrl(url) {
       let u = url.trim();
       if (u.endsWith('/')) u = u.slice(0, -1);
@@ -579,13 +631,11 @@
       firebaseDbUrl = url;
       localStorage.setItem('cm309_firebase_url', url);
       updateCloudBadge();
-      alert("✅ Firebase 網址已儲存！正在同步所有資料與燈號...");
+      alert("✅ Firebase 網址已儲存！正在同步...");
       fetchFromFirebase(false);
     }
 
-    // 1. 將當前狀態（包含所有亮燈）推上 Firebase
     function syncToFirebase() {
-      // 本機先立即快取
       localStorage.setItem('cm309_attState', JSON.stringify(attendanceState));
       localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
       localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState));
@@ -595,13 +645,15 @@
       localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
       localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
       localStorage.setItem('cm309_cleanAssign', JSON.stringify(cleanAssignment));
+      localStorage.setItem('cm309_corrBoxes', JSON.stringify(correctionBoxes));
+      localStorage.setItem('cm309_cleanlinessAssign', JSON.stringify(cleanlinessAssignment));
+      localStorage.setItem('cm309_cleanlinessAwarded', JSON.stringify(cleanlinessAwarded));
 
       if (!firebaseDbUrl) return;
 
       clearTimeout(syncDebounceTimer);
       updateCloudBadge('syncing');
 
-      // 600ms 防抖，讓老師連續快速點擊時不會頻繁發送請求
       syncDebounceTimer = setTimeout(() => {
         const payload = {
           attendanceState,
@@ -613,6 +665,9 @@
           petCollection,
           announcements,
           cleanAssignment,
+          correctionBoxes,
+          cleanlinessAssignment,
+          cleanlinessAwarded,
           students
         };
 
@@ -622,9 +677,7 @@
           body: JSON.stringify(payload)
         })
         .then(res => res.json())
-        .then(() => {
-          updateCloudBadge();
-        })
+        .then(() => { updateCloudBadge(); })
         .catch(err => {
           console.error("Firebase 上傳失敗:", err);
           updateCloudBadge();
@@ -632,7 +685,6 @@
       }, 600);
     }
 
-    // 2. 從 Firebase 抓取全班資料（包含所有亮燈與假別）
     function fetchFromFirebase(silent = false) {
       if (!firebaseDbUrl) return;
       updateCloudBadge('syncing');
@@ -651,8 +703,10 @@
             petCollection = data.petCollection || {};
             announcements = data.announcements || [];
             cleanAssignment = data.cleanAssignment || {};
+            if (data.correctionBoxes) correctionBoxes = data.correctionBoxes;
+            cleanlinessAssignment = data.cleanlinessAssignment || {};
+            cleanlinessAwarded = data.cleanlinessAwarded || {};
 
-            // 寫入本機快取
             localStorage.setItem('cm309_students', JSON.stringify(students));
             localStorage.setItem('cm309_attState', JSON.stringify(attendanceState));
             localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
@@ -663,28 +717,397 @@
             localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
             localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
             localStorage.setItem('cm309_cleanAssign', JSON.stringify(cleanAssignment));
+            localStorage.setItem('cm309_corrBoxes', JSON.stringify(correctionBoxes));
+            localStorage.setItem('cm309_cleanlinessAssign', JSON.stringify(cleanlinessAssignment));
+            localStorage.setItem('cm309_cleanlinessAwarded', JSON.stringify(cleanlinessAwarded));
 
-            // 即刻重繪介面（燈號瞬間點亮）
             renderAllGrids();
             renderPetsGrid();
             renderBulletins();
             renderManageBulletins();
             document.getElementById('studentRosterInput').value = students.join('\n');
             updateCloudBadge();
-            if (!silent) alert("✅ 已成功從 Firebase 同步最新狀態與亮燈！");
+            if (!silent) alert("✅ 已成功從 Firebase 同步最新狀態！");
           } else {
             updateCloudBadge();
-            if (!silent) alert("Firebase 資料庫尚為空，請在任一設備點擊燈號或發布公告，將自動建立雲端資料庫！");
           }
         })
         .catch(err => {
           console.error(err);
           updateCloudBadge();
-          if (!silent) alert("連線失敗！請確認 Firebase 規則是否設定為「測試模式」（read 與 write 為 true）。");
         });
     }
 
-    // === 📢 公告管理 ===
+    // === 師生互動區切換 ===
+    function switchInteractiveMode(mode) {
+      currentInteractiveMode = mode;
+      document.querySelectorAll('#tab-interactive .album-chip').forEach(b => b.classList.remove('active'));
+      document.getElementById('btn-sub-' + mode).classList.add('active');
+
+      const title = document.getElementById('currentInteractiveTitleDisplay');
+      const grid = document.getElementById('interactiveGrid');
+      const corrSec = document.getElementById('correctionBoardSection');
+      const cleanSec = document.getElementById('cleanlinessBoardSection');
+      const kanban = document.getElementById('cleanKanban');
+
+      grid.style.display = 'none';
+      corrSec.style.display = 'none';
+      cleanSec.style.display = 'none';
+      kanban.style.display = 'none';
+
+      if (mode === 'hw') {
+        title.textContent = '目前項目：作業繳交';
+        grid.style.display = 'grid';
+      } else if (mode === 'correction') {
+        title.textContent = '目前項目：作業訂正追蹤 (點擊亮綠燈完成)';
+        corrSec.style.display = 'block';
+        renderCorrectionBoard();
+      } else if (mode === 'cleanliness') {
+        title.textContent = '目前項目：整潔大師 (座位整潔評比)';
+        cleanSec.style.display = 'block';
+        renderCleanlinessBoard();
+      } else if (mode === 'clean') {
+        title.textContent = '目前項目：打掃工作';
+        kanban.style.display = 'block';
+        renderCleanKanban();
+      } else {
+        title.textContent = (mode === 'teeth' ? '目前項目：潔牙高手' : '目前項目：漱口水');
+        grid.style.display = 'grid';
+      }
+      renderInteractiveGrid();
+    }
+
+    // === 2. 作業訂正專區 (點擊切換綠燈) ===
+    function renderCorrectionBoard() {
+      const pool = document.getElementById('correctionPool');
+      pool.innerHTML = '';
+      students.forEach((name, i) => {
+        const id = i + 1;
+        const tag = document.createElement('div');
+        tag.className = 'drag-tag';
+        tag.setAttribute('data-seat', id);
+        tag.setAttribute('data-name', name);
+        tag.textContent = `${id}號 ${name}`;
+        pool.appendChild(tag);
+      });
+
+      new Sortable(pool, {
+        group: { name: 'corrGroup', pull: 'clone', put: false },
+        sort: false,
+        animation: 150
+      });
+
+      const boxesContainer = document.getElementById('correctionBoxesContainer');
+      boxesContainer.innerHTML = '';
+      correctionBoxes.forEach((box, bIdx) => {
+        const col = document.createElement('div');
+        col.className = 'clean-col';
+        col.innerHTML = `
+          <div style="display:flex; gap:6px; margin-bottom:8px; align-items:center;">
+            <input type="text" class="form-control" style="font-weight:700; padding:4px 8px; font-size:0.9rem;" value="${box.title}" onchange="updateCorrectionBoxTitle(${bIdx}, this.value)">
+            <button onclick="removeCorrectionBox(${bIdx})" style="background:transparent; border:none; color:#ef4444; cursor:pointer; padding:4px;"><i class="fa-solid fa-trash-can"></i></button>
+          </div>
+          <div class="clean-list" id="corr-box-${box.id}"></div>
+        `;
+        boxesContainer.appendChild(col);
+
+        const listEl = col.querySelector(`#corr-box-${box.id}`);
+        box.students.forEach((st, sIdx) => {
+          const tag = document.createElement('div');
+          const isDone = !!st.done;
+          tag.className = `drag-tag ${isDone ? 'is-corrected' : ''}`;
+          tag.innerHTML = `
+            <span onclick="toggleStudentCorrDone(${bIdx}, ${sIdx})" style="cursor:pointer;">
+              ${isDone ? '🟢 ' : ''}${st.seat}號 ${st.name}${isDone ? ' (已訂正)' : ''}
+            </span>
+            <i class="fa-solid fa-xmark btn-remove-tag" onclick="removeStudentFromCorr(${bIdx}, ${sIdx})"></i>
+          `;
+          listEl.appendChild(tag);
+        });
+
+        new Sortable(listEl, {
+          group: { name: 'corrGroup', pull: true, put: true },
+          animation: 150,
+          onAdd: function (evt) {
+            const seat = evt.item.getAttribute('data-seat');
+            const name = evt.item.getAttribute('data-name');
+            evt.item.remove();
+            if (!box.students.some(s => s.seat == seat)) {
+              box.students.push({ seat, name, done: false });
+              renderCorrectionBoard();
+              syncToFirebase();
+            }
+          }
+        });
+      });
+    }
+
+    // 💡 點擊切換訂正綠燈狀態（不參與寵物加減分）
+    function toggleStudentCorrDone(boxIdx, stIdx) {
+      correctionBoxes[boxIdx].students[stIdx].done = !correctionBoxes[boxIdx].students[stIdx].done;
+      renderCorrectionBoard();
+      syncToFirebase();
+    }
+
+    function addCorrectionBox() {
+      const newId = 'box_' + Date.now();
+      correctionBoxes.push({ id: newId, title: '新作業項目', students: [] });
+      renderCorrectionBoard();
+      syncToFirebase();
+    }
+
+    function removeCorrectionBox(idx) {
+      if (confirm(`確定刪除「${correctionBoxes[idx].title}」分類框嗎？`)) {
+        correctionBoxes.splice(idx, 1);
+        renderCorrectionBoard();
+        syncToFirebase();
+      }
+    }
+
+    function updateCorrectionBoxTitle(idx, val) {
+      correctionBoxes[idx].title = val.trim() || '未命名作業';
+      syncToFirebase();
+    }
+
+    function removeStudentFromCorr(boxIdx, stIdx) {
+      correctionBoxes[boxIdx].students.splice(stIdx, 1);
+      renderCorrectionBoard();
+      syncToFirebase();
+    }
+
+    // === 3. 整潔大師看板 ===
+    function initCleanlinessSortables() {
+      const zones = ['cleanlinessPool', 'zone-clean-tidy', 'zone-clean-chair', 'zone-clean-messy', 'zone-clean-bag', 'zone-clean-align'];
+      zones.forEach(zId => {
+        const el = document.getElementById(zId);
+        if (!el) return;
+        new Sortable(el, {
+          group: 'cleanlinessGroup',
+          animation: 150,
+          onEnd: function (evt) {
+            const seat = evt.item.getAttribute('data-seat');
+            const targetZone = evt.to.id;
+            cleanlinessAssignment[seat] = targetZone;
+
+            if (targetZone === 'zone-clean-tidy') {
+              if (!cleanlinessAwarded[seat]) {
+                addPetXp(seat, 1);
+                cleanlinessAwarded[seat] = true;
+              }
+            } else {
+              if (cleanlinessAwarded[seat]) {
+                addPetXp(seat, -1);
+                delete cleanlinessAwarded[seat];
+              }
+            }
+            syncToFirebase();
+          }
+        });
+      });
+    }
+
+    function renderCleanlinessBoard() {
+      const zones = ['cleanlinessPool', 'zone-clean-tidy', 'zone-clean-chair', 'zone-clean-messy', 'zone-clean-bag', 'zone-clean-align'];
+      zones.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
+      });
+
+      students.forEach((name, i) => {
+        const id = i + 1;
+        const targetZone = cleanlinessAssignment[id] || 'cleanlinessPool';
+        const tag = document.createElement('div');
+        tag.className = 'drag-tag';
+        tag.setAttribute('data-seat', id);
+        tag.textContent = `${id}號 ${name}`;
+        
+        const zoneEl = document.getElementById(targetZone);
+        if (zoneEl) zoneEl.appendChild(tag);
+      });
+    }
+
+    // === 師生互動看板網格與點名 ===
+    function renderInteractiveGrid() {
+      if (currentInteractiveMode === 'clean' || currentInteractiveMode === 'correction' || currentInteractiveMode === 'cleanliness') return;
+      const container = document.getElementById('interactiveGrid'); container.innerHTML = '';
+      students.forEach((name, i) => {
+        const id = i+1; const div = document.createElement('div'); div.className = 'student-btn';
+        if(currentInteractiveMode === 'hw') {
+          const hw = interactiveHwState[id];
+          if(hw) div.classList.add(hw.lightClass);
+          div.innerHTML = `<div class="indicator-lamp"></div><span class="seat">${id}號</span><span class="name">${name}</span><span class="status">${hw ? hw.status : '未登記'}</span>`;
+          div.onclick = () => handleHwClick(id, name);
+        } else {
+          const isLit = (currentInteractiveMode === 'teeth' ? teethLampState[id] : mouthwashLampState[id]);
+          if(isLit) div.classList.add('is-lit');
+          div.innerHTML = `<div class="indicator-lamp"></div><span class="seat">${id}號</span><span class="name">${name}</span><span class="status">${isLit?'已完成':'未完成'}</span>`;
+          div.onclick = () => toggleLamp(id);
+        }
+        container.appendChild(div);
+      });
+    }
+
+    function handleHwClick(seat, name) {
+      if (clickTimeout && lastClickedSeat === seat) {
+        clearTimeout(clickTimeout); clickTimeout = null; lastClickedSeat = null;
+        if(interactiveHwState[seat] && interactiveHwState[seat].lightClass === 'hw-green') addPetXp(seat, -1);
+        delete interactiveHwState[seat]; 
+        renderInteractiveGrid(); 
+        syncToFirebase();
+        return;
+      }
+      lastClickedSeat = seat;
+      clickTimeout = setTimeout(() => {
+        clickTimeout = null; lastClickedSeat = null; currentSelectedStudent = { seat, name };
+        document.getElementById('missingInputArea').style.display = 'none'; document.getElementById('hwMissingText').value = '';
+        document.getElementById('hwStatusModal').classList.add('active');
+      }, 250);
+    }
+    
+    function applyHwStatus(status, lightCls) {
+      const seat = currentSelectedStudent.seat; const oldState = interactiveHwState[seat];
+      const wasGreen = oldState && oldState.lightClass === 'hw-green'; const isGreen = lightCls === 'hw-green';
+      if (!wasGreen && isGreen) addPetXp(seat, 1);
+      if (wasGreen && !isGreen) addPetXp(seat, -1);
+      interactiveHwState[seat] = { status, lightClass: lightCls };
+      closeHwModal(); 
+      renderInteractiveGrid();
+      syncToFirebase();
+    }
+    
+    function resetSingleStudentHw() {
+      const seat = currentSelectedStudent.seat;
+      if(interactiveHwState[seat] && interactiveHwState[seat].lightClass === 'hw-green') addPetXp(seat, -1);
+      delete interactiveHwState[seat]; 
+      closeHwModal(); 
+      renderInteractiveGrid(); 
+      syncToFirebase();
+    }
+    function showMissingInput() { document.getElementById('missingInputArea').style.display = 'block'; }
+    function submitMissingHw() {
+      const txt = document.getElementById('hwMissingText').value.trim();
+      if(!txt) return alert("請輸入缺交項目！");
+      applyHwStatus(`缺項(${txt})`, 'hw-teal');
+    }
+    function closeHwModal() { document.getElementById('hwStatusModal').classList.remove('active'); }
+
+    function toggleLamp(seat) {
+      let isOn = false;
+      if (currentInteractiveMode === 'clean') { cleanLampState[seat] = !cleanLampState[seat]; isOn = cleanLampState[seat]; }
+      else if (currentInteractiveMode === 'teeth') { teethLampState[seat] = !teethLampState[seat]; isOn = teethLampState[seat]; }
+      else if (currentInteractiveMode === 'mouthwash') { mouthwashLampState[seat] = !mouthwashLampState[seat]; isOn = mouthwashLampState[seat]; }
+      if (isOn) addPetXp(seat, 1); else addPetXp(seat, -1);
+      renderInteractiveGrid();
+      syncToFirebase();
+    }
+
+    function initSortables() {
+      const zones = ['zone-unassigned', 'zone-classroom', 'zone-corridor', 'zone-mop', 'zone-window', 'zone-blackboard', 'zone-trash'];
+      zones.forEach(z => {
+        const el = document.getElementById(z);
+        if (!el) return;
+        new Sortable(el, {
+          group: 'clean', animation: 150, delay: 200, delayOnTouchOnly: true,
+          onEnd: function(evt) {
+            const seat = evt.item.getAttribute('data-seat');
+            cleanAssignment[seat] = evt.to.id;
+            syncToFirebase();
+          }
+        });
+      });
+    }
+
+    function renderCleanKanban() {
+      const zones = ['zone-unassigned', 'zone-classroom', 'zone-corridor', 'zone-mop', 'zone-window', 'zone-blackboard', 'zone-trash'];
+      zones.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
+      });
+
+      students.forEach((name, i) => {
+        const id = i+1; const targetZone = cleanAssignment[id] || 'zone-unassigned'; const isLit = !!cleanLampState[id];
+        const div = document.createElement('div'); div.className = `student-btn ${isLit ? 'is-lit' : ''}`;
+        div.style.padding = '8px'; div.style.width = '75px'; div.setAttribute('data-seat', id);
+        div.innerHTML = `<div class="indicator-lamp"></div><div class="name" style="font-size:0.9rem;">${name}</div>`;
+        div.onclick = (e) => { if(e.detail === 0) return; toggleLamp(id); }; 
+        const zoneEl = document.getElementById(targetZone); if(zoneEl) zoneEl.appendChild(div);
+      });
+    }
+
+    function resetCurrentInteractive() {
+      if(confirm("確定重整當前項目的紀錄？")) {
+        if(currentInteractiveMode === 'hw') interactiveHwState = {};
+        else if(currentInteractiveMode === 'clean') cleanLampState = {};
+        else if(currentInteractiveMode === 'teeth') teethLampState = {};
+        else if(currentInteractiveMode === 'mouthwash') mouthwashLampState = {};
+        else if(currentInteractiveMode === 'correction') {
+          correctionBoxes.forEach(b => b.students = []);
+          renderCorrectionBoard();
+        } else if(currentInteractiveMode === 'cleanliness') {
+          cleanlinessAssignment = {};
+          cleanlinessAwarded = {};
+          renderCleanlinessBoard();
+        }
+        renderInteractiveGrid();
+        syncToFirebase();
+      }
+    }
+
+    function uploadInteractiveBatch() {
+      let detailText = "";
+      if(currentInteractiveMode === 'hw') {
+        let stats = {"已繳交":0, "忘記帶回家":0, "未完成":0, "忘記帶來學校":0};
+        let missingList = [];
+        students.forEach((n,i) => {
+          const st = interactiveHwState[i+1] ? interactiveHwState[i+1].status : "未登記";
+          if(st.includes("缺項")) missingList.push(`${i+1}號 ${n}(${st})`);
+          else if(stats[st] !== undefined) stats[st]++;
+          else if(st !== "未登記") missingList.push(`${i+1}號 ${n}(${st})`);
+          if(["忘記帶回家", "未完成", "忘記帶來學校"].includes(st)) missingList.push(`${i+1}號 ${n}(${st})`);
+        });
+        detailText = `已繳交:${stats["已繳交"]}、缺/未帶:${missingList.length}。 ${missingList.length>0 ? '需追蹤:'+missingList.join('、') : ''}`;
+        sendToSheets({ category: "作業繳交(總表)", student: "全班", detail: detailText });
+      } else if(currentInteractiveMode === 'correction') {
+        let boxSummaries = correctionBoxes.map(b => {
+          let doneList = b.students.filter(s => s.done).map(s => s.name);
+          let undoneList = b.students.filter(s => !s.done).map(s => s.name);
+          return `${b.title} [已訂正:${doneList.join('、')||'無'}, 未訂正:${undoneList.join('、')||'無'}]`;
+        });
+        detailText = boxSummaries.join(' | ');
+        sendToSheets({ category: "作業訂正追蹤", student: "全班", detail: detailText });
+      } else if(currentInteractiveMode === 'cleanliness') {
+        let tidyStudents = students.filter((_, i) => cleanlinessAssignment[i+1] === 'zone-clean-tidy');
+        detailText = `整潔達標: ${tidyStudents.join('、') || '無'}`;
+        sendToSheets({ category: "整潔大師評比", student: "全班", detail: detailText });
+      } else {
+        const actionMap = { clean: "打掃工作", teeth: "潔牙高手", mouthwash: "漱口水" };
+        let lamp = (currentInteractiveMode === 'clean') ? cleanLampState : ((currentInteractiveMode === 'teeth') ? teethLampState : mouthwashLampState);
+        let notDone = students.map((n,i)=>({id:i+1})).filter(s => !lamp[s.id]).map(s=>`${s.id}號`);
+        detailText = notDone.length > 0 ? `未完成: ${notDone.join('、')}` : '全員完成！';
+        sendToSheets({ category: actionMap[currentInteractiveMode], student: "全班", detail: detailText });
+      }
+      alert(`已彙整上傳至 Google 試算表！\n\n${detailText}`);
+    }
+
+    // === 點名功能 ===
+    function renderAttendanceGrid() {
+      const container = document.getElementById('attendanceGrid'); container.innerHTML = '';
+      students.forEach((name, i) => {
+        const id = i+1; const st = attendanceState[id] || '出席'; let cls = '';
+        if(st==='出席') cls='att-present'; else if(st==='病假') cls='att-sick'; else if(st==='事假') cls='att-absent'; else cls='att-late';
+        container.innerHTML += `<div class="student-btn ${cls}" onclick="attendanceState[${id}] = ['出席','事假','病假','遲到'][ (['出席','事假','病假','遲到'].indexOf(attendanceState[${id}]||'出席')+1)%4 ]; renderAttendanceGrid(); syncToFirebase();">
+          <span class="seat">${id}號</span><span class="name">${name}</span><span class="status">${st}</span></div>`;
+      });
+    }
+    function resetAttendance() { if(confirm("確定重整為全數出席？")) { attendanceState = {}; renderAttendanceGrid(); syncToFirebase(); } }
+    function uploadAttendanceBatch() {
+      let abnormal = [], present = 0;
+      students.forEach((n, i) => { let st = attendanceState[i+1] || '出席'; if(st === '出席') present++; else abnormal.push(`${i+1}號 ${n}(${st})`); });
+      let txt = `應到${students.length}人，實到${present}人。${abnormal.length>0 ? '請假:'+abnormal.join('、') : '全班到齊！'}`;
+      sendToSheets({ category: "每日點名", student: "全班", detail: txt }); alert(`已上傳至 Google 試算表！\n${txt}`);
+    }
+
+    // === 公告管理 ===
     function renderBulletins() {
       const container = document.getElementById('bulletinListContainer'); container.innerHTML = '';
       if (announcements.length === 0) return container.innerHTML = '<li style="padding:16px; color:#94a3b8; text-align:center;">目前尚無公告</li>';
@@ -707,17 +1130,14 @@
       const anno = announcements[index];
       document.getElementById('annoTitle').textContent = anno.title;
       document.getElementById('annoContent').textContent = anno.content;
-      
       const imgContainer = document.getElementById('annoImgContainer');
       const imgEl = document.getElementById('annoImg');
-      
       if (anno.imgSrc) {
         imgEl.src = anno.imgSrc;
         imgContainer.style.display = 'block';
       } else {
         imgContainer.style.display = 'none';
       }
-      
       document.getElementById('announcementModal').classList.add('active');
     }
 
@@ -752,7 +1172,6 @@
             if (w > 500) { h *= 500 / w; w = 500; }
             canvas.width = w; canvas.height = h;
             canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-            
             const compressedImg = canvas.toDataURL('image/jpeg', 0.6);
             saveAnnoAndSync(dept, title, content, compressedImg);
           };
@@ -765,19 +1184,11 @@
     }
 
     function saveAnnoAndSync(dept, title, content, imgSrc) {
-      announcements.unshift({
-        id: Date.now(),
-        dept: dept,
-        title: title,
-        content: content,
-        imgSrc: imgSrc
-      });
-
+      announcements.unshift({ id: Date.now(), dept, title, content, imgSrc });
       document.getElementById('newAnnoDept').value = '';
       document.getElementById('newAnnoTitle').value = '';
       document.getElementById('newAnnoContent').value = '';
       document.getElementById('newAnnoImageFile').value = '';
-
       renderBulletins();
       renderManageBulletins();
       alert('✅ 公告發佈成功！');
@@ -819,7 +1230,6 @@
           const isMystery = p.stage === 1;
           const isCompleted = p.stage > 3;
           const emoji = isMystery ? '🥚' : cat.stages[Math.min(p.stage - 1, 2)];
-          
           let stageName = isCompleted ? '圓滿成長' : (p.stage===1?'蛋':(p.stage===2?'幼體':'成體'));
           let progressPercent = isCompleted ? 100 : Math.floor((p.xp / PET_REQ[p.stage - 1]) * 100);
           
@@ -835,7 +1245,6 @@
       currentSelectedStudent = { seat, name };
       const p = petState[seat];
       document.getElementById('petModalTitle').textContent = `${seat}號 ${name} 的寵物`;
-      
       const manageView = document.getElementById('petManageView');
       const selectView = document.getElementById('petSelectView');
       const gardenView = document.getElementById('petGardenView');
@@ -854,7 +1263,6 @@
         const cat = PET_CATALOG.find(c => c.id === p.petId);
         const isMystery = p.stage === 1;
         const isCompleted = p.stage > 3;
-
         document.getElementById('petModalEmoji').textContent = isMystery ? '🥚' : cat.stages[Math.min(p.stage - 1, 2)];
         document.getElementById('petModalEmoji').className = `pet-emoji s${Math.min(p.stage, 4)}`;
         
@@ -913,7 +1321,7 @@
     }
 
     function resetAllPets() {
-      if(confirm("⚠️ 警告：確定要刪除全班寵物與寵物園嗎？")) {
+      if(confirm("⚠️️ 警告：確定要刪除全班寵物與寵物園嗎？")) {
         petState = {}; petCollection = {};
         alert("✅ 全班寵物紀錄已清除！");
         if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
@@ -922,171 +1330,6 @@
     }
 
     function closePetModal() { document.getElementById('petManageModal').classList.remove('active'); }
-
-    // === 師生互動區 (點擊即觸發 Firebase 燈號同步) ===
-    function switchInteractiveMode(mode) {
-      currentInteractiveMode = mode;
-      document.querySelectorAll('#tab-interactive .album-chip').forEach(b => b.classList.remove('active'));
-      document.getElementById('btn-sub-'+mode).classList.add('active');
-      const title = document.getElementById('currentInteractiveTitleDisplay'), grid = document.getElementById('interactiveGrid'), kanban = document.getElementById('cleanKanban');
-      if(mode === 'hw') { title.textContent='目前：作業繳交'; grid.style.display='grid'; kanban.style.display='none'; }
-      else if(mode === 'clean') { title.textContent='目前：打掃工作'; grid.style.display='none'; kanban.style.display='block'; }
-      else { title.textContent=(mode==='teeth'?'目前：潔牙高手':'目前：漱口水'); grid.style.display='grid'; kanban.style.display='none'; }
-      renderInteractiveGrid();
-    }
-
-    function renderInteractiveGrid() {
-      if(currentInteractiveMode === 'clean') { renderCleanKanban(); return; }
-      const container = document.getElementById('interactiveGrid'); container.innerHTML = '';
-      students.forEach((name, i) => {
-        const id = i+1; const div = document.createElement('div'); div.className = 'student-btn';
-        if(currentInteractiveMode === 'hw') {
-          const hw = interactiveHwState[id];
-          if(hw) div.classList.add(hw.lightClass);
-          div.innerHTML = `<div class="indicator-lamp"></div><span class="seat">${id}號</span><span class="name">${name}</span><span class="status">${hw ? hw.status : '未登記'}</span>`;
-          div.onclick = () => handleHwClick(id, name);
-        } else {
-          const isLit = (currentInteractiveMode === 'teeth' ? teethLampState[id] : mouthwashLampState[id]);
-          if(isLit) div.classList.add('is-lit');
-          div.innerHTML = `<div class="indicator-lamp"></div><span class="seat">${id}號</span><span class="name">${name}</span><span class="status">${isLit?'已完成':'未完成'}</span>`;
-          div.onclick = () => toggleLamp(id);
-        }
-        container.appendChild(div);
-      });
-    }
-
-    function handleHwClick(seat, name) {
-      if (clickTimeout && lastClickedSeat === seat) {
-        clearTimeout(clickTimeout); clickTimeout = null; lastClickedSeat = null;
-        if(interactiveHwState[seat] && interactiveHwState[seat].lightClass === 'hw-green') addPetXp(seat, -1);
-        delete interactiveHwState[seat]; 
-        renderInteractiveGrid(); 
-        syncToFirebase(); // 💡 觸發燈號同步
-        return;
-      }
-      lastClickedSeat = seat;
-      clickTimeout = setTimeout(() => {
-        clickTimeout = null; lastClickedSeat = null; currentSelectedStudent = { seat, name };
-        document.getElementById('missingInputArea').style.display = 'none'; document.getElementById('hwMissingText').value = '';
-        document.getElementById('hwStatusModal').classList.add('active');
-      }, 250);
-    }
-    
-    function applyHwStatus(status, lightCls) {
-      const seat = currentSelectedStudent.seat; const oldState = interactiveHwState[seat];
-      const wasGreen = oldState && oldState.lightClass === 'hw-green'; const isGreen = lightCls === 'hw-green';
-      if (!wasGreen && isGreen) addPetXp(seat, 1);
-      if (wasGreen && !isGreen) addPetXp(seat, -1);
-      interactiveHwState[seat] = { status, lightClass: lightCls };
-      closeHwModal(); 
-      renderInteractiveGrid();
-      syncToFirebase(); // 💡 觸發燈號同步
-    }
-    
-    function resetSingleStudentHw() {
-      const seat = currentSelectedStudent.seat;
-      if(interactiveHwState[seat] && interactiveHwState[seat].lightClass === 'hw-green') addPetXp(seat, -1);
-      delete interactiveHwState[seat]; 
-      closeHwModal(); 
-      renderInteractiveGrid(); 
-      syncToFirebase();
-    }
-    function showMissingInput() { document.getElementById('missingInputArea').style.display = 'block'; }
-    function submitMissingHw() {
-      const txt = document.getElementById('hwMissingText').value.trim();
-      if(!txt) return alert("請輸入缺交項目！");
-      applyHwStatus(`缺項(${txt})`, 'hw-teal');
-    }
-    function closeHwModal() { document.getElementById('hwStatusModal').classList.remove('active'); }
-
-    function toggleLamp(seat) {
-      let isOn = false;
-      if (currentInteractiveMode === 'clean') { cleanLampState[seat] = !cleanLampState[seat]; isOn = cleanLampState[seat]; }
-      else if (currentInteractiveMode === 'teeth') { teethLampState[seat] = !teethLampState[seat]; isOn = teethLampState[seat]; }
-      else if (currentInteractiveMode === 'mouthwash') { mouthwashLampState[seat] = !mouthwashLampState[seat]; isOn = mouthwashLampState[seat]; }
-      if (isOn) addPetXp(seat, 1); else addPetXp(seat, -1);
-      renderInteractiveGrid();
-      syncToFirebase(); // 💡 觸發燈號同步
-    }
-
-    function initSortables() {
-      const zones = ['zone-unassigned', 'zone-classroom', 'zone-corridor', 'zone-mop', 'zone-window', 'zone-blackboard', 'zone-trash'];
-      zones.forEach(z => {
-        new Sortable(document.getElementById(z), {
-          group: 'clean', animation: 150, delay: 200, delayOnTouchOnly: true,
-          onEnd: function(evt) {
-            const seat = evt.item.getAttribute('data-seat');
-            cleanAssignment[seat] = evt.to.id;
-            syncToFirebase();
-          }
-        });
-      });
-    }
-
-    function renderCleanKanban() {
-      document.querySelectorAll('.clean-list').forEach(el => el.innerHTML = '');
-      students.forEach((name, i) => {
-        const id = i+1; const targetZone = cleanAssignment[id] || 'zone-unassigned'; const isLit = !!cleanLampState[id];
-        const div = document.createElement('div'); div.className = `student-btn ${isLit ? 'is-lit' : ''}`;
-        div.style.padding = '8px'; div.style.width = '75px'; div.setAttribute('data-seat', id);
-        div.innerHTML = `<div class="indicator-lamp"></div><div class="name" style="font-size:0.9rem;">${name}</div>`;
-        div.onclick = (e) => { if(e.detail === 0) return; toggleLamp(id); }; 
-        const zoneEl = document.getElementById(targetZone); if(zoneEl) zoneEl.appendChild(div);
-      });
-    }
-
-    function resetCurrentInteractive() {
-      if(confirm("清除畫面亮燈記錄？")) {
-        if(currentInteractiveMode === 'hw') interactiveHwState = {};
-        else if(currentInteractiveMode === 'clean') cleanLampState = {};
-        else if(currentInteractiveMode === 'teeth') teethLampState = {};
-        else mouthwashLampState = {};
-        renderInteractiveGrid();
-        syncToFirebase();
-      }
-    }
-
-    function uploadInteractiveBatch() {
-      let detailText = "";
-      if(currentInteractiveMode === 'hw') {
-        let stats = {"已繳交":0, "要訂正":0, "訂正完成":0, "忘記帶回家":0, "未完成":0, "忘記帶來學校":0};
-        let missingList = [];
-        students.forEach((n,i) => {
-          const st = interactiveHwState[i+1] ? interactiveHwState[i+1].status : "未登記";
-          if(st.includes("缺項")) missingList.push(`${i+1}號 ${n}(${st})`);
-          else if(stats[st] !== undefined) stats[st]++;
-          else if(st !== "未登記") missingList.push(`${i+1}號 ${n}(${st})`);
-          if(["要訂正", "忘記帶回家", "未完成", "忘記帶來學校"].includes(st)) missingList.push(`${i+1}號 ${n}(${st})`);
-        });
-        detailText = `已繳交:${stats["已繳交"]}、訂正完:${stats["訂正完成"]}、缺/未帶:${missingList.length}。 ${missingList.length>0 ? '需追蹤:'+missingList.join('、') : ''}`;
-        sendToSheets({ category: "作業繳交(總表)", student: "全班", detail: detailText });
-      } else {
-        const actionMap = { clean: "打掃工作", teeth: "潔牙高手", mouthwash: "漱口水" };
-        let lamp = (currentInteractiveMode === 'clean') ? cleanLampState : ((currentInteractiveMode === 'teeth') ? teethLampState : mouthwashLampState);
-        let notDone = students.map((n,i)=>({id:i+1})).filter(s => !lamp[s.id]).map(s=>`${s.id}號`);
-        detailText = notDone.length > 0 ? `未完成: ${notDone.join('、')}` : '全員完成！';
-        sendToSheets({ category: actionMap[currentInteractiveMode], student: "全班", detail: detailText });
-      }
-      alert(`已彙整上傳至 Google 試算表！\n\n${detailText}`);
-    }
-
-    // === 點名功能 (點擊即觸發 Firebase 燈號同步) ===
-    function renderAttendanceGrid() {
-      const container = document.getElementById('attendanceGrid'); container.innerHTML = '';
-      students.forEach((name, i) => {
-        const id = i+1; const st = attendanceState[id] || '出席'; let cls = '';
-        if(st==='出席') cls='att-present'; else if(st==='病假') cls='att-sick'; else if(st==='事假') cls='att-absent'; else cls='att-late';
-        container.innerHTML += `<div class="student-btn ${cls}" onclick="attendanceState[${id}] = ['出席','事假','病假','遲到'][ (['出席','事假','病假','遲到'].indexOf(attendanceState[${id}]||'出席')+1)%4 ]; renderAttendanceGrid(); syncToFirebase();">
-          <span class="seat">${id}號</span><span class="name">${name}</span><span class="status">${st}</span></div>`;
-      });
-    }
-    function resetAttendance() { if(confirm("確定重整為全數出席？")) { attendanceState = {}; renderAttendanceGrid(); syncToFirebase(); } }
-    function uploadAttendanceBatch() {
-      let abnormal = [], present = 0;
-      students.forEach((n, i) => { let st = attendanceState[i+1] || '出席'; if(st === '出席') present++; else abnormal.push(`${i+1}號 ${n}(${st})`); });
-      let txt = `應到${students.length}人，實到${present}人。${abnormal.length>0 ? '請假:'+abnormal.join('、') : '全班到齊！'}`;
-      sendToSheets({ category: "每日點名", student: "全班", detail: txt }); alert(`已上傳至 Google 試算表！\n${txt}`);
-    }
 
     // === 相簿功能 ===
     function openPhotoModal() { document.getElementById('photoUploadModal').classList.add('active'); }
