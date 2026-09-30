@@ -129,38 +129,41 @@
     .bulletin-badge { font-size: 0.72rem; padding: 3px 6px; border-radius: 4px; background: #fee2e2; color: #b91c1c; margin-right: 6px; }
     .bulletin-has-img { font-size: 0.75rem; color: #2563eb; margin-left: 6px; }
     
-    /* 💡 公告照片容器與提示優化 */
+    /* 💡 高畫質呈現容器 */
     .anno-img-container {
-      width: 100%; max-height: 50vh; border-radius: 8px; overflow: hidden;
+      width: 100%; max-height: 60vh; border-radius: 8px; overflow: hidden;
       margin-bottom: 12px; border: 1px solid var(--border); position: relative;
       background: #0f172a; display: flex; justify-content: center; align-items: center; cursor: zoom-in;
     }
-    .anno-img-container img { width: 100%; height: 100%; max-height: 50vh; object-fit: contain; }
+    .anno-img-container img {
+      width: auto; height: auto; max-width: 100%; max-height: 60vh;
+      object-fit: contain; image-rendering: -webkit-optimize-contrast;
+    }
     .anno-img-hint {
-      position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.65);
-      color: #fff; font-size: 0.72rem; padding: 3px 8px; border-radius: 4px; pointer-events: none;
+      position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.7);
+      color: #fff; font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; pointer-events: none;
     }
 
-    /* 💡 全螢幕大圖燈箱 Modal */
+    /* 💡 2K 超清燈箱 */
     #imageViewerModal {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 200;
-      display: none; justify-content: center; align-items: center; padding: 12px;
-      backdrop-filter: blur(4px); cursor: zoom-out;
+      position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 200;
+      display: none; justify-content: center; align-items: center; padding: 10px;
+      backdrop-filter: blur(6px); cursor: zoom-out;
     }
     #imageViewerModal.active { display: flex; animation: fadeIn 0.15s; }
     #imageViewerModal img {
-      max-width: 96vw; max-height: 94vh; object-fit: contain; border-radius: 6px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      max-width: 98vw; max-height: 96vh; object-fit: contain; border-radius: 4px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.7); image-rendering: -webkit-optimize-contrast;
     }
     #imageViewerModal .close-btn {
-      position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.25);
-      border: none; color: #fff; font-size: 1.5rem; width: 40px; height: 40px;
+      position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.3);
+      border: none; color: #fff; font-size: 1.5rem; width: 44px; height: 44px;
       border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center;
     }
 
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; padding: 16px; }
     .modal-overlay.active { display: flex; animation: fadeIn 0.15s; }
-    .modal-box { background: #fff; border-radius: var(--radius); width: 100%; max-width: 500px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto;}
+    .modal-box { background: #fff; border-radius: var(--radius); width: 100%; max-width: 520px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto;}
     .modal-options { display: flex; flex-direction: column; gap: 8px; }
     .opt-btn { padding: 12px; border-radius: 8px; border: 1.5px solid var(--border); background: #fff; text-align: left; font-size: 0.95rem; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px; }
 
@@ -237,7 +240,7 @@
         <button class="album-chip active" id="btn-sub-hw" onclick="switchInteractiveMode('hw')">1.作業繳交</button>
         <button class="album-chip" id="btn-sub-correction" onclick="switchInteractiveMode('correction')">2.作業訂正</button>
         <button class="album-chip" id="btn-sub-cleanliness" onclick="switchInteractiveMode('cleanliness')">3.整潔大師</button>
-        <button class="album-chip" id="btn-sub-clean" onclick="switchInteractiveMode('clean')">4.打掃工作</button>
+        <button class="album-chip" id="btn-sub-clean" onclick="switchInteractiveMode('clean')">4.打掃除工作</button>
         <button class="album-chip" id="btn-sub-teeth" onclick="switchInteractiveMode('teeth')">5.潔牙高手</button>
         <button class="album-chip" id="btn-sub-mouthwash" onclick="switchInteractiveMode('mouthwash')">6.漱口水</button>
       </div>
@@ -377,7 +380,7 @@
             <i class="fa-solid fa-rotate"></i> 重新整理公告
           </button>
         </div>
-        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">點擊公告標題即可查看詳細內容；點擊照片可放大全螢幕檢視。</p>
+        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">點擊公告標題即可查看詳細內容；點擊照片可放大 2K 超高清全螢幕檢視。</p>
         <ul class="bulletin-list" id="bulletinListContainer"></ul>
       </div>
     </section>
@@ -405,7 +408,7 @@
           <textarea id="newAnnoContent" class="form-control" rows="3" style="margin-bottom:8px;" placeholder="詳細說明內容..." required></textarea>
           
           <div class="form-group" style="margin-bottom:8px;">
-            <label style="font-size:0.8rem; font-weight:600; color:#475569;">📷 附上海報或照片 (選填，自動壓縮)：</label>
+            <label style="font-size:0.8rem; font-weight:600; color:#475569;">📷 附上海報或照片 (高清還原)：</label>
             <input type="file" id="newAnnoImageFile" class="form-control" accept="image/*" style="padding:6px;">
           </div>
 
@@ -533,10 +536,9 @@
     <div class="modal-box">
       <h3 id="annoTitle" style="margin-bottom:10px;">公告標題</h3>
       
-      <!-- 點擊可放大全螢幕檢視 -->
       <div id="annoImgContainer" class="anno-img-container" style="display:none;" onclick="openImageViewer(document.getElementById('annoImg').src)">
         <img id="annoImg" src="" alt="公告附圖">
-        <span class="anno-img-hint"><i class="fa-solid fa-magnifying-glass-plus"></i> 點擊放大全圖</span>
+        <span class="anno-img-hint"><i class="fa-solid fa-magnifying-glass-plus"></i> 點擊放大 2K 超清全圖</span>
       </div>
 
       <p id="annoContent" style="margin:14px 0; font-size:0.95rem; line-height:1.6; color:#475569; white-space:pre-wrap;"></p>
@@ -544,7 +546,7 @@
     </div>
   </div>
 
-  <!-- 💡 全螢幕大圖燈箱 Modal -->
+  <!-- 💡 超清全螢幕大圖燈箱 Modal -->
   <div id="imageViewerModal" onclick="closeImageViewer()">
     <button class="close-btn" onclick="closeImageViewer()"><i class="fa-solid fa-xmark"></i></button>
     <img id="imageViewerImg" src="" alt="全螢幕照片">
@@ -1241,7 +1243,7 @@
 
     function closeAnnouncementModal() { document.getElementById('announcementModal').classList.remove('active'); }
 
-    // 💡 全螢幕大圖開關
+    // 💡 2K 超清全螢幕大圖開關
     function openImageViewer(src) {
       if(!src) return;
       document.getElementById('imageViewerImg').src = src;
@@ -1263,6 +1265,7 @@
       });
     }
 
+    // 💡 升級：2048px (2K 超清) 高畫質壓縮引擎
     function handleCreateAnnouncement(e) {
       e.preventDefault();
       const dept = document.getElementById('newAnnoDept').value.trim();
@@ -1277,11 +1280,25 @@
           img.onload = () => {
             const canvas = document.createElement('canvas');
             let w = img.width, h = img.height;
-            // 提升清晰度至 700px，字體更清晰
-            if (w > 700) { h *= 700 / w; w = 700; }
+            // 💡 上限提升至 2048px (2K 高清)，保留細小文字清晰度
+            const MAX_DIM = 2048;
+            if (w > MAX_DIM || h > MAX_DIM) {
+              if (w > h) {
+                h = Math.round((h * MAX_DIM) / w);
+                w = MAX_DIM;
+              } else {
+                w = Math.round((w * MAX_DIM) / h);
+                h = MAX_DIM;
+              }
+            }
             canvas.width = w; canvas.height = h;
-            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-            const compressedImg = canvas.toDataURL('image/jpeg', 0.65);
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, 0, 0, w, h);
+            
+            // 💡 提升畫質至 0.88，字體銳利無毛邊
+            const compressedImg = canvas.toDataURL('image/jpeg', 0.88);
             saveAnnoAndSync(dept, title, content, compressedImg);
           };
           img.src = event.target.result;
@@ -1300,7 +1317,7 @@
       document.getElementById('newAnnoImageFile').value = '';
       renderBulletins();
       renderManageBulletins();
-      alert('✅ 公告發佈成功！');
+      alert('✅ 高清公告發佈成功！');
       syncToFirebase();
     }
 
@@ -1453,9 +1470,9 @@
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas'); let w = img.width, h = img.height;
-          if(w>h) { if(w>500) { h*=500/w; w=500; } } else { if(h>500) { w*=500/h; h=500; } }
+          if(w>h) { if(w>1024) { h*=1024/w; w=1024; } } else { if(h>1024) { w*=1024/h; h=1024; } }
           canvas.width=w; canvas.height=h; canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-          try { albums.unshift({ cat, desc, src: canvas.toDataURL('image/jpeg', 0.6) }); localStorage.setItem('cm309_albums', JSON.stringify(albums));
+          try { albums.unshift({ cat, desc, src: canvas.toDataURL('image/jpeg', 0.8) }); localStorage.setItem('cm309_albums', JSON.stringify(albums));
             document.getElementById('photoUploadModal').classList.remove('active'); renderAlbum('全部活動'); alert("已儲存！");
           } catch(err) { alert("容量滿，請刪除舊照片。"); albums.shift(); }
         }; img.src = e.target.result;
