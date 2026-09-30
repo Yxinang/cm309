@@ -99,16 +99,30 @@
     .clean-list { flex-grow: 1; min-height: 80px; display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
     .sortable-ghost { opacity: 0.4; background: #e2e8f0; }
 
+    /* 💡 每 10 格換一行的座號池網格排版 */
+    .ten-col-pool {
+      display: grid !important;
+      grid-template-columns: repeat(10, 1fr) !important;
+      gap: 6px !important;
+      width: 100% !important;
+    }
+    @media (max-width: 768px) {
+      .ten-col-pool {
+        grid-template-columns: repeat(5, 1fr) !important; /* 手機螢幕自動改為 5 欄 */
+      }
+    }
+
     .drag-tag {
       background: #fff; border: 1px solid var(--border); border-radius: 6px;
-      padding: 6px 12px; font-size: 0.88rem; font-weight: 700; display: inline-flex;
-      align-items: center; gap: 6px; cursor: grab; user-select: none; transition: all 0.15s;
+      padding: 6px 4px; font-size: 0.88rem; font-weight: 700; display: inline-flex;
+      justify-content: center; align-items: center; gap: 4px; cursor: grab; user-select: none; transition: all 0.15s;
+      text-align: center;
     }
     .drag-tag .btn-remove-tag { color: #ef4444; cursor: pointer; font-size: 0.75rem; margin-left: 2px; }
     
     .drag-tag.is-corrected {
       background: #dcfce7 !important; border-color: #16a34a !important; color: #15803d !important;
-      box-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.3); opacity: 0.85;
     }
 
     .form-group { margin-bottom: 12px; }
@@ -258,14 +272,14 @@
         <div id="correctionBoardSection" style="display:none;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
             <p style="font-size:0.85rem; color:#64748b;">
-              <i class="fa-solid fa-circle-info"></i> 從下方拖曳座號至各訂正項目。<strong>點擊座號可切換綠燈（已訂正完成）</strong>，不影響寵物分數。
+              <i class="fa-solid fa-circle-info"></i> 每 10 格自動換行。<strong>點擊座號切換綠燈，已完成訂正者會自動沉到最下方</strong>。
             </p>
             <button class="btn-upload" style="background:#2563eb; font-size:0.8rem; padding:5px 12px;" onclick="addCorrectionBox()"><i class="fa-solid fa-plus"></i> 新增訂正分類框</button>
           </div>
           <div class="clean-board full" style="margin-bottom:12px;">
             <div class="clean-col" style="background:#eff6ff; border-color:#93c5fd; min-height:80px;">
-              <h4 style="color:#1e40af; border-bottom-color:#bfdbfe;">📋 全班座號池 (可重複拖出)</h4>
-              <div class="clean-list" id="correctionPool"></div>
+              <h4 style="color:#1e40af; border-bottom-color:#bfdbfe;">📋 全班座號池 (每行 10 格，可重複拖出)</h4>
+              <div class="clean-list ten-col-pool" id="correctionPool"></div>
             </div>
           </div>
           <div class="clean-board" id="correctionBoxesContainer"></div>
@@ -550,14 +564,12 @@
   </div>
 
   <script>
-    // 💡 預設名單直接採用純「座號」
     const DEFAULT_STUDENTS = [
       "1號", "2號", "3號", "4號", "5號", "6號", "7號", "8號", "9號", "10號",
       "11號", "12號", "13號", "14號", "15號", "16號", "17號", "18號", "19號", "20號",
       "21號", "22號", "23號", "24號", "25號"
     ];
 
-    // 💡 內建最新寵物分數保底庫（完全保留您的最新記錄）
     const INITIAL_PETS = {
       1: { petId: 'cat', stage: 1, xp: 12 },
       2: { petId: 'dog', stage: 1, xp: 11 },
@@ -597,7 +609,6 @@
     ];
     const PET_REQ = [20, 30, 40]; 
 
-    // 強制將含有名字的名單格式化為純座號
     let storedStudents = JSON.parse(localStorage.getItem('cm309_students'));
     if (!storedStudents || storedStudents.length !== 25 || storedStudents[0].includes("黃")) {
       storedStudents = DEFAULT_STUDENTS;
@@ -841,7 +852,7 @@
         title.textContent = '目前項目：作業繳交';
         grid.style.display = 'grid';
       } else if (mode === 'correction') {
-        title.textContent = '目前項目：作業訂正追蹤 (點擊切換綠燈)';
+        title.textContent = '目前項目：作業訂正追蹤 (10格換行，完成自動沉底)';
         corrSec.style.display = 'block';
         renderCorrectionBoard();
       } else if (mode === 'cleanliness') {
@@ -859,7 +870,7 @@
       renderInteractiveGrid();
     }
 
-    // === 2. 作業訂正專區 (純座號顯示) ===
+    // === 2. 作業訂正專區 (10 格換行 + 完成自動沉底) ===
     function renderCorrectionBoard() {
       const pool = document.getElementById('correctionPool');
       pool.innerHTML = '';
@@ -882,6 +893,9 @@
       const boxesContainer = document.getElementById('correctionBoxesContainer');
       boxesContainer.innerHTML = '';
       correctionBoxes.forEach((box, bIdx) => {
+        // 💡 自動排序：未訂正的排在前面，已完成訂正 (done: true) 的自動沉到最下方
+        box.students.sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1));
+
         const col = document.createElement('div');
         col.className = 'clean-col';
         col.innerHTML = `
@@ -924,6 +938,7 @@
       });
     }
 
+    // 💡 點擊切換訂正狀態，並自動重新排序沉底
     function toggleStudentCorrDone(boxIdx, stIdx) {
       correctionBoxes[boxIdx].students[stIdx].done = !correctionBoxes[boxIdx].students[stIdx].done;
       renderCorrectionBoard();
@@ -956,7 +971,7 @@
       syncToFirebase();
     }
 
-    // === 3. 整潔大師看板 (純座號顯示) ===
+    // === 3. 整潔大師看板 ===
     function initCleanlinessSortables() {
       const zones = ['cleanlinessPool', 'zone-clean-tidy', 'zone-clean-chair', 'zone-clean-messy', 'zone-clean-bag', 'zone-clean-align'];
       zones.forEach(zId => {
@@ -1007,7 +1022,7 @@
       });
     }
 
-    // === 4. 打掃看板 (純座號顯示) ===
+    // === 4. 打掃看板 ===
     function initSortables() {
       const zones = ['zone-unassigned', 'zone-classroom', 'zone-corridor', 'zone-mop', 'zone-window', 'zone-blackboard', 'zone-trash'];
       zones.forEach(z => {
@@ -1069,7 +1084,7 @@
       syncToFirebase();
     }
 
-    // === 師生互動看板網格 (純座號顯示) ===
+    // === 師生互動看板網格 ===
     function renderInteractiveGrid() {
       if (currentInteractiveMode === 'clean' || currentInteractiveMode === 'correction' || currentInteractiveMode === 'cleanliness') return;
       const container = document.getElementById('interactiveGrid'); container.innerHTML = '';
@@ -1199,7 +1214,7 @@
       alert(`已彙整上傳至 Google 試算表！\n\n${detailText}`);
     }
 
-    // === 點名功能 (純座號顯示) ===
+    // === 點名功能 ===
     function renderAttendanceGrid() {
       const container = document.getElementById('attendanceGrid'); container.innerHTML = '';
       students.forEach((name, i) => {
@@ -1336,7 +1351,7 @@
       }
     }
 
-    // === 🐾 寵物養成系統 (純座號顯示) ===
+    // === 🐾 寵物養成系統 ===
     function addPetXp(seat, amount) {
       if (!petState[seat]) return; 
       let p = petState[seat];
