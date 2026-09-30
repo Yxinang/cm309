@@ -78,7 +78,6 @@
     .att-sick { background-color: #fffbeb; border-color: #fbbf24; color: #92400e; }
     .att-late { background-color: #f5f3ff; border-color: #a78bfa; color: #5b21b6; }
 
-    /* 亮燈效果 */
     .indicator-lamp { width: 12px; height: 12px; border-radius: 50%; background: #cbd5e1; margin-bottom: 2px; }
     .is-lit { background: #f0fdf4 !important; border-color: #22c55e !important; box-shadow: 0 0 10px rgba(34, 197, 94, 0.3); }
     .is-lit .indicator-lamp { background: #22c55e !important; box-shadow: 0 0 8px #22c55e; }
@@ -94,7 +93,6 @@
     .hw-teal { background: #f0fdfa !important; border-color: #0d9488 !important; }
     .hw-teal .status { background: #ccfbf1; color: #0f766e; }
 
-    /* 看板通用樣式 */
     .clean-board { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 14px; }
     .clean-board.full { grid-template-columns: 1fr; } 
     .clean-col { background: #f8fafc; border: 1.5px dashed var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; min-height: 140px; }
@@ -102,7 +100,6 @@
     .clean-list { flex-grow: 1; min-height: 80px; display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
     .sortable-ghost { opacity: 0.4; background: #e2e8f0; }
 
-    /* 拖曳標籤樣式 */
     .drag-tag {
       background: #fff; border: 1px solid var(--border); border-radius: 6px;
       padding: 6px 10px; font-size: 0.85rem; font-weight: 600; display: inline-flex;
@@ -131,12 +128,39 @@
     .bulletin-item { padding: 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
     .bulletin-badge { font-size: 0.72rem; padding: 3px 6px; border-radius: 4px; background: #fee2e2; color: #b91c1c; margin-right: 6px; }
     .bulletin-has-img { font-size: 0.75rem; color: #2563eb; margin-left: 6px; }
-    .anno-img-container { width: 100%; max-height: 260px; border-radius: 8px; overflow: hidden; margin-bottom: 12px; border: 1px solid var(--border); }
-    .anno-img-container img { width: 100%; height: 100%; object-fit: contain; background: #f8fafc; }
+    
+    /* 💡 公告照片容器與提示優化 */
+    .anno-img-container {
+      width: 100%; max-height: 50vh; border-radius: 8px; overflow: hidden;
+      margin-bottom: 12px; border: 1px solid var(--border); position: relative;
+      background: #0f172a; display: flex; justify-content: center; align-items: center; cursor: zoom-in;
+    }
+    .anno-img-container img { width: 100%; height: 100%; max-height: 50vh; object-fit: contain; }
+    .anno-img-hint {
+      position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.65);
+      color: #fff; font-size: 0.72rem; padding: 3px 8px; border-radius: 4px; pointer-events: none;
+    }
+
+    /* 💡 全螢幕大圖燈箱 Modal */
+    #imageViewerModal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 200;
+      display: none; justify-content: center; align-items: center; padding: 12px;
+      backdrop-filter: blur(4px); cursor: zoom-out;
+    }
+    #imageViewerModal.active { display: flex; animation: fadeIn 0.15s; }
+    #imageViewerModal img {
+      max-width: 96vw; max-height: 94vh; object-fit: contain; border-radius: 6px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    #imageViewerModal .close-btn {
+      position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.25);
+      border: none; color: #fff; font-size: 1.5rem; width: 40px; height: 40px;
+      border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center;
+    }
 
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; padding: 16px; }
     .modal-overlay.active { display: flex; animation: fadeIn 0.15s; }
-    .modal-box { background: #fff; border-radius: var(--radius); width: 100%; max-width: 440px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto;}
+    .modal-box { background: #fff; border-radius: var(--radius); width: 100%; max-width: 500px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto;}
     .modal-options { display: flex; flex-direction: column; gap: 8px; }
     .opt-btn { padding: 12px; border-radius: 8px; border: 1.5px solid var(--border); background: #fff; text-align: left; font-size: 0.95rem; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px; }
 
@@ -270,7 +294,7 @@
           </div>
         </div>
 
-        <!-- 4. 打掃工作看板 (加強點擊發光) -->
+        <!-- 4. 打掃工作看板 -->
         <div id="cleanKanban" style="display:none;">
           <div style="font-size:0.8rem; color:#059669; font-weight:700; margin-bottom:10px; background:#dcfce7; padding:6px 10px; border-radius:6px;">
             <i class="fa-solid fa-hand-pointer"></i> 提示：<strong>直接點擊學生標籤即可「亮綠燈 / 關閉綠燈」</strong>，完成打掃的孩子寵物自動 +1 分！
@@ -353,7 +377,7 @@
             <i class="fa-solid fa-rotate"></i> 重新整理公告
           </button>
         </div>
-        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">點擊公告標題即可查看詳細內容與海報照片。</p>
+        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">點擊公告標題即可查看詳細內容；點擊照片可放大全螢幕檢視。</p>
         <ul class="bulletin-list" id="bulletinListContainer"></ul>
       </div>
     </section>
@@ -421,7 +445,7 @@
         <button class="opt-btn" onclick="applyHwStatus('忘記帶回家', 'hw-blue')"><span style="color:#2563eb;">🔵 2. 忘記帶回家</span></button>
         <button class="opt-btn" onclick="applyHwStatus('未完成', 'hw-red')"><span style="color:#dc2626;">🔴 3. 未完成</span></button>
         <button class="opt-btn" onclick="applyHwStatus('忘記帶來學校', 'hw-orange')"><span style="color:#ea580c;">🟠 4. 忘記帶來學校</span></button>
-        <button class="opt-btn" onclick="showMissingInput()"><span style="color:#0d9488;">✍️️ 5. 缺項 (自訂輸入)</span></button>
+        <button class="opt-btn" onclick="showMissingInput()"><span style="color:#0d9488;">✍ 5. 缺項 (自訂輸入)</span></button>
         
         <div id="missingInputArea" style="display:none; padding:10px; background:#f0fdfa; border:1px dashed #0d9488; border-radius:8px;">
           <input type="text" id="hwMissingText" class="form-control" placeholder="輸入缺漏項目(如:數習)">
@@ -508,23 +532,31 @@
   <div id="announcementModal" class="modal-overlay">
     <div class="modal-box">
       <h3 id="annoTitle" style="margin-bottom:10px;">公告標題</h3>
-      <div id="annoImgContainer" class="anno-img-container" style="display:none;">
+      
+      <!-- 點擊可放大全螢幕檢視 -->
+      <div id="annoImgContainer" class="anno-img-container" style="display:none;" onclick="openImageViewer(document.getElementById('annoImg').src)">
         <img id="annoImg" src="" alt="公告附圖">
+        <span class="anno-img-hint"><i class="fa-solid fa-magnifying-glass-plus"></i> 點擊放大全圖</span>
       </div>
+
       <p id="annoContent" style="margin:14px 0; font-size:0.95rem; line-height:1.6; color:#475569; white-space:pre-wrap;"></p>
       <button class="btn-submit" onclick="closeAnnouncementModal()">了解關閉</button>
     </div>
   </div>
 
+  <!-- 💡 全螢幕大圖燈箱 Modal -->
+  <div id="imageViewerModal" onclick="closeImageViewer()">
+    <button class="close-btn" onclick="closeImageViewer()"><i class="fa-solid fa-xmark"></i></button>
+    <img id="imageViewerImg" src="" alt="全螢幕照片">
+  </div>
+
   <script>
-    // 💡 內建您照片中最新的 25 位學生標準名冊
     const DEFAULT_STUDENTS = [
       "黃琨翔", "陳秉軒", "杜晨翔", "劉景碩", "王宇童", "吳立翔", "陳宇恩", "林楷諾", "李柏衡", "林晉翰",
       "徐堉綸", "紀孟希", "徐晟瀚", "王知言", "蔡沛穎", "鄖詠心", "郭聿芸", "楊茲甯", "王岑芝", "吳涵儒",
       "洪瑀晴", "林芷萱", "潘若穎", "馮語霓", "蘇唯心"
     ];
 
-    // 💡 內建最新寵物分數保底庫
     const INITIAL_PETS = {
       1: { petId: 'cat', stage: 1, xp: 12 },
       2: { petId: 'dog', stage: 1, xp: 11 },
@@ -571,7 +603,6 @@
     let announcements = JSON.parse(localStorage.getItem('cm309_announcements')) || [];
     let albums = JSON.parse(localStorage.getItem('cm309_albums')) || [];
     
-    // 若本機無資料，自動載入最新 25 人的保底進度
     let petState = JSON.parse(localStorage.getItem('cm309_pets')) || INITIAL_PETS;
     let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
     let cleanAssignment = JSON.parse(localStorage.getItem('cm309_cleanAssign')) || {};
@@ -736,7 +767,6 @@
             mouthwashLampState = data.mouthwashLampState || {};
             cleanLampState = data.cleanLampState || {};
             
-            // 若雲端有寵物紀錄則讀取，否則保留目前分數
             if (data.petState && Object.keys(data.petState).length > 0) {
               petState = data.petState;
             }
@@ -965,7 +995,7 @@
       });
     }
 
-    // === 4. 打掃看板與亮燈（完全修復點擊切換） ===
+    // === 4. 打掃看板與亮燈 ===
     function initSortables() {
       const zones = ['zone-unassigned', 'zone-classroom', 'zone-corridor', 'zone-mop', 'zone-window', 'zone-blackboard', 'zone-trash'];
       zones.forEach(z => {
@@ -974,7 +1004,7 @@
         new Sortable(el, {
           group: 'clean',
           animation: 150,
-          delay: 150, // 增加微小延遲，確保「點擊」與「拖曳」互不干擾
+          delay: 150,
           delayOnTouchOnly: true,
           onEnd: function(evt) {
             const seat = evt.item.getAttribute('data-seat');
@@ -1009,7 +1039,6 @@
           <div style="font-size:0.65rem; color:${isLit?'#15803d':'#94a3b8'}; pointer-events:none;">${isLit?'已完成':'未完成'}</div>
         `;
         
-        // 點擊事件監聽
         div.onmouseup = function(e) {
           toggleCleanLamp(id);
         };
@@ -1176,7 +1205,7 @@
       sendToSheets({ category: "每日點名", student: "全班", detail: txt }); alert(`已上傳至 Google 試算表！\n${txt}`);
     }
 
-    // === 公告管理 ===
+    // === 📢 公告管理與大圖檢視 ===
     function renderBulletins() {
       const container = document.getElementById('bulletinListContainer'); container.innerHTML = '';
       if (announcements.length === 0) return container.innerHTML = '<li style="padding:16px; color:#94a3b8; text-align:center;">目前尚無公告</li>';
@@ -1203,7 +1232,7 @@
       const imgEl = document.getElementById('annoImg');
       if (anno.imgSrc) {
         imgEl.src = anno.imgSrc;
-        imgContainer.style.display = 'block';
+        imgContainer.style.display = 'flex';
       } else {
         imgContainer.style.display = 'none';
       }
@@ -1211,6 +1240,16 @@
     }
 
     function closeAnnouncementModal() { document.getElementById('announcementModal').classList.remove('active'); }
+
+    // 💡 全螢幕大圖開關
+    function openImageViewer(src) {
+      if(!src) return;
+      document.getElementById('imageViewerImg').src = src;
+      document.getElementById('imageViewerModal').classList.add('active');
+    }
+    function closeImageViewer() {
+      document.getElementById('imageViewerModal').classList.remove('active');
+    }
 
     function renderManageBulletins() {
       const list = document.getElementById('manageBulletinList'); list.innerHTML = '';
@@ -1238,10 +1277,11 @@
           img.onload = () => {
             const canvas = document.createElement('canvas');
             let w = img.width, h = img.height;
-            if (w > 500) { h *= 500 / w; w = 500; }
+            // 提升清晰度至 700px，字體更清晰
+            if (w > 700) { h *= 700 / w; w = 700; }
             canvas.width = w; canvas.height = h;
             canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-            const compressedImg = canvas.toDataURL('image/jpeg', 0.6);
+            const compressedImg = canvas.toDataURL('image/jpeg', 0.65);
             saveAnnoAndSync(dept, title, content, compressedImg);
           };
           img.src = event.target.result;
