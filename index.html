@@ -99,7 +99,6 @@
     .clean-list { flex-grow: 1; min-height: 80px; display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
     .sortable-ghost { opacity: 0.4; background: #e2e8f0; }
 
-    /* 10 欄網格排版 */
     .ten-col-pool {
       display: grid !important;
       grid-template-columns: repeat(10, 1fr) !important;
@@ -107,9 +106,7 @@
       width: 100% !important;
     }
     @media (max-width: 768px) {
-      .ten-col-pool {
-        grid-template-columns: repeat(5, 1fr) !important;
-      }
+      .ten-col-pool { grid-template-columns: repeat(5, 1fr) !important; }
     }
 
     .drag-tag {
@@ -120,7 +117,6 @@
     }
     .drag-tag .btn-remove-tag { color: #ef4444; cursor: pointer; font-size: 0.75rem; margin-left: 2px; }
     
-    /* 💡 訂正完成純綠燈光暈效果（不增加文字） */
     .drag-tag.is-corrected {
       background: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important;
       box-shadow: 0 0 10px rgba(34, 197, 94, 0.45) !important; font-weight: 800;
@@ -194,10 +190,34 @@
     .pet-card .emoji { font-size: 36px; margin-bottom: 4px; }
     .pet-card .name { font-size: 0.95rem; font-weight: 700; color: #1e293b; }
 
-    .garden-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 15px; }
-    .garden-item { border: 1.5px dashed var(--border); border-radius: 10px; padding: 10px; text-align: center; background:#f0fdf4; border-color:#86efac; }
-    .garden-item .emoji { font-size: 32px; }
+    /* 💡 動物園網格與兌換黃燈樣式 */
+    .garden-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 10px; margin-top: 15px; }
+    .garden-item {
+      border: 1.5px dashed var(--border); border-radius: 10px; padding: 10px 6px; text-align: center;
+      background: #f0fdf4; border-color: #86efac; cursor: pointer; transition: all 0.2s; position: relative;
+    }
+    .garden-item:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+    .garden-item .emoji { font-size: 34px; }
     .garden-item .name { font-size: 0.75rem; font-weight: 700; color: #15803d; margin-top: 4px; }
+    
+    /* 💡 兌換成體亮黃燈樣式 */
+    .garden-item.is-redeemed {
+      background: #fffbeb !important;
+      border: 2px solid #eab308 !important;
+      box-shadow: 0 0 12px rgba(234, 179, 8, 0.45) !important;
+    }
+    .garden-item.is-redeemed .name { color: #b45309 !important; }
+    .redeemed-badge {
+      font-size: 0.65rem; background: #fef08a; color: #854d0e; padding: 2px 4px;
+      border-radius: 4px; margin-top: 4px; display: inline-block; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;
+    }
+
+    .ticket-summary-box {
+      background: #fffbeb; border: 1.5px solid #fde047; border-radius: 8px;
+      padding: 10px 14px; margin-top: 10px; text-align: center; font-size: 0.88rem;
+      color: #854d0e; font-weight: 700; display: flex; justify-content: space-around; align-items: center;
+    }
 
     @media (max-width: 768px) {
       .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; z-index: 50; border-top: 1px solid var(--border); justify-content: space-around; padding: 6px 0; }
@@ -514,12 +534,28 @@
       </div>
 
       <div id="petGardenView" style="display:none; text-align:left;">
+        <div id="gardenTicketSummary" class="ticket-summary-box"></div>
+        <p style="font-size:0.8rem; color:#64748b; margin-top:10px;"><i class="fa-solid fa-circle-info"></i> 點擊成體可「登記兌換獎勵 (亮黃燈)」；點擊「✕」可取消兌換。</p>
         <div class="garden-grid" id="gardenGrid"></div>
       </div>
 
       <div style="margin-top:20px; display:flex; flex-direction:column; gap:8px;">
-        <button class="btn-submit" style="background:#0ea5e9;" id="btnViewGarden" onclick="showPetGarden()">🌳 查看他的專屬寵物園</button>
+        <button class="btn-submit" style="background:#0ea5e9;" id="btnViewGarden" onclick="showPetGarden()">🌳 查看專屬動物園與抽獎券</button>
+        <div id="gardenTicketBadgeBelow" style="font-size:0.82rem; color:#b45309; font-weight:700; text-align:center;"></div>
         <button class="btn-submit" style="background:#94a3b8;" id="btnModalClose" onclick="closePetModal()">關閉視窗</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 💡 獎品兌換對話框 Modal -->
+  <div id="rewardRedeemModal" class="modal-overlay" style="z-index:110;">
+    <div class="modal-box" style="max-width:380px;">
+      <h3 style="color:#b45309; margin-bottom:8px;"><i class="fa-solid fa-gift"></i> 登記成體兌換獎勵</h3>
+      <p style="font-size:0.85rem; color:#64748b; margin-bottom:12px;" id="redeemModalAnimalName">請輸入要兌換的獎品：</p>
+      <input type="text" id="rewardPrizeInput" class="form-control" placeholder="例如: 橡皮擦、免寫作業卡、貼紙" required>
+      <div style="display:flex; gap:8px; margin-top:14px;">
+        <button class="btn-submit" style="background:#eab308; color:#fff;" onclick="submitRewardRedeem()">確認兌換 (亮黃燈)</button>
+        <button class="btn-submit" style="background:#94a3b8;" onclick="closeRewardModal()">取消</button>
       </div>
     </div>
   </div>
@@ -646,6 +682,7 @@
     let clickTimeout = null;
     let lastClickedSeat = null;
     let syncDebounceTimer = null;
+    let selectedRedeemIndex = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('zh-TW');
@@ -871,7 +908,7 @@
       renderInteractiveGrid();
     }
 
-    // === 2. 作業訂正專區 (純綠燈光暈，不加「已訂正」文字) ===
+    // === 2. 作業訂正專區 ===
     function renderCorrectionBoard() {
       const pool = document.getElementById('correctionPool');
       pool.innerHTML = '';
@@ -894,7 +931,6 @@
       const boxesContainer = document.getElementById('correctionBoxesContainer');
       boxesContainer.innerHTML = '';
       correctionBoxes.forEach((box, bIdx) => {
-        // 自動排序：完成訂正 (done: true) 的自動沉到底部
         box.students.sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1));
 
         const col = document.createElement('div');
@@ -913,7 +949,6 @@
           const tag = document.createElement('div');
           const isDone = !!st.done;
           tag.className = `drag-tag ${isDone ? 'is-corrected' : ''}`;
-          // 💡 純亮綠燈顯示，不額外加字串
           tag.innerHTML = `
             <span onclick="toggleStudentCorrDone(${bIdx}, ${sIdx})" style="cursor:pointer; display:inline-block; padding:0 2px;">
               ${st.name}
@@ -1402,6 +1437,9 @@
       document.getElementById('btnModalClose').textContent = '關閉視窗';
       document.getElementById('btnModalClose').onclick = closePetModal;
 
+      // 更新查看專屬動物園按鈕下方的抽獎券摘要
+      updateTicketBadgeBelow(seat);
+
       const cat = PET_CATALOG.find(c => c.id === p.petId) || PET_CATALOG[0];
       const isMystery = p.stage === 1;
       const isCompleted = p.stage > 3;
@@ -1427,6 +1465,18 @@
       document.getElementById('petManageModal').classList.add('active');
     }
 
+    function updateTicketBadgeBelow(seat) {
+      const myPets = petCollection[seat] || [];
+      const adultCount = myPets.length;
+      const tickets = Math.floor(adultCount / 2);
+      const badge = document.getElementById('gardenTicketBadgeBelow');
+      if (adultCount > 0) {
+        badge.innerHTML = `🌟 目前動物園成體：${adultCount} 隻 ｜ 累計抽獎券：<strong style="color:#d97706; font-size:0.95rem;">🎟️ ${tickets} 張</strong>`;
+      } else {
+        badge.innerHTML = `🎟️ 培育 2 隻動物成體即可兌換 1 張抽獎券！`;
+      }
+    }
+
     function selectMysteryPet() {
       const seat = currentSelectedStudent.seat;
       const randomPet = PET_CATALOG[Math.floor(Math.random() * PET_CATALOG.length)];
@@ -1441,24 +1491,124 @@
     function moveToGarden() {
       const seat = currentSelectedStudent.seat; const p = petState[seat];
       if(!petCollection[seat]) petCollection[seat] = [];
-      petCollection[seat].push(p.petId); 
+      // 支援紀錄兌換獎勵物件格式
+      petCollection[seat].push({ petId: p.petId, prize: null, redeemed: false }); 
       delete petState[seat];
       openPetModal(seat, currentSelectedStudent.name); 
       renderPetsGrid();
       syncToFirebase();
     }
 
+    // === 🌳 查看專屬動物園與獎勵兌換（含亮黃燈） ===
     function showPetGarden() {
-      document.getElementById('petManageView').style.display = 'none'; document.getElementById('petSelectView').style.display = 'none';
-      document.getElementById('petGardenView').style.display = 'block'; document.getElementById('btnViewGarden').style.display = 'none';
-      document.getElementById('petModalTitle').textContent = `${currentSelectedStudent.name} 的專屬寵物園`;
+      document.getElementById('petManageView').style.display = 'none';
+      document.getElementById('petSelectView').style.display = 'none';
+      document.getElementById('petGardenView').style.display = 'block';
+      document.getElementById('btnViewGarden').style.display = 'none';
+      document.getElementById('gardenTicketBadgeBelow').style.display = 'none';
+      document.getElementById('petModalTitle').textContent = `${currentSelectedStudent.name} 的專屬動物園`;
       document.getElementById('btnModalClose').textContent = '🔙 返回上一頁';
-      document.getElementById('btnModalClose').onclick = () => openPetModal(currentSelectedStudent.seat, currentSelectedStudent.name);
+      document.getElementById('btnModalClose').onclick = () => {
+        document.getElementById('gardenTicketBadgeBelow').style.display = 'block';
+        openPetModal(currentSelectedStudent.seat, currentSelectedStudent.name);
+      };
 
-      const grid = document.getElementById('gardenGrid'); grid.innerHTML = '';
-      const myPets = petCollection[currentSelectedStudent.seat] || [];
-      if(myPets.length === 0) { grid.innerHTML = '<p style="color:#64748b; text-align:center; grid-column:1/-1; padding:20px;">目前寵物園空空如也，趕快培育第一隻寵物吧！</p>'; } 
-      else { myPets.forEach(petId => { const cat = PET_CATALOG.find(c => c.id === petId); grid.innerHTML += `<div class="garden-item"><div class="emoji">${cat.stages[2]}</div><div class="name">${cat.name}</div></div>`; }); }
+      renderPetGardenContent();
+    }
+
+    function renderPetGardenContent() {
+      const seat = currentSelectedStudent.seat;
+      const grid = document.getElementById('gardenGrid');
+      grid.innerHTML = '';
+      
+      let rawPets = petCollection[seat] || [];
+      // 相容早期純字串 ID 格式
+      const myPets = rawPets.map(p => typeof p === 'string' ? { petId: p, prize: null, redeemed: false } : p);
+      petCollection[seat] = myPets;
+
+      const adultCount = myPets.length;
+      const tickets = Math.floor(adultCount / 2);
+
+      // 頂部統計欄位
+      const summaryBox = document.getElementById('gardenTicketSummary');
+      summaryBox.innerHTML = `
+        <div>🦁 成體總數：<strong>${adultCount} 隻</strong></div>
+        <div style="font-size:1rem; color:#b45309;">🎟️ 累計抽獎券：<strong>${tickets} 張</strong> (每2隻換1張)</div>
+      `;
+
+      if (myPets.length === 0) {
+        grid.innerHTML = '<p style="color:#64748b; text-align:center; grid-column:1/-1; padding:20px;">目前動物園空空如也，趕快培育第一隻成體動物吧！</p>';
+      } else {
+        myPets.forEach((item, idx) => {
+          const cat = PET_CATALOG.find(c => c.id === item.petId) || PET_CATALOG[0];
+          const isRedeemed = !!item.redeemed;
+          
+          const div = document.createElement('div');
+          div.className = `garden-item ${isRedeemed ? 'is-redeemed' : ''}`;
+          
+          let cancelBtnHtml = isRedeemed ? 
+            `<button onclick="event.stopPropagation(); cancelRewardRedeem(${idx})" style="background:#fee2e2; border:1px solid #fca5a5; color:#dc2626; border-radius:4px; font-size:0.65rem; padding:2px 6px; margin-top:4px; cursor:pointer; font-weight:700;">✕ 取消</button>` : '';
+
+          let prizeBadgeHtml = isRedeemed ? 
+            `<div class="redeemed-badge" title="${item.prize || '已兌換'}">🎁 ${item.prize || '已換獎'}</div>` : 
+            `<div style="font-size:0.65rem; color:#64748b; margin-top:4px;">(點擊兌換)</div>`;
+
+          div.innerHTML = `
+            <div class="emoji">${cat.stages[2]}</div>
+            <div class="name">${cat.name}</div>
+            ${prizeBadgeHtml}
+            ${cancelBtnHtml}
+          `;
+
+          // 點擊卡片彈出兌換框
+          div.onclick = () => {
+            if (!isRedeemed) openRewardModal(idx, cat.name);
+          };
+
+          grid.appendChild(div);
+        });
+      }
+    }
+
+    // 💡 獎品兌換彈窗控制
+    function openRewardModal(index, animalName) {
+      selectedRedeemIndex = index;
+      document.getElementById('redeemModalAnimalName').textContent = `這隻【${animalName}】可以兌換一個獎品，請輸入獎品名稱：`;
+      document.getElementById('rewardPrizeInput').value = '';
+      document.getElementById('rewardRedeemModal').classList.add('active');
+      setTimeout(() => document.getElementById('rewardPrizeInput').focus(), 100);
+    }
+
+    function closeRewardModal() {
+      document.getElementById('rewardRedeemModal').classList.remove('active');
+      selectedRedeemIndex = null;
+    }
+
+    function submitRewardRedeem() {
+      const prize = document.getElementById('rewardPrizeInput').value.trim();
+      if (!prize) return alert("請輸入要兌換的獎品名稱！");
+
+      const seat = currentSelectedStudent.seat;
+      if (petCollection[seat] && petCollection[seat][selectedRedeemIndex]) {
+        petCollection[seat][selectedRedeemIndex].redeemed = true;
+        petCollection[seat][selectedRedeemIndex].prize = prize;
+        closeRewardModal();
+        renderPetGardenContent();
+        syncToFirebase();
+        alert(`✅ 兌換成功！已標記為【${prize}】並亮黃燈！`);
+      }
+    }
+
+    function cancelRewardRedeem(index) {
+      if (confirm("確定要取消此隻動物的獎品兌換，回到原始未兌換狀態嗎？")) {
+        const seat = currentSelectedStudent.seat;
+        if (petCollection[seat] && petCollection[seat][index]) {
+          petCollection[seat][index].redeemed = false;
+          petCollection[seat][index].prize = null;
+          renderPetGardenContent();
+          syncToFirebase();
+        }
+      }
     }
 
     function resetAllPets() {
