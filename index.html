@@ -190,7 +190,6 @@
     .pet-card .emoji { font-size: 36px; margin-bottom: 4px; }
     .pet-card .name { font-size: 0.95rem; font-weight: 700; color: #1e293b; }
 
-    /* 💡 動物園網格與兌換黃燈樣式 */
     .garden-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 10px; margin-top: 15px; }
     .garden-item {
       border: 1.5px dashed var(--border); border-radius: 10px; padding: 10px 6px; text-align: center;
@@ -200,7 +199,6 @@
     .garden-item .emoji { font-size: 34px; }
     .garden-item .name { font-size: 0.75rem; font-weight: 700; color: #15803d; margin-top: 4px; }
     
-    /* 💡 兌換成體亮黃燈樣式 */
     .garden-item.is-redeemed {
       background: #fffbeb !important;
       border: 2px solid #eab308 !important;
@@ -535,7 +533,7 @@
 
       <div id="petGardenView" style="display:none; text-align:left;">
         <div id="gardenTicketSummary" class="ticket-summary-box"></div>
-        <p style="font-size:0.8rem; color:#64748b; margin-top:10px;"><i class="fa-solid fa-circle-info"></i> 點擊成體可「登記兌換獎勵 (亮黃燈)」；點擊「✕」可取消兌換。</p>
+        <p style="font-size:0.8rem; color:#64748b; margin-top:10px;"><i class="fa-solid fa-circle-info"></i> 點擊成體可「登記兌換獎勵 (亮黃燈)」；點擊「✕ 取消」可復原。</p>
         <div class="garden-grid" id="gardenGrid"></div>
       </div>
 
@@ -547,7 +545,7 @@
     </div>
   </div>
 
-  <!-- 💡 獎品兌換對話框 Modal -->
+  <!-- 獎品兌換對話框 Modal -->
   <div id="rewardRedeemModal" class="modal-overlay" style="z-index:110;">
     <div class="modal-box" style="max-width:380px;">
       <h3 style="color:#b45309; margin-bottom:8px;"><i class="fa-solid fa-gift"></i> 登記成體兌換獎勵</h3>
@@ -608,41 +606,62 @@
     ];
 
     const INITIAL_PETS = {
-      1: { petId: 'cat', stage: 1, xp: 12 },
-      2: { petId: 'dog', stage: 1, xp: 11 },
+      1: { petId: 'cat_black', stage: 1, xp: 12 },
+      2: { petId: 'dog_shiba', stage: 1, xp: 11 },
       3: { petId: 'turtle', stage: 1, xp: 11 },
       4: { petId: 'dragon', stage: 1, xp: 10 },
       5: { petId: 'parrot', stage: 1, xp: 10 },
       6: { petId: 'penguin', stage: 1, xp: 11 },
       7: { petId: 'fish', stage: 1, xp: 8 },
-      8: { petId: 'cat', stage: 1, xp: 9 },
-      9: { petId: 'dog', stage: 1, xp: 9 },
+      8: { petId: 'rabbit', stage: 1, xp: 9 },
+      9: { petId: 'panda', stage: 1, xp: 9 },
       10: { petId: 'turtle', stage: 1, xp: 10 },
       11: { petId: 'dragon', stage: 1, xp: 10 },
-      12: { petId: 'parrot', stage: 1, xp: 10 },
-      13: { petId: 'penguin', stage: 1, xp: 8 },
+      12: { petId: 'owl', stage: 1, xp: 10 },
+      13: { petId: 'dog_corgi', stage: 1, xp: 8 },
       14: { petId: 'fish', stage: 1, xp: 10 },
-      15: { petId: 'cat', stage: 1, xp: 11 },
-      16: { petId: 'dog', stage: 1, xp: 10 },
-      17: { petId: 'turtle', stage: 1, xp: 9 },
-      18: { petId: 'dragon', stage: 1, xp: 11 },
-      19: { petId: 'parrot', stage: 1, xp: 10 },
-      20: { petId: 'penguin', stage: 1, xp: 12 },
-      21: { petId: 'fish', stage: 1, xp: 11 },
-      22: { petId: 'cat', stage: 1, xp: 12 },
-      23: { petId: 'dog', stage: 1, xp: 6 },
-      24: { petId: 'turtle', stage: 1, xp: 10 },
-      25: { petId: 'dragon', stage: 1, xp: 10 }
+      15: { petId: 'cat_orange', stage: 1, xp: 11 },
+      16: { petId: 'dog_husky', stage: 1, xp: 10 },
+      17: { petId: 'fox', stage: 1, xp: 9 },
+      18: { petId: 'trex', stage: 1, xp: 11 },
+      19: { petId: 'cat_calico', stage: 1, xp: 10 },
+      20: { petId: 'dolphin', stage: 1, xp: 12 },
+      21: { petId: 'unicorn', stage: 1, xp: 11 },
+      22: { petId: 'lion', stage: 1, xp: 12 },
+      23: { petId: 'dog_poodle', stage: 1, xp: 6 },
+      24: { petId: 'cat_white', stage: 1, xp: 10 },
+      25: { petId: 'whale', stage: 1, xp: 10 }
     };
 
+    // 💡 擴充貓咪（黑貓、橘貓、三花、白貓）與狗狗（柴犬、哈士奇、貴賓、柯基、金毛）
     const PET_CATALOG = [
-      { id: 'cat', name: '橘貓', stages: ['🥚', '🐱', '🐈'], desc: '常見寵物' },
-      { id: 'dog', name: '柴犬', stages: ['🥚', '🐶', '🐕'], desc: '常見寵物' },
+      { id: 'cat_black', name: '黑貓', stages: ['🥚', '🐱', '🐈‍⬛'], desc: '幸運黑貓' },
+      { id: 'cat_orange', name: '橘貓', stages: ['🥚', '🐱', '🐈'], desc: '圓滾大橘' },
+      { id: 'cat_calico', name: '三花貓', stages: ['🥚', '🐱', '🐾'], desc: '花紋三花' },
+      { id: 'cat_white', name: '純白貓', stages: ['🥚', '🐱', '🤍'], desc: '雪白波斯' },
+      { id: 'dog_shiba', name: '柴犬', stages: ['🥚', '🐶', '🐕'], desc: '赤毛柴犬' },
+      { id: 'dog_husky', name: '哈士奇', stages: ['🥚', '🐶', '🐺'], desc: '二哈雪橇' },
+      { id: 'dog_poodle', name: '貴賓狗', stages: ['🥚', '🐶', '🐩'], desc: '捲毛貴賓' },
+      { id: 'dog_corgi', name: '柯基犬', stages: ['🥚', '🐶', '🦊'], desc: '短腿柯基' },
+      { id: 'dog_golden', name: '黃金獵犬', stages: ['🥚', '🐶', '🦮'], desc: '溫柔金毛' },
+      { id: 'rabbit', name: '小白兔', stages: ['🥚', '🐰', '🐇'], desc: '可愛寵物' },
+      { id: 'hamster', name: '倉鼠', stages: ['🥚', '🐹', '🐹'], desc: '可愛寵物' },
       { id: 'turtle', name: '烏龜', stages: ['🥚', '🐢', '🐢'], desc: '爬蟲類' },
-      { id: 'dragon', name: '飛龍', stages: ['🥚', '🦎', '🐉'], desc: '傳說生物' },
-      { id: 'parrot', name: '鸚鵡', stages: ['🥚', '🐤', '🦜'], desc: '鳥禽類' },
-      { id: 'penguin', name: '企鵝', stages: ['🥚', '🐧', '🐧'], desc: '動物園' },
-      { id: 'fish', name: '熱帶魚', stages: ['🫧', '🐠', '🦈'], desc: '水族館' }
+      { id: 'dragon', name: '飛龍', stages: ['🥚', '🦎', '🐉'], desc: '神話傳說' },
+      { id: 'unicorn', name: '獨角獸', stages: ['🥚', '🐴', '🦄'], desc: '神話傳說' },
+      { id: 'eagle', name: '金翅雀鷹', stages: ['🥚', '🐣', '🦅'], desc: '天空飛禽' },
+      { id: 'parrot', name: '金剛鸚鵡', stages: ['🥚', '🐤', '🦜'], desc: '天空飛禽' },
+      { id: 'owl', name: '貓頭鷹', stages: ['🥚', '🐥', '🦉'], desc: '天空飛禽' },
+      { id: 'penguin', name: '國王企鵝', stages: ['🥚', '🐧', '🐧'], desc: '極地冰原' },
+      { id: 'fish', name: '大白鯊', stages: ['🫧', '🐠', '🦈'], desc: '海洋世界' },
+      { id: 'dolphin', name: '海豚', stages: ['🫧', '🐟', '🐬'], desc: '海洋世界' },
+      { id: 'whale', name: '藍鯨', stages: ['🫧', '🐋', '🐳'], desc: '海洋世界' },
+      { id: 'trex', name: '霸王龍', stages: ['🥚', '🦎', '🦖'], desc: '史前恐龍' },
+      { id: 'bronto', name: '腕龍', stages: ['🥚', '🦎', '🦕'], desc: '史前恐龍' },
+      { id: 'panda', name: '大熊貓', stages: ['🥚', '🐼', '🐼'], desc: '野生動物' },
+      { id: 'lion', name: '萬獸獅王', stages: ['🥚', '🦁', '🦁'], desc: '野生動物' },
+      { id: 'koala', name: '無尾熊', stages: ['🥚', '🐨', '🐨'], desc: '野生動物' },
+      { id: 'fox', name: '赤狐', stages: ['🥚', '🦊', '🦊'], desc: '野生動物' }
     ];
     const PET_REQ = [20, 30, 40]; 
 
@@ -1424,7 +1443,7 @@
 
     function openPetModal(seat, name) {
       currentSelectedStudent = { seat, name };
-      const p = petState[seat] || { stage: 1, xp: 0, petId: 'cat' };
+      const p = petState[seat] || { stage: 1, xp: 0, petId: 'cat_orange' };
       document.getElementById('petModalTitle').textContent = `${name} 的寵物`;
       const manageView = document.getElementById('petManageView');
       const selectView = document.getElementById('petSelectView');
@@ -1437,7 +1456,6 @@
       document.getElementById('btnModalClose').textContent = '關閉視窗';
       document.getElementById('btnModalClose').onclick = closePetModal;
 
-      // 更新查看專屬動物園按鈕下方的抽獎券摘要
       updateTicketBadgeBelow(seat);
 
       const cat = PET_CATALOG.find(c => c.id === p.petId) || PET_CATALOG[0];
@@ -1491,7 +1509,6 @@
     function moveToGarden() {
       const seat = currentSelectedStudent.seat; const p = petState[seat];
       if(!petCollection[seat]) petCollection[seat] = [];
-      // 支援紀錄兌換獎勵物件格式
       petCollection[seat].push({ petId: p.petId, prize: null, redeemed: false }); 
       delete petState[seat];
       openPetModal(seat, currentSelectedStudent.name); 
@@ -1522,14 +1539,12 @@
       grid.innerHTML = '';
       
       let rawPets = petCollection[seat] || [];
-      // 相容早期純字串 ID 格式
       const myPets = rawPets.map(p => typeof p === 'string' ? { petId: p, prize: null, redeemed: false } : p);
       petCollection[seat] = myPets;
 
       const adultCount = myPets.length;
       const tickets = Math.floor(adultCount / 2);
 
-      // 頂部統計欄位
       const summaryBox = document.getElementById('gardenTicketSummary');
       summaryBox.innerHTML = `
         <div>🦁 成體總數：<strong>${adultCount} 隻</strong></div>
@@ -1560,7 +1575,6 @@
             ${cancelBtnHtml}
           `;
 
-          // 點擊卡片彈出兌換框
           div.onclick = () => {
             if (!isRedeemed) openRewardModal(idx, cat.name);
           };
@@ -1570,7 +1584,6 @@
       }
     }
 
-    // 💡 獎品兌換彈窗控制
     function openRewardModal(index, animalName) {
       selectedRedeemIndex = index;
       document.getElementById('redeemModalAnimalName').textContent = `這隻【${animalName}】可以兌換一個獎品，請輸入獎品名稱：`;
