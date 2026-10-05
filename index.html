@@ -126,7 +126,6 @@
     .form-control { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; outline: none; }
     .btn-submit { width: 100%; padding: 12px; background: var(--primary); color: #fff; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; }
     
-    /* 💡 相簿專屬兩層選單樣式 */
     .album-category-list { display: flex; gap: 8px; margin-bottom: 8px; overflow-x: auto; padding-bottom: 4px; }
     .album-sub-list { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; align-items: center; background: #f8fafc; padding: 8px; border-radius: 8px; border: 1px solid var(--border); }
     .album-chip { padding: 6px 14px; background: #e2e8f0; border-radius: 20px; font-size: 0.85rem; cursor: pointer; border: none; white-space: nowrap; font-weight: 600; }
@@ -613,7 +612,7 @@
     </div>
   </div>
 
-  <!-- 照片上傳 Modal (對應三大分類：體育課、生活寫真、校園活動) -->
+  <!-- 照片上傳 Modal -->
   <div id="photoUploadModal" class="modal-overlay">
     <div class="modal-box">
       <h3>上傳新照片</h3>
@@ -626,7 +625,7 @@
         </select>
       </div>
       <div class="form-group">
-        <label style="font-size:0.8rem; font-weight:600; color:#475569;">指定學生（選填，若為個人寫真請選擇座號）：</label>
+        <label style="font-size:0.8rem; font-weight:600; color:#475569;">指定座號（選填，若為個人寫真請選擇）：</label>
         <select id="uploadPhotoStudent" class="form-control">
           <option value="">(不指定，全班共用)</option>
         </select>
@@ -739,10 +738,10 @@
     let announcements = JSON.parse(localStorage.getItem('cm309_announcements')) || [];
     let albums = JSON.parse(localStorage.getItem('cm309_albums')) || [];
     
-    // 💡 相簿篩選狀態變數
+    // 相簿篩選狀態變數
     let currentAlbumCategory = '全部';
-    let currentAlbumSubMode = '全班'; // '全班' 或 '個人'
-    let currentAlbumTargetSeat = '';   // 例如 '1號'
+    let currentAlbumSubMode = '全班'; 
+    let currentAlbumTargetSeat = '';   
 
     let petState = JSON.parse(localStorage.getItem('cm309_pets')) || INITIAL_PETS;
     let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
@@ -805,10 +804,11 @@
       select.innerHTML = '';
       students.forEach((name, i) => { select.add(new Option(`${name}`, `${name}`)); });
 
-      // 同步更新相簿上傳modal的學生選單
       const albumSelect = document.getElementById('uploadPhotoStudent');
-      albumSelect.innerHTML = '<option value="">(不指定，全班共用)</option>';
-      students.forEach(name => { albumSelect.add(new Option(name, name)); });
+      if (albumSelect) {
+        albumSelect.innerHTML = '<option value="">(不指定，全班共用)</option>';
+        students.forEach(name => { albumSelect.add(new Option(name, name)); });
+      }
     }
 
     function updateCloudBadge(status) {
@@ -1736,7 +1736,7 @@
     }
 
     function resetAllPets() {
-      if(confirm("⚠️ 警告: 確定要刪除全班寵物與寵物園嗎？")) {
+      if(confirm("⚠️ 警告：確定要刪除全班寵物與寵物園嗎？")) {
         petState = {}; petCollection = {};
         alert("✅ 全班寵物紀錄已清除！");
         if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
@@ -1749,7 +1749,6 @@
     // === 💡 兩層式相簿核心控制 ===
     function selectAlbumCategory(catName) {
       currentAlbumCategory = catName;
-      // 更新第一層按鈕狀態
       const chips = document.querySelectorAll('#albumCategoryList .album-chip');
       chips.forEach(b => {
         if (b.textContent === catName) b.classList.add('active');
@@ -1761,7 +1760,6 @@
     function selectAlbumSub(mode, seatName) {
       currentAlbumSubMode = mode;
       currentAlbumTargetSeat = seatName;
-      // 更新第二層按鈕狀態
       const subChips = document.querySelectorAll('#albumSubList .album-sub-chip');
       subChips.forEach(b => {
         if (mode === '全班' && b.textContent.includes('全班')) b.classList.add('active');
@@ -1776,15 +1774,11 @@
       container.innerHTML = '';
 
       const filtered = albums.filter(alb => {
-        // 第一層分類過濾 (若選全部則跳過)
         let matchCat = (currentAlbumCategory === '全部' || alb.cat === currentAlbumCategory);
-        // 第二層範圍過濾
         let matchSub = true;
         if (currentAlbumSubMode === '全班') {
-          // 全班顯示：沒有指定特定學生座號的相片
           matchSub = (!alb.studentSeat || alb.studentSeat === '');
         } else {
-          // 個人顯示：剛好符合該座號的相片
           matchSub = (alb.studentSeat === currentAlbumTargetSeat);
         }
         return matchCat && matchSub;
@@ -1796,7 +1790,7 @@
         return;
       }
 
-      filtered.forEach((alb, idx) => {
+      filtered.forEach((alb) => {
         const originalIndex = albums.indexOf(alb);
         const seatBadge = alb.studentSeat ? `<span class="tag-badge">👤 ${alb.studentSeat}</span>` : `<span class="tag-badge" style="background:#dcfce7; color:#15803d;">👥 全班</span>`;
         container.innerHTML += `
@@ -1823,7 +1817,7 @@
       const file = document.getElementById('uploadPhotoFile').files[0]; 
       if(!file) return alert("請選擇照片檔案！");
       const cat = document.getElementById('uploadPhotoCat').value;
-      const studentSeat = document.getElementById('uploadPhotoStudent').value; // 座號或空
+      const studentSeat = document.getElementById('uploadPhotoStudent').value; 
       const desc = document.getElementById('uploadPhotoDesc').value.trim();
 
       const reader = new FileReader();
@@ -1832,7 +1826,7 @@
         img.onload = () => {
           const canvas = document.createElement('canvas'); 
           let w = img.width, h = img.height;
-          const MAX_DIM = 1200; // 高清相簿壓縮
+          const MAX_DIM = 1200; 
           if(w > MAX_DIM || h > MAX_DIM) {
             if(w > h) { h = Math.round((h * MAX_DIM) / w); w = MAX_DIM; }
             else { w = Math.round((w * MAX_DIM) / h); h = MAX_DIM; }
