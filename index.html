@@ -128,11 +128,13 @@
     .album-category-list { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
     .album-chip { padding: 6px 14px; background: #e2e8f0; border-radius: 20px; font-size: 0.85rem; cursor: pointer; border: none; white-space: nowrap; }
     .album-chip.active { background: var(--primary); color: #fff; }
+    
+    /* 💡 相簿網格與可點擊放大圖示 */
     .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
     .gallery-item { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: #fff; position: relative; }
-    .gallery-item img { width: 100%; height: 120px; object-fit: cover; background: #eee; }
+    .gallery-item img { width: 100%; height: 120px; object-fit: cover; background: #eee; cursor: zoom-in; }
     .gallery-item .desc { padding: 8px; font-size: 0.8rem; line-height: 1.4; }
-    .gallery-item .btn-del-img { position: absolute; top:4px; right:4px; background:rgba(0,0,0,0.6); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer;}
+    .gallery-item .btn-del-img { position: absolute; top:4px; right:4px; background:rgba(0,0,0,0.6); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; z-index:10;}
     
     .bulletin-list { list-style: none; }
     .bulletin-item { padding: 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
@@ -330,7 +332,7 @@
         <!-- 4. 打掃工作看板 -->
         <div id="cleanKanban" style="display:none;">
           <div style="font-size:0.8rem; color:#059669; font-weight:700; margin-bottom:10px; background:#dcfce7; padding:6px 10px; border-radius:6px;">
-            <i class="fa-solid fa-hand-pointer"></i> 提示：<strong>直接點擊座號即可專家亮綠燈 / 關閉綠燈</strong>，完成打掃的孩子寵物自動 +1 分！
+            <i class="fa-solid fa-hand-pointer"></i> 提示：<strong>直接點擊座號即可「亮綠燈 / 關閉綠燈」</strong>，完成打掃的孩子寵物自動 +1 分！
           </div>
           <div class="clean-board full">
             <div class="clean-col" style="background:#f1f5f9; border-color:#cbd5e1;">
@@ -459,11 +461,10 @@
         <button class="btn-submit" style="margin-top:8px;" onclick="saveStudentRoster()">儲存座號設定</button>
       </div>
 
-      <!-- 💡 新增：隨機重抽未孵化蛋的品種按鈕 -->
       <div class="card" style="border: 2px solid #10b981;">
         <div class="card-title"><i class="fa-solid fa-dice text-secondary"></i> 4. 隨機更換未孵化蛋的品種</div>
         <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">
-          若想把還沒破殼的蛋重新隨機抽選為全新的貓狗或恐龍等 20 種品種，點擊下方按鈕（<strong>現有分數 100% 完整保留</strong>）：
+          點擊下方按鈕可將所有「尚未破殼的蛋」重新隨機抽選為全新的貓狗品種（<strong>現有分數 100% 完整保留</strong>）：
         </p>
         <button class="btn-submit" style="background:#10b981;" onclick="rerollUnhatchedEggs()">
           <i class="fa-solid fa-shuffle"></i> 🎲 重新隨機抽選未孵化蛋的品種
@@ -532,7 +533,6 @@
           <button class="btn-submit" style="background:#f8fafc; color:#ef4444; border:1px solid #fca5a5;" onclick="manualAddPetXp(-1)">-1 扣分</button>
         </div>
 
-        <!-- 💡 單獨重抽一顆蛋按鈕 -->
         <div id="petModalRerollArea" style="margin-top:10px;">
           <button class="btn-submit" style="background:#f3f4f6; color:#4b5563; border:1px solid #d1d5db; font-size:0.8rem; padding:8px;" onclick="rerollSingleEgg()">
             🎲 換一顆神秘新蛋（保留目前分數）
@@ -651,7 +651,6 @@
       25: { petId: 'whale', stage: 1, xp: 10 }
     };
 
-    // 💡 20 種豐富品種圖鑑
     const PET_CATALOG = [
       { id: 'cat_black', name: '黑貓', stages: ['🥚', '🐱', '🐈‍⬛'], desc: '幸運黑貓' },
       { id: 'cat_orange', name: '橘貓', stages: ['🥚', '🐱', '🐈'], desc: '圓滾大橘' },
@@ -682,7 +681,7 @@
       { id: 'fox', name: '赤狐', stages: ['🥚', '🦊', '🦊'], desc: '野生動物' }
     ];
 
-    // 💡 修改積分升級門檻：每一階段為 20 分 (0-20➔蛋, 20-40➔幼體, 40-60➔成體)
+    // 💡 每一階段 20 分跳下一階段 (0-20➔蛋, 20-40➔幼體, 40-60➔成體)
     const PET_REQ = [20, 20, 20]; 
 
     let storedStudents = JSON.parse(localStorage.getItem('cm309_students'));
@@ -1295,7 +1294,7 @@
       students.forEach((name, i) => {
         const id = i+1; const st = attendanceState[id] || '出席'; let cls = '';
         if(st==='出席') cls='att-present'; else if(st==='病假') cls='att-sick'; else if(st==='事假') cls='att-absent'; else cls='att-late';
-        container.innerHTML += `<div class="student-btn ${cls}" onclick="attendanceState[${id}] = ['出席','事假','病假','遲到'][ (['出席','事假','病假','遲ไป'].indexOf(attendanceState[${id}]||'出席')+1)%4 ]; renderAttendanceGrid(); syncToFirebase();">
+        container.innerHTML += `<div class="student-btn ${cls}" onclick="attendanceState[${id}] = ['出席','事假','病假','遲到'][ (['出席','事假','病假','遲到'].indexOf(attendanceState[${id}]||'出席')+1)%4 ]; renderAttendanceGrid(); syncToFirebase();">
           <span class="seat">${name}</span><span class="status">${st}</span></div>`;
       });
     }
@@ -1492,7 +1491,6 @@
       const actionArea = document.getElementById('petModalActionArea');
       const completeArea = document.getElementById('petModalCompleteArea');
 
-      // 💡 若還在第一階段（蛋），顯示重抽按鈕
       const rerollArea = document.getElementById('petModalRerollArea');
       if (isMystery) {
         rerollArea.style.display = 'block';
@@ -1511,7 +1509,6 @@
       document.getElementById('petManageModal').classList.add('active');
     }
 
-    // 💡 針對單一學生重抽蛋的品種
     function rerollSingleEgg() {
       const seat = currentSelectedStudent.seat;
       const p = petState[seat];
@@ -1524,7 +1521,6 @@
       alert(`🎲 已將 ${currentSelectedStudent.name} 的蛋更換為新神秘品種！分數保持不變。`);
     }
 
-    // 💡 設定頁一鍵重抽全班所有未孵化的蛋
     function rerollUnhatchedEggs() {
       if (confirm("確定要將全班所有「尚未破殼的蛋」重新隨機抽選新品種嗎？（學生的目前分數 100% 完整保留）")) {
         let count = 0;
@@ -1606,7 +1602,7 @@
       const summaryBox = document.getElementById('gardenTicketSummary');
       summaryBox.innerHTML = `
         <div>🦁 成體總數：<strong>${adultCount} 隻</strong></div>
-        <div style="font-size:1rem; color:#b45309;">🎟️️ 累計抽獎券：<strong>${tickets} 張</strong> (每2隻換1張)</div>
+        <div style="font-size:1rem; color:#b45309;">🎟️ 累計抽獎券：<strong>${tickets} 張</strong> (每2隻換1張)</div>
       `;
 
       if (myPets.length === 0) {
@@ -1693,14 +1689,19 @@
 
     function closePetModal() { document.getElementById('petManageModal').classList.remove('active'); }
 
-    // === 相簿功能 ===
+    // === 相簿功能 (支援點擊放大) ===
     function openPhotoModal() { document.getElementById('photoUploadModal').classList.add('active'); }
     function filterAlbum(cat) { document.querySelectorAll('.album-category-list .album-chip').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); renderAlbum(cat); }
     function renderAlbum(filterCat) {
       const container = document.getElementById('albumGallery'); container.innerHTML = '';
       albums.forEach((alb, idx) => {
         if(filterCat === '全部活動' || alb.cat === filterCat) {
-          container.innerHTML += `<div class="gallery-item"><button class="btn-del-img" onclick="deletePhoto(${idx})"><i class="fa-solid fa-xmark"></i></button><img src="${alb.src}"><div class="desc"><strong>${alb.desc||'未命名'}</strong><br><span style="color:#94a3b8;">${alb.cat}</span></div></div>`;
+          container.innerHTML += `
+            <div class="gallery-item">
+              <button class="btn-del-img" onclick="deletePhoto(${idx})"><i class="fa-solid fa-xmark"></i></button>
+              <img src="${alb.src}" onclick="openImageViewer('${alb.src}')" alt="相簿照片">
+              <div class="desc"><strong>${alb.desc||'未命名'}</strong><br><span style="color:#94a3b8;">${alb.cat}</span></div>
+            </div>`;
         }
       });
     }
