@@ -125,15 +125,20 @@
     .form-group { margin-bottom: 12px; }
     .form-control { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; outline: none; }
     .btn-submit { width: 100%; padding: 12px; background: var(--primary); color: #fff; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; }
-    .album-category-list { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
-    .album-chip { padding: 6px 14px; background: #e2e8f0; border-radius: 20px; font-size: 0.85rem; cursor: pointer; border: none; white-space: nowrap; }
-    .album-chip.active { background: var(--primary); color: #fff; }
     
-    /* 💡 相簿網格與可點擊放大圖示 */
+    /* 💡 相簿專屬兩層選單樣式 */
+    .album-category-list { display: flex; gap: 8px; margin-bottom: 8px; overflow-x: auto; padding-bottom: 4px; }
+    .album-sub-list { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; align-items: center; background: #f8fafc; padding: 8px; border-radius: 8px; border: 1px solid var(--border); }
+    .album-chip { padding: 6px 14px; background: #e2e8f0; border-radius: 20px; font-size: 0.85rem; cursor: pointer; border: none; white-space: nowrap; font-weight: 600; }
+    .album-chip.active { background: var(--primary); color: #fff; }
+    .album-sub-chip { padding: 4px 10px; background: #fff; border: 1px solid var(--border); border-radius: 16px; font-size: 0.78rem; cursor: pointer; white-space: nowrap; color: #475569; font-weight: 600; }
+    .album-sub-chip.active { background: #059669; color: #fff; border-color: #059669; }
+
     .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
     .gallery-item { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: #fff; position: relative; }
     .gallery-item img { width: 100%; height: 120px; object-fit: cover; background: #eee; cursor: zoom-in; }
     .gallery-item .desc { padding: 8px; font-size: 0.8rem; line-height: 1.4; }
+    .gallery-item .tag-badge { font-size: 0.68rem; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; margin-right: 4px; display: inline-block; font-weight: 700; }
     .gallery-item .btn-del-img { position: absolute; top:4px; right:4px; background:rgba(0,0,0,0.6); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; z-index:10;}
     
     .bulletin-list { list-style: none; }
@@ -383,7 +388,7 @@
       </div>
     </section>
 
-    <!-- 第四部分：學生相簿 -->
+    <!-- 第四部分：學生相簿 (兩層式架構：四大分類 ➔ 全班/個人座號) -->
     <section id="tab-album" class="page-section">
       <div class="card">
         <div class="card-title" style="justify-content:space-between;">
@@ -392,13 +397,45 @@
             <i class="fa-solid fa-plus"></i> 新增照片
           </button>
         </div>
-        <div class="album-category-list">
-          <button class="album-chip active" onclick="filterAlbum('全部活動')">全部</button>
-          <button class="album-chip" onclick="filterAlbum('體育運動會')">體育運動會</button>
-          <button class="album-chip" onclick="filterAlbum('特色課程')">特色課程</button>
-          <button class="album-chip" onclick="filterAlbum('日常學習')">日常學習</button>
-          <button class="album-chip" onclick="filterAlbum('掃除打掃')">掃除打掃</button>
+
+        <!-- 第一層：四大分類 -->
+        <div class="album-category-list" id="albumCategoryList">
+          <button class="album-chip active" onclick="selectAlbumCategory('全部')">全部</button>
+          <button class="album-chip" onclick="selectAlbumCategory('體育課')">體育課</button>
+          <button class="album-chip" onclick="selectAlbumCategory('生活寫真')">生活寫真</button>
+          <button class="album-chip" onclick="selectAlbumCategory('校園活動')">校園活動</button>
         </div>
+
+        <!-- 第二層：全班 / 個人座號 (共25個分層) -->
+        <div class="album-sub-list" id="albumSubList">
+          <button class="album-sub-chip active" onclick="selectAlbumSub('全班', '')">👥 全班</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '1號')">1號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '2號')">2號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '3號')">3號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '4號')">4號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '5號')">5號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '6號')">6號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '7號')">7號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '8號')">8號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '9號')">9號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '10號')">10號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '11號')">11號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '12號')">12號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '13號')">13號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '14號')">14號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '15號')">15號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '16號')">16號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '17號')">17號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '18號')">18號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '19號')">19號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '20號')">20號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '21號')">21號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '22號')">22號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '23號')">23號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '24號')">24號</button>
+          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '25號')">25號</button>
+        </div>
+
         <div class="gallery-grid" id="albumGallery"></div>
       </div>
     </section>
@@ -576,16 +613,22 @@
     </div>
   </div>
 
-  <!-- 照片上傳 Modal -->
+  <!-- 照片上傳 Modal (對應三大分類：體育課、生活寫真、校園活動) -->
   <div id="photoUploadModal" class="modal-overlay">
     <div class="modal-box">
       <h3>上傳新照片</h3>
       <div class="form-group">
+        <label style="font-size:0.8rem; font-weight:600; color:#475569;">分類相簿：</label>
         <select id="uploadPhotoCat" class="form-control">
-          <option value="體育運動會">體育運動會</option>
-          <option value="特色課程">特色課程</option>
-          <option value="日常學習">日常學習</option>
-          <option value="掃除打掃">掃除打掃</option>
+          <option value="體育課">體育課</option>
+          <option value="生活寫真">生活寫真</option>
+          <option value="校園活動">校園活動</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label style="font-size:0.8rem; font-weight:600; color:#475569;">指定學生（選填，若為個人寫真請選擇座號）：</label>
+        <select id="uploadPhotoStudent" class="form-control">
+          <option value="">(不指定，全班共用)</option>
         </select>
       </div>
       <div class="form-group"><input type="text" id="uploadPhotoDesc" class="form-control" placeholder="照片描述 (選填)"></div>
@@ -681,7 +724,6 @@
       { id: 'fox', name: '赤狐', stages: ['🥚', '🦊', '🦊'], desc: '野生動物' }
     ];
 
-    // 💡 每一階段 20 分跳下一階段 (0-20➔蛋, 20-40➔幼體, 40-60➔成體)
     const PET_REQ = [20, 20, 20]; 
 
     let storedStudents = JSON.parse(localStorage.getItem('cm309_students'));
@@ -697,6 +739,11 @@
     let announcements = JSON.parse(localStorage.getItem('cm309_announcements')) || [];
     let albums = JSON.parse(localStorage.getItem('cm309_albums')) || [];
     
+    // 💡 相簿篩選狀態變數
+    let currentAlbumCategory = '全部';
+    let currentAlbumSubMode = '全班'; // '全班' 或 '個人'
+    let currentAlbumTargetSeat = '';   // 例如 '1號'
+
     let petState = JSON.parse(localStorage.getItem('cm309_pets')) || INITIAL_PETS;
     let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
     let cleanAssignment = JSON.parse(localStorage.getItem('cm309_cleanAssign')) || {};
@@ -733,7 +780,7 @@
       renderAllGrids();
       renderBulletins();
       renderManageBulletins();
-      renderAlbum('全部活動');
+      renderAlbum();
       updateCloudBadge();
 
       if (firebaseDbUrl) {
@@ -757,6 +804,11 @@
       const select = document.getElementById('recordStudentSelect');
       select.innerHTML = '';
       students.forEach((name, i) => { select.add(new Option(`${name}`, `${name}`)); });
+
+      // 同步更新相簿上傳modal的學生選單
+      const albumSelect = document.getElementById('uploadPhotoStudent');
+      albumSelect.innerHTML = '<option value="">(不指定，全班共用)</option>';
+      students.forEach(name => { albumSelect.add(new Option(name, name)); });
     }
 
     function updateCloudBadge(status) {
@@ -806,6 +858,7 @@
       localStorage.setItem('cm309_pets', JSON.stringify(petState));
       localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
       localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
+      localStorage.setItem('cm309_albums', JSON.stringify(albums));
       localStorage.setItem('cm309_cleanAssign', JSON.stringify(cleanAssignment));
       localStorage.setItem('cm309_corrBoxes', JSON.stringify(correctionBoxes));
       localStorage.setItem('cm309_cleanlinessAssign', JSON.stringify(cleanlinessAssignment));
@@ -826,6 +879,7 @@
           petState,
           petCollection,
           announcements,
+          albums,
           cleanAssignment,
           correctionBoxes,
           cleanlinessAssignment,
@@ -871,6 +925,7 @@
             }
             petCollection = data.petCollection || {};
             announcements = data.announcements || [];
+            albums = data.albums || [];
             cleanAssignment = data.cleanAssignment || {};
             if (data.correctionBoxes) correctionBoxes = data.correctionBoxes;
             cleanlinessAssignment = data.cleanlinessAssignment || {};
@@ -885,6 +940,7 @@
             localStorage.setItem('cm309_pets', JSON.stringify(petState));
             localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
             localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
+            localStorage.setItem('cm309_albums', JSON.stringify(albums));
             localStorage.setItem('cm309_cleanAssign', JSON.stringify(cleanAssignment));
             localStorage.setItem('cm309_corrBoxes', JSON.stringify(correctionBoxes));
             localStorage.setItem('cm309_cleanlinessAssign', JSON.stringify(cleanlinessAssignment));
@@ -894,6 +950,7 @@
             renderPetsGrid();
             renderBulletins();
             renderManageBulletins();
+            renderAlbum();
             document.getElementById('studentRosterInput').value = students.join('\n');
             updateCloudBadge();
             if (!silent) alert("✅ 已成功從 Firebase 同步最新狀態！");
@@ -1679,7 +1736,7 @@
     }
 
     function resetAllPets() {
-      if(confirm("⚠️ 警告：確定要刪除全班寵物與寵物園嗎？")) {
+      if(confirm("⚠️ 警告: 確定要刪除全班寵物與寵物園嗎？")) {
         petState = {}; petCollection = {};
         alert("✅ 全班寵物紀錄已清除！");
         if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
@@ -1689,38 +1746,123 @@
 
     function closePetModal() { document.getElementById('petManageModal').classList.remove('active'); }
 
-    // === 相簿功能 (支援點擊放大) ===
-    function openPhotoModal() { document.getElementById('photoUploadModal').classList.add('active'); }
-    function filterAlbum(cat) { document.querySelectorAll('.album-category-list .album-chip').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); renderAlbum(cat); }
-    function renderAlbum(filterCat) {
-      const container = document.getElementById('albumGallery'); container.innerHTML = '';
-      albums.forEach((alb, idx) => {
-        if(filterCat === '全部活動' || alb.cat === filterCat) {
-          container.innerHTML += `
-            <div class="gallery-item">
-              <button class="btn-del-img" onclick="deletePhoto(${idx})"><i class="fa-solid fa-xmark"></i></button>
-              <img src="${alb.src}" onclick="openImageViewer('${alb.src}')" alt="相簿照片">
-              <div class="desc"><strong>${alb.desc||'未命名'}</strong><br><span style="color:#94a3b8;">${alb.cat}</span></div>
-            </div>`;
+    // === 💡 兩層式相簿核心控制 ===
+    function selectAlbumCategory(catName) {
+      currentAlbumCategory = catName;
+      // 更新第一層按鈕狀態
+      const chips = document.querySelectorAll('#albumCategoryList .album-chip');
+      chips.forEach(b => {
+        if (b.textContent === catName) b.classList.add('active');
+        else b.classList.remove('active');
+      });
+      renderAlbum();
+    }
+
+    function selectAlbumSub(mode, seatName) {
+      currentAlbumSubMode = mode;
+      currentAlbumTargetSeat = seatName;
+      // 更新第二層按鈕狀態
+      const subChips = document.querySelectorAll('#albumSubList .album-sub-chip');
+      subChips.forEach(b => {
+        if (mode === '全班' && b.textContent.includes('全班')) b.classList.add('active');
+        else if (mode === '個人' && b.textContent === seatName) b.classList.add('active');
+        else b.classList.remove('active');
+      });
+      renderAlbum();
+    }
+
+    function renderAlbum() {
+      const container = document.getElementById('albumGallery');
+      container.innerHTML = '';
+
+      const filtered = albums.filter(alb => {
+        // 第一層分類過濾 (若選全部則跳過)
+        let matchCat = (currentAlbumCategory === '全部' || alb.cat === currentAlbumCategory);
+        // 第二層範圍過濾
+        let matchSub = true;
+        if (currentAlbumSubMode === '全班') {
+          // 全班顯示：沒有指定特定學生座號的相片
+          matchSub = (!alb.studentSeat || alb.studentSeat === '');
+        } else {
+          // 個人顯示：剛好符合該座號的相片
+          matchSub = (alb.studentSeat === currentAlbumTargetSeat);
         }
+        return matchCat && matchSub;
+      });
+
+      if (filtered.length === 0) {
+        let scopeText = currentAlbumSubMode === '全班' ? '全班' : currentAlbumTargetSeat;
+        container.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:#94a3b8; padding:30px;">目前【${currentAlbumCategory} ➔ ${scopeText}】尚無照片，點擊右上角「新增照片」開始上傳！</p>`;
+        return;
+      }
+
+      filtered.forEach((alb, idx) => {
+        const originalIndex = albums.indexOf(alb);
+        const seatBadge = alb.studentSeat ? `<span class="tag-badge">👤 ${alb.studentSeat}</span>` : `<span class="tag-badge" style="background:#dcfce7; color:#15803d;">👥 全班</span>`;
+        container.innerHTML += `
+          <div class="gallery-item">
+            <button class="btn-del-img" onclick="deletePhoto(${originalIndex})"><i class="fa-solid fa-xmark"></i></button>
+            <img src="${alb.src}" onclick="openImageViewer('${alb.src}')" alt="相簿照片">
+            <div class="desc">
+              <div>${seatBadge}<span style="color:#64748b;">${alb.cat}</span></div>
+              <strong>${alb.desc||'未命名'}</strong>
+            </div>
+          </div>`;
       });
     }
-    function deletePhoto(idx) { if(confirm("確定刪除照片？")) { albums.splice(idx,1); localStorage.setItem('cm309_albums', JSON.stringify(albums)); renderAlbum('全部活動'); } }
+
+    function deletePhoto(idx) { 
+      if(confirm("確定刪除這張照片？")) { 
+        albums.splice(idx, 1); 
+        renderAlbum(); 
+        syncToFirebase();
+      } 
+    }
+
     function processAndSavePhoto() {
-      const file = document.getElementById('uploadPhotoFile').files[0]; if(!file) return alert("請選照片");
-      const cat = document.getElementById('uploadPhotoCat').value, desc = document.getElementById('uploadPhotoDesc').value;
+      const file = document.getElementById('uploadPhotoFile').files[0]; 
+      if(!file) return alert("請選擇照片檔案！");
+      const cat = document.getElementById('uploadPhotoCat').value;
+      const studentSeat = document.getElementById('uploadPhotoStudent').value; // 座號或空
+      const desc = document.getElementById('uploadPhotoDesc').value.trim();
+
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
         img.onload = () => {
-          const canvas = document.createElement('canvas'); let w = img.width, h = img.height;
-          if(w>h) { if(w>1024) { h*=1024/w; w=1024; } } else { if(h>1024) { w*=1024/h; h=1024; } }
-          canvas.width=w; canvas.height=h; canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-          try { albums.unshift({ cat, desc, src: canvas.toDataURL('image/jpeg', 0.8) }); localStorage.setItem('cm309_albums', JSON.stringify(albums));
-            document.getElementById('photoUploadModal').classList.remove('active'); renderAlbum('全部活動'); alert("已儲存！");
-          } catch(err) { alert("容量滿，請刪除舊照片。"); albums.shift(); }
-        }; img.src = e.target.result;
-      }; reader.readAsDataURL(file);
+          const canvas = document.createElement('canvas'); 
+          let w = img.width, h = img.height;
+          const MAX_DIM = 1200; // 高清相簿壓縮
+          if(w > MAX_DIM || h > MAX_DIM) {
+            if(w > h) { h = Math.round((h * MAX_DIM) / w); w = MAX_DIM; }
+            else { w = Math.round((w * MAX_DIM) / h); h = MAX_DIM; }
+          }
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, w, h);
+
+          try { 
+            albums.unshift({ 
+              cat, 
+              studentSeat: studentSeat, 
+              desc, 
+              src: canvas.toDataURL('image/jpeg', 0.85),
+              time: Date.now()
+            }); 
+            document.getElementById('photoUploadModal').classList.remove('active'); 
+            renderAlbum(); 
+            syncToFirebase();
+            alert("✅ 相片已成功壓縮並上傳！");
+          } catch(err) { 
+            alert("記憶體容量已滿，請刪除部分舊照片後再試。"); 
+            albums.shift(); 
+          }
+        }; 
+        img.src = e.target.result;
+      }; 
+      reader.readAsDataURL(file);
     }
 
     // === Google 試算表日誌寫入 ===
