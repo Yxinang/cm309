@@ -387,11 +387,12 @@
       </div>
     </section>
 
-    <!-- 第四部分：學生相簿 (兩層式架構：四大分類 ➔ 全班/個人座號) -->
+    <!-- 第四部分：學生相簿 -->
     <section id="tab-album" class="page-section">
       <div class="card">
         <div class="card-title" style="justify-content:space-between;">
           <span><i class="fa-solid fa-photo-film"></i> 班級活動相簿</span>
+          <!-- 💡 點擊觸發開啟上傳彈窗 -->
           <button class="btn-upload" onclick="openPhotoModal()" style="font-size:0.75rem; padding:6px 10px;">
             <i class="fa-solid fa-plus"></i> 新增照片
           </button>
@@ -738,7 +739,6 @@
     let announcements = JSON.parse(localStorage.getItem('cm309_announcements')) || [];
     let albums = JSON.parse(localStorage.getItem('cm309_albums')) || [];
     
-    // 相簿篩選狀態變數
     let currentAlbumCategory = '全部';
     let currentAlbumSubMode = '全班'; 
     let currentAlbumTargetSeat = '';   
@@ -1659,7 +1659,7 @@
       const summaryBox = document.getElementById('gardenTicketSummary');
       summaryBox.innerHTML = `
         <div>🦁 成體總數：<strong>${adultCount} 隻</strong></div>
-        <div style="font-size:1rem; color:#b45309;">🎟️ 累計抽獎券：<strong>${tickets} 張</strong> (每2隻換1張)</div>
+        <div style="font-size:1rem; color:#b45309;">🎟️️ 累計抽獎券：<strong>${tickets} 張</strong> (每2隻換1張)</div>
       `;
 
       if (myPets.length === 0) {
@@ -1746,7 +1746,13 @@
 
     function closePetModal() { document.getElementById('petManageModal').classList.remove('active'); }
 
-    // === 💡 兩層式相簿核心控制 ===
+    // === 💡 相簿控制核心 (新增照片彈窗修復) ===
+    function openPhotoModal() { 
+      document.getElementById('uploadPhotoFile').value = '';
+      document.getElementById('uploadPhotoDesc').value = '';
+      document.getElementById('photoUploadModal').classList.add('active'); 
+    }
+
     function selectAlbumCategory(catName) {
       currentAlbumCategory = catName;
       const chips = document.querySelectorAll('#albumCategoryList .album-chip');
@@ -1814,8 +1820,10 @@
     }
 
     function processAndSavePhoto() {
-      const file = document.getElementById('uploadPhotoFile').files[0]; 
-      if(!file) return alert("請選擇照片檔案！");
+      const fileInput = document.getElementById('uploadPhotoFile');
+      if (!fileInput.files || fileInput.files.length === 0) return alert("請選擇照片檔案！");
+      const file = fileInput.files[0];
+      
       const cat = document.getElementById('uploadPhotoCat').value;
       const studentSeat = document.getElementById('uploadPhotoStudent').value; 
       const desc = document.getElementById('uploadPhotoDesc').value.trim();
