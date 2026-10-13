@@ -362,7 +362,7 @@
         <div class="card-title"><i class="fa-solid fa-paw text-secondary"></i> 班級神秘寵物樂園</div>
         <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px; line-height:1.5;">
           一開始會隨機獲得神秘的蛋，升級後才會破殼揭曉真正品種！滿等後可送入個人專屬「寵物園」。<br>
-          <strong style="color:#2563eb;">成長階段：🥚 蛋(0-20分) ➔ 🐤 幼體(20-40分) ➔ 🦅 成體(40-60分)</strong>
+          <strong style="color:#2563eb;">成長階段：🥚 蛋(0-20分) ➔ 🐤 幼體(20-40分) ➔ 🦅 成體(40-55分)</strong>
         </p>
         <div class="student-grid" id="petsGrid"></div>
       </div>
@@ -392,7 +392,6 @@
       <div class="card">
         <div class="card-title" style="justify-content:space-between;">
           <span><i class="fa-solid fa-photo-film"></i> 班級活動相簿</span>
-          <!-- 💡 點擊觸發開啟上傳彈窗 -->
           <button class="btn-upload" onclick="openPhotoModal()" style="font-size:0.75rem; padding:6px 10px;">
             <i class="fa-solid fa-plus"></i> 新增照片
           </button>
@@ -724,7 +723,8 @@
       { id: 'fox', name: '赤狐', stages: ['🥚', '🦊', '🦊'], desc: '野生動物' }
     ];
 
-    const PET_REQ = [20, 20, 20]; 
+    // 💡 每一階段改為：第一階段 20分，第二階段 20分，第三階段 15分 (總計 55 分滿等)
+    const PET_REQ = [20, 20, 15]; 
 
     let storedStudents = JSON.parse(localStorage.getItem('cm309_students'));
     if (!storedStudents || storedStudents.length !== 25 || storedStudents[0].includes("黃")) {
@@ -1659,7 +1659,7 @@
       const summaryBox = document.getElementById('gardenTicketSummary');
       summaryBox.innerHTML = `
         <div>🦁 成體總數：<strong>${adultCount} 隻</strong></div>
-        <div style="font-size:1rem; color:#b45309;">🎟️️ 累計抽獎券：<strong>${tickets} 張</strong> (每2隻換1張)</div>
+        <div style="font-size:1rem; color:#b45309;">🎟️ 累計抽獎券：<strong>${tickets} 張</strong> (每2隻換1張)</div>
       `;
 
       if (myPets.length === 0) {
@@ -1746,7 +1746,7 @@
 
     function closePetModal() { document.getElementById('petManageModal').classList.remove('active'); }
 
-    // === 💡 相簿控制核心 (新增照片彈窗修復) ===
+    // === 💡 兩層式相簿控制核心 ===
     function openPhotoModal() { 
       document.getElementById('uploadPhotoFile').value = '';
       document.getElementById('uploadPhotoDesc').value = '';
