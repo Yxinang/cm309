@@ -497,16 +497,6 @@
         <button class="btn-submit" style="margin-top:8px;" onclick="saveStudentRoster()">儲存座號設定</button>
       </div>
 
-      <div class="card" style="border: 2px solid #10b981;">
-        <div class="card-title"><i class="fa-solid fa-dice text-secondary"></i> 4. 隨機更換未孵化蛋的品種</div>
-        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">
-          點擊下方按鈕可將所有「尚未破殼的蛋」重新隨機抽選為全新的貓狗品種（<strong>現有分數 100% 完整保留</strong>）：
-        </p>
-        <button class="btn-submit" style="background:#10b981;" onclick="rerollUnhatchedEggs()">
-          <i class="fa-solid fa-shuffle"></i> 🎲 重新隨機抽選未孵化蛋的品種
-        </button>
-      </div>
-
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-triangle-exclamation text-danger"></i> 進階資料清除</div>
         <button class="btn-submit" style="background:#ef4444;" onclick="resetAllPets()">
@@ -568,12 +558,6 @@
           <button class="btn-submit" style="background:#059669;" onclick="manualAddPetXp(5)">+5 獎勵分</button>
           <button class="btn-submit" style="background:#f8fafc; color:#ef4444; border:1px solid #fca5a5;" onclick="manualAddPetXp(-1)">-1 扣分</button>
         </div>
-
-        <div id="petModalRerollArea" style="margin-top:10px;">
-          <button class="btn-submit" style="background:#f3f4f6; color:#4b5563; border:1px solid #d1d5db; font-size:0.8rem; padding:8px;" onclick="rerollSingleEgg()">
-            🎲 換一顆神秘新蛋（保留目前分數）
-          </button>
-        </div>
       </div>
 
       <div id="petSelectView" style="display:none; text-align:left;">
@@ -585,30 +569,39 @@
         </div>
       </div>
 
+      <!-- 💡 動物園與雙寵物兌換獎勵區域 -->
       <div id="petGardenView" style="display:none; text-align:left;">
         <div id="gardenTicketSummary" class="ticket-summary-box"></div>
-        <p style="font-size:0.8rem; color:#64748b; margin-top:10px;"><i class="fa-solid fa-circle-info"></i> 點擊成體可「登記兌換獎勵 (亮黃燈)」；點擊「✕ 取消」可復原。</p>
+        <p style="font-size:0.8rem; color:#64748b; margin-top:10px;"><i class="fa-solid fa-circle-info"></i> <strong>2隻寵物換1次獎勵（自由選小禮物或抽獎券）</strong>：點擊第1隻成體後，再點擊第2隻成體即可進行配對兌換（亮黃燈）。點擊已兌換的其中一隻可取消。</p>
         <div class="garden-grid" id="gardenGrid"></div>
       </div>
 
       <div style="margin-top:20px; display:flex; flex-direction:column; gap:8px;">
-        <button class="btn-submit" style="background:#0ea5e9;" id="btnViewGarden" onclick="showPetGarden()">🌳 查看專屬動物園與抽獎券</button>
+        <button class="btn-submit" style="background:#0ea5e9;" id="btnViewGarden" onclick="showPetGarden()">🌳 查看專屬動物園與獎勵兌換</button>
         <div id="gardenTicketBadgeBelow" style="font-size:0.82rem; color:#b45309; font-weight:700; text-align:center;"></div>
         <button class="btn-submit" style="background:#94a3b8;" id="btnModalClose" onclick="closePetModal()">關閉視窗</button>
       </div>
     </div>
   </div>
 
-  <!-- 獎品兌換對話框 Modal -->
+  <!-- 💡 獎品/抽獎券選擇對話框 Modal -->
   <div id="rewardRedeemModal" class="modal-overlay" style="z-index:110;">
-    <div class="modal-box" style="max-width:380px;">
-      <h3 style="color:#b45309; margin-bottom:8px;"><i class="fa-solid fa-gift"></i> 登記成體兌換獎勵</h3>
-      <p style="font-size:0.85rem; color:#64748b; margin-bottom:12px;" id="redeemModalAnimalName">請輸入要兌換的獎品：</p>
-      <input type="text" id="rewardPrizeInput" class="form-control" placeholder="例如: 橡皮擦、免寫作業卡、貼紙" required>
-      <div style="display:flex; gap:8px; margin-top:14px;">
-        <button class="btn-submit" style="background:#eab308; color:#fff;" onclick="submitRewardRedeem()">確認兌換 (亮黃燈)</button>
-        <button class="btn-submit" style="background:#94a3b8;" onclick="closeRewardModal()">取消</button>
+    <div class="modal-box" style="max-width:380px; text-align:center;">
+      <h3 style="color:#b45309; margin-bottom:8px;"><i class="fa-solid fa-gift"></i> 2隻寵物兌換獎勵</h3>
+      <p style="font-size:0.85rem; color:#64748b; margin-bottom:14px;" id="redeemModalPairText">已選擇第 1 隻與第 2 隻成體，請選擇要兌換的獎勵類型：</p>
+      
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px;">
+        <button class="btn-submit" style="background:#10b981;" onclick="setRewardType('prize')">🎁 兌換小禮物（自訂名稱）</button>
+        <button class="btn-submit" style="background:#d97706;" onclick="setRewardType('ticket')">🎟️ 換抽獎券一張</button>
       </div>
+
+      <div id="prizeInputArea" style="display:none; margin-bottom:14px; text-align:left;">
+        <label style="font-size:0.78rem; font-weight:700; color:#475569;">輸入小禮物名稱：</label>
+        <input type="text" id="rewardPrizeInput" class="form-control" placeholder="例如: 橡皮擦、免寫作業卡">
+        <button class="btn-submit" style="background:#eab308; margin-top:8px;" onclick="submitRewardRedeem('prize')">確認送出 (兩隻寵物亮黃燈)</button>
+      </div>
+
+      <button class="btn-submit" style="background:#94a3b8;" onclick="closeRewardModal()">取消返回</button>
     </div>
   </div>
 
@@ -723,7 +716,7 @@
       { id: 'fox', name: '赤狐', stages: ['🥚', '🦊', '🦊'], desc: '野生動物' }
     ];
 
-    // 💡 每一階段改為：第一階段 20分，第二階段 20分，第三階段 15分 (總計 55 分滿等)
+    // 💡 每一階段設定：第一階段 20分，第二階段 20分，第三階段 15分 (總計 55 分滿等)
     const PET_REQ = [20, 20, 15]; 
 
     let storedStudents = JSON.parse(localStorage.getItem('cm309_students'));
@@ -766,7 +759,9 @@
     let clickTimeout = null;
     let lastClickedSeat = null;
     let syncDebounceTimer = null;
-    let selectedRedeemIndex = null;
+
+    // 💡 雙寵物兌換暫存狀態
+    let firstSelectedPetIndex = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('zh-TW');
@@ -1548,13 +1543,6 @@
       const actionArea = document.getElementById('petModalActionArea');
       const completeArea = document.getElementById('petModalCompleteArea');
 
-      const rerollArea = document.getElementById('petModalRerollArea');
-      if (isMystery) {
-        rerollArea.style.display = 'block';
-      } else {
-        rerollArea.style.display = 'none';
-      }
-
       if(isCompleted) {
          progressArea.style.display = 'none'; actionArea.style.display = 'none'; completeArea.style.display = 'block';
       } else {
@@ -1566,43 +1554,17 @@
       document.getElementById('petManageModal').classList.add('active');
     }
 
-    function rerollSingleEgg() {
-      const seat = currentSelectedStudent.seat;
-      const p = petState[seat];
-      if (!p || p.stage !== 1) return alert("只有在「蛋」階段才能更換品種喔！");
-      const randomPet = PET_CATALOG[Math.floor(Math.random() * PET_CATALOG.length)];
-      p.petId = randomPet.id;
-      openPetModal(seat, currentSelectedStudent.name);
-      renderPetsGrid();
-      syncToFirebase();
-      alert(`🎲 已將 ${currentSelectedStudent.name} 的蛋更換為新神秘品種！分數保持不變。`);
-    }
-
-    function rerollUnhatchedEggs() {
-      if (confirm("確定要將全班所有「尚未破殼的蛋」重新隨機抽選新品種嗎？（學生的目前分數 100% 完整保留）")) {
-        let count = 0;
-        for (let seat in petState) {
-          if (petState[seat].stage === 1) {
-            const randomPet = PET_CATALOG[Math.floor(Math.random() * PET_CATALOG.length)];
-            petState[seat].petId = randomPet.id;
-            count++;
-          }
-        }
-        renderPetsGrid();
-        syncToFirebase();
-        alert(`✅ 成功幫 ${count} 顆未孵化的蛋重新抽選新品種！分數均已完整保留。`);
-      }
-    }
-
     function updateTicketBadgeBelow(seat) {
       const myPets = petCollection[seat] || [];
-      const adultCount = myPets.length;
+      const adultCount = myPets.filter(item => item.stage > 3 || !item.pairId).length;
+      // 計算已兌換的總對數 (每2隻成體一組)
+      const pairedCount = myPets.filter(item => item.redeemed).length / 2;
       const tickets = Math.floor(adultCount / 2);
       const badge = document.getElementById('gardenTicketBadgeBelow');
       if (adultCount > 0) {
-        badge.innerHTML = `🌟 目前動物園成體：${adultCount} 隻 ｜ 累計抽獎券：<strong style="color:#d97706; font-size:0.95rem;">🎟️ ${tickets} 張</strong>`;
+        badge.innerHTML = `🌟 目前動物園成體：${adultCount} 隻 ｜ 累計抽獎券/禮物：<strong style="color:#d97706; font-size:0.95rem;">${pairedCount} 組</strong>`;
       } else {
-        badge.innerHTML = `🎟️ 培育 2 隻動物成體即可兌換 1 張抽獎券！`;
+        badge.innerHTML = `🎟️ 培育 2 隻動物成體即可配對兌換 1 次獎勵！`;
       }
     }
 
@@ -1620,14 +1582,14 @@
     function moveToGarden() {
       const seat = currentSelectedStudent.seat; const p = petState[seat];
       if(!petCollection[seat]) petCollection[seat] = [];
-      petCollection[seat].push({ petId: p.petId, prize: null, redeemed: false }); 
+      petCollection[seat].push({ petId: p.petId, prize: null, redeemed: false, pairId: null }); 
       delete petState[seat];
       openPetModal(seat, currentSelectedStudent.name); 
       renderPetsGrid();
       syncToFirebase();
     }
 
-    // === 🌳 查看專屬動物園與獎勵兌換（含亮黃燈） ===
+    // === 🌳 查看專屬動物園與雙寵物兌換獎勵系統 ===
     function showPetGarden() {
       document.getElementById('petManageView').style.display = 'none';
       document.getElementById('petSelectView').style.display = 'none';
@@ -1641,6 +1603,7 @@
         openPetModal(currentSelectedStudent.seat, currentSelectedStudent.name);
       };
 
+      firstSelectedPetIndex = null;
       renderPetGardenContent();
     }
 
@@ -1650,16 +1613,16 @@
       grid.innerHTML = '';
       
       let rawPets = petCollection[seat] || [];
-      const myPets = rawPets.map(p => typeof p === 'string' ? { petId: p, prize: null, redeemed: false } : p);
+      const myPets = rawPets.map(p => typeof p === 'string' ? { petId: p, prize: null, redeemed: false, pairId: null } : p);
       petCollection[seat] = myPets;
 
       const adultCount = myPets.length;
-      const tickets = Math.floor(adultCount / 2);
+      const pairedCount = myPets.filter(item => item.redeemed).length / 2;
 
       const summaryBox = document.getElementById('gardenTicketSummary');
       summaryBox.innerHTML = `
         <div>🦁 成體總數：<strong>${adultCount} 隻</strong></div>
-        <div style="font-size:1rem; color:#b45309;">🎟️ 累計抽獎券：<strong>${tickets} 張</strong> (每2隻換1張)</div>
+        <div style="font-size:1rem; color:#b45309;">🎁 已兌換獎勵：<strong>${pairedCount} 組</strong> (每2隻換1次)</div>
       `;
 
       if (myPets.length === 0) {
@@ -1668,26 +1631,52 @@
         myPets.forEach((item, idx) => {
           const cat = PET_CATALOG.find(c => c.id === item.petId) || PET_CATALOG[0];
           const isRedeemed = !!item.redeemed;
+          const isSelectedFirst = (firstSelectedPetIndex === idx);
           
           const div = document.createElement('div');
-          div.className = `garden-item ${isRedeemed ? 'is-redeemed' : ''}`;
-          
-          let cancelBtnHtml = isRedeemed ? 
-            `<button onclick="event.stopPropagation(); cancelRewardRedeem(${idx})" style="background:#fee2e2; border:1px solid #fca5a5; color:#dc2626; border-radius:4px; font-size:0.65rem; padding:2px 6px; margin-top:4px; cursor:pointer; font-weight:700;">✕ 取消</button>` : '';
+          let itemClass = 'garden-item';
+          if (isRedeemed) itemClass += ' is-redeemed';
+          if (isSelectedFirst) itemClass += ' is-selected-first';
+          div.className = itemClass;
 
-          let prizeBadgeHtml = isRedeemed ? 
-            `<div class="redeemed-badge" title="${item.prize || '已兌換'}">🎁 ${item.prize || '已換獎'}</div>` : 
-            `<div style="font-size:0.65rem; color:#64748b; margin-top:4px;">(點擊兌換)</div>`;
+          // 若為第一隻被點擊等待配對的寵物，加上特殊提示
+          let statusHtml = '';
+          if (isSelectedFirst) {
+            statusHtml = `<div style="font-size:0.65rem; background:#2563eb; color:#fff; padding:2px 4px; border-radius:4px; margin-top:4px; font-weight:700;">點第2隻配對</div>`;
+          } else if (isRedeemed) {
+            statusHtml = `<div class="redeemed-badge" title="${item.prize || '已兌換'}">🎁 ${item.prize || '已換獎'}</div><button onclick="event.stopPropagation(); cancelPairRedeem(${idx})" style="background:#fee2e2; border:1px solid #fca5a5; color:#dc2626; border-radius:4px; font-size:0.6rem; padding:1px 4px; margin-top:2px; cursor:pointer; font-weight:700;">✕ 取消</button>`;
+          } else {
+            statusHtml = `<div style="font-size:0.65rem; color:#64748b; margin-top:4px;">(點擊配對)</div>`;
+          }
 
           div.innerHTML = `
             <div class="emoji">${cat.stages[2]}</div>
             <div class="name">${cat.name}</div>
-            ${prizeBadgeHtml}
-            ${cancelBtnHtml}
+            ${statusHtml}
           `;
 
+          // 點擊事件：處理雙寵物配對邏輯
           div.onclick = () => {
-            if (!isRedeemed) openRewardModal(idx, cat.name);
+            if (isRedeemed) {
+              // 若點擊已兌換的寵物，直接詢問是否取消這組兌換
+              if (confirm("要取消此組雙寵物兌換，讓這兩隻寵物恢復未兌換狀態嗎？")) {
+                cancelPairRedeem(idx);
+              }
+              return;
+            }
+
+            if (firstSelectedPetIndex === null) {
+              // 步驟一：選定第一隻
+              firstSelectedPetIndex = idx;
+              renderPetGardenContent();
+            } else if (firstSelectedPetIndex === idx) {
+              // 點自己取消選取
+              firstSelectedPetIndex = null;
+              renderPetGardenContent();
+            } else {
+              // 步驟二：選定第二隻，彈出選擇兌換框
+              openRewardModal(firstSelectedPetIndex, idx);
+            }
           };
 
           grid.appendChild(div);
@@ -1695,44 +1684,79 @@
       }
     }
 
-    function openRewardModal(index, animalName) {
-      selectedRedeemIndex = index;
-      document.getElementById('redeemModalAnimalName').textContent = `這隻【${animalName}】可以兌換一個獎品，請輸入獎品名稱：`;
+    function openRewardModal(idx1, idx2) {
+      selectedRedeemIndex = { idx1, idx2 };
+      document.getElementById('prizeInputArea').style.display = 'none';
       document.getElementById('rewardPrizeInput').value = '';
       document.getElementById('rewardRedeemModal').classList.add('active');
-      setTimeout(() => document.getElementById('rewardPrizeInput').focus(), 100);
     }
 
     function closeRewardModal() {
       document.getElementById('rewardRedeemModal').classList.remove('active');
+      firstSelectedPetIndex = null;
       selectedRedeemIndex = null;
     }
 
-    function submitRewardRedeem() {
-      const prize = document.getElementById('rewardPrizeInput').value.trim();
-      if (!prize) return alert("請輸入要兌換的獎品名稱！");
-
-      const seat = currentSelectedStudent.seat;
-      if (petCollection[seat] && petCollection[seat][selectedRedeemIndex]) {
-        petCollection[seat][selectedRedeemIndex].redeemed = true;
-        petCollection[seat][selectedRedeemIndex].prize = prize;
-        closeRewardModal();
-        renderPetGardenContent();
-        syncToFirebase();
-        alert(`✅ 兌換成功！已標記為【${prize}】並亮黃燈！`);
+    function setRewardType(type) {
+      if (type === 'prize') {
+        document.getElementById('prizeInputArea').style.display = 'block';
+        setTimeout(() => document.getElementById('rewardPrizeInput').focus(), 100);
+      } else {
+        // 直接確認兌換抽獎券
+        submitRewardRedeem('ticket', '🎟️ 抽獎券一張');
       }
     }
 
-    function cancelRewardRedeem(index) {
-      if (confirm("確定要取消此隻動物的獎品兌換，回到原始未兌換狀態嗎？")) {
-        const seat = currentSelectedStudent.seat;
-        if (petCollection[seat] && petCollection[seat][index]) {
-          petCollection[seat][index].redeemed = false;
-          petCollection[seat][index].prize = null;
-          renderPetGardenContent();
-          syncToFirebase();
-        }
+    function submitRewardRedeem(type, customName = '') {
+      let prizeName = customName;
+      if (type === 'prize') {
+        prizeName = document.getElementById('rewardPrizeInput').value.trim();
+        if (!prizeName) return alert("請輸入小禮物名稱！");
       }
+
+      const seat = currentSelectedStudent.seat;
+      const pets = petCollection[seat];
+      const { idx1, idx2 } = selectedRedeemIndex;
+      const pairToken = 'pair_' + Date.now();
+
+      pets[idx1].redeemed = true;
+      pets[idx1].prize = prizeName;
+      pets[idx1].pairId = pairToken;
+
+      pets[idx2].redeemed = true;
+      pets[idx2].prize = prizeName;
+      pets[idx2].pairId = pairToken;
+
+      closeRewardModal();
+      renderPetGardenContent();
+      syncToFirebase();
+      alert(`✅ 雙寵物兌換成功！已獲得【${prizeName}】，兩隻寵物已同步亮黃燈！`);
+    }
+
+    function cancelPairRedeem(index) {
+      const seat = currentSelectedStudent.seat;
+      const pets = petCollection[seat];
+      const targetPairId = pets[index].pairId;
+
+      if (!targetPairId) {
+        // 相容舊單隻格式
+        pets[index].redeemed = false;
+        pets[index].prize = null;
+      } else {
+        // 同時清除相同 pairId 的兩隻寵物
+        pets.forEach(p => {
+          if (p.pairId === targetPairId) {
+            p.redeemed = false;
+            p.prize = null;
+            p.pairId = null;
+          }
+        });
+      }
+
+      firstSelectedPetIndex = null;
+      renderPetGardenContent();
+      syncToFirebase();
+      alert("✅ 已成功取消兌換，恢復未亮燈狀態！");
     }
 
     function resetAllPets() {
