@@ -146,16 +146,25 @@
 
     </main>
 
-    <!-- JavaScript 互動邏輯 -->
+    <!-- JavaScript 互動邏輯 (與主網頁同步 cm309_students) -->
     <script>
-        // 初始化 309 班級學生資料 (內含 pets 數量，1隻動物 = 5代幣)
-        let students = JSON.parse(localStorage.getItem('cm309_students')) || [
-            { id: 1, name: "1號 小明", pets: 6, extraCoins: 20, coupons: [] }, // 6隻動物*5 = 30代幣 + 20額外代幣 = 50代幣
-            { id: 2, name: "2號 小華", pets: 4, extraCoins: 20, coupons: [] },
-            { id: 3, name: "3號 小美", pets: 8, extraCoins: 20, coupons: [] },
-            { id: 4, name: "4號 大寶", pets: 2, extraCoins: 20, coupons: [] },
-            { id: 5, name: "5號 貝貝", pets: 10, extraCoins: 30, coupons: [] }
-        ];
+        // 從瀏覽器的 localStorage 讀取主網頁的學生資料 (key 統一為 'cm309_students')
+        // 若找不到則自動建立 1~25 號的預設名單
+        let students = JSON.parse(localStorage.getItem('cm309_students'));
+        
+        if (!students || students.length === 0) {
+            students = [];
+            for (let i = 1; i <= 25; i++) {
+                students.push({
+                    id: i,
+                    name: `${i}號 學生`,
+                    pets: 0,          // 預設寵物數
+                    extraCoins: 20,   // 初始額外代幣
+                    coupons: []       // 兌換券背包
+                });
+            }
+            localStorage.setItem('cm309_students', JSON.stringify(students));
+        }
 
         let currentStudentId = students[0].id;
 
@@ -190,24 +199,27 @@
 
         // 計算總代幣：動物數量 * 5 + 額外獲得的代幣
         function getTotalCoins(student) {
-            return (student.pets * 5) + (student.extraCoins || 0);
+            let pCount = student.pets !== undefined ? student.pets : (student.petCount || 0);
+            let eCoins = student.extraCoins !== undefined ? student.extraCoins : (student.coins || 0);
+            return (pCount * 5) + eCoins;
         }
 
-        // 扣除代幣（優先扣除額外代幣，不敷時可選擇扣動物或扣減 extraCoins）
+        // 扣除代幣
         function deductCoins(amount) {
             let student = getCurrentStudent();
             let total = getTotalCoins(student);
             if (total < amount) return false;
 
-            // 優先從 extraCoins 扣，若不夠則扣減 pets 換算
-            if (student.extraCoins >= amount) {
-                student.extraCoins -= amount;
+            let eCoins = student.extraCoins !== undefined ? student.extraCoins : (student.coins || 0);
+            
+            if (eCoins >= amount) {
+                student.extraCoins = eCoins - amount;
             } else {
-                let remainder = amount - student.extraCoins;
+                let remainder = amount - eCoins;
                 student.extraCoins = 0;
+                let petsCount = student.pets !== undefined ? student.pets : 0;
                 let petsToReduce = Math.ceil(remainder / 5);
-                student.pets = Math.max(0, student.pets - petsToReduce);
-                // 找零或補回多扣的額外代幣
+                student.pets = Math.max(0, petsCount - petsToReduce);
                 let refund = (petsToReduce * 5) - remainder;
                 student.extraCoins += refund;
             }
@@ -216,19 +228,21 @@
 
         function updateView() {
             let student = getCurrentStudent();
+            let pCount = student.pets !== undefined ? student.pets : 0;
             let totalCoins = getTotalCoins(student);
 
             // 頂端列同步
-            document.getElementById('studentPets').textContent = student.pets;
+            document.getElementById('studentPets').textContent = pCount;
             document.getElementById('studentCoins').textContent = totalCoins;
 
             // 學生資訊區同步
             document.getElementById('infoStudentName').textContent = student.name;
-            document.getElementById('infoPets').textContent = student.pets + " 隻";
+            document.getElementById('infoPets').textContent = pCount + " 隻";
             document.getElementById('infoCoins').textContent = totalCoins + " 枚";
 
             renderShop();
             renderCoupons();
+            // 同步寫回 localStorage，讓主網頁也能抓到最新的點數與兌換紀錄
             localStorage.setItem('cm309_students', JSON.stringify(students));
         }
 
@@ -275,7 +289,6 @@
             }
             deductCoins(10);
 
-            // 停用按鈕避免重複點擊
             document.querySelectorAll('.ladder-btn').forEach(btn => btn.disabled = true);
             let climber = document.getElementById('climberIcon');
             let statusText = document.getElementById('ladderStatusText');
@@ -317,14 +330,11 @@
 
             deductCoins(10);
 
-            // 勝率 90%：90% 機會讓電腦數字比玩家小（或相等讓玩家贏），10% 機會電腦贏
             let isWin = Math.random() < 0.90;
             let cNum;
             if (isWin) {
-                // 電腦數字比玩家小或等於（確保玩家贏，若玩家輸入1則電腦為1）
                 cNum = Math.floor(Math.random() * pInput) + 1;
             } else {
-                // 電腦數字比玩家大（玩家輸）
                 cNum = Math.floor(Math.random() * (100 - pInput)) + pInput + 1;
                 if (cNum > 100) cNum = 100;
             }
@@ -337,7 +347,6 @@
                 resText = "🎉 太神啦！你贏了電腦，獲得 25 代幣獎勵！";
                 confetti({ particleCount: 130, spread: 90, origin: { y: 0.6 } });
             } else {
-                // 輸了只扣 5 代幣（原本扣10，這裡補回5等於只扣5）
                 student.extraCoins = (student.extraCoins || 0) + 5;
                 resText = "😢 可惡差一點！電腦比較大，安慰獎幫你補回部分代幣（僅扣 5 代幣）！";
             }
@@ -377,13 +386,13 @@
                 return;
             }
 
-            // 扣除獎品費用
             let success = deductCoins(item.cost);
             if (!success) {
                 alert('兌換扣款失敗，請檢查代幣數量！');
                 return;
             }
 
+            if (!student.coupons) student.coupons = [];
             let serialCode = 'CM309-' + Math.random().toString(36).substring(2, 8).toUpperCase();
             student.coupons.push({ name: item.name, code: serialCode, date: new Date().toLocaleDateString() });
 
