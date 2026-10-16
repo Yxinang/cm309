@@ -17,11 +17,16 @@
             100% { transform: translateY(-30px) rotate(5deg); }
         }
         .animate-climb { animation: climbing 0.4s infinite alternate; }
+        .coupon-used {
+            background-color: #fef08a !important;
+            border-color: #eab308 !important;
+            box-shadow: 0 0 10px rgba(234, 179, 8, 0.4);
+        }
     </style>
 </head>
 <body class="min-h-screen text-gray-800 flex flex-col items-center p-4">
 
-    <!-- 頂部導覽列 / 身分切換 -->
+    <!-- 頂部導覽列 -->
     <header class="w-full max-w-4xl bg-white shadow-md rounded-2xl p-4 mb-6 flex flex-wrap justify-between items-center border-4 border-emerald-300">
         <div class="flex items-center space-x-3 mb-2 sm:mb-0">
             <span class="text-3xl">🐱</span>
@@ -61,7 +66,7 @@
         <!-- 1. 扭蛋機畫面 -->
         <div id="section-gacha" class="tab-content text-center py-6">
             <h2 class="text-2xl font-bold text-emerald-700 mb-2">✨ 歡樂扭蛋機 ✨</h2>
-            <p class="text-gray-500 mb-6">每次遊戲消耗 <span class="font-bold text-amber-600">10 代幣</span>（每隻動物成體 = 5分），試試你的手氣抽大獎！</p>
+            <p class="text-gray-500 mb-6">每次遊戲消耗 <span class="font-bold text-amber-600">10 代幣</span>（動物園成體每隻 = 5代幣），試試你的手氣抽大獎！</p>
             <div class="w-48 h-48 mx-auto bg-gradient-to-b from-pink-400 to-red-500 rounded-full flex items-center justify-center shadow-2xl border-8 border-white mb-6 relative animate-bounce">
                 <span class="text-7xl">🔮</span>
             </div>
@@ -69,10 +74,10 @@
             <div id="gachaResult" class="mt-6 text-xl font-bold text-emerald-600 h-12 flex items-center justify-center"></div>
         </div>
 
-        <!-- 2. 爬梯子畫面 -->
+        <!-- 2. 爬梯子畫面 (3個隨機獎項) -->
         <div id="section-ladder" class="tab-content hidden text-center py-6">
             <h2 class="text-2xl font-bold text-emerald-700 mb-2">🧗 神秘爬梯子冒險 🧗</h2>
-            <p class="text-gray-500 mb-6">選擇一條幸運路線，觀看爬梯動畫並尋找寶箱！(每次消耗 10 代幣)</p>
+            <p class="text-gray-500 mb-6">選擇一條路線（代幣 10 / 再來一次 / 謝謝惠顧隨機給），每次消耗 10 代幣！</p>
             
             <div id="ladderAnimBox" class="h-28 bg-emerald-50 border-2 border-emerald-200 rounded-2xl mb-6 flex flex-col items-center justify-center relative overflow-hidden">
                 <div id="climberIcon" class="text-4xl transition-all duration-300">🧍‍♂️</div>
@@ -86,10 +91,10 @@
             </div>
         </div>
 
-        <!-- 3. 比大小畫面 -->
+        <!-- 3. 比大小畫面 (獲勝+5，輸了-5) -->
         <div id="section-battle" class="tab-content hidden text-center py-6">
             <h2 class="text-2xl font-bold text-emerald-700 mb-2">⚔️ 幸運數字比大小 (1-100) ⚔️</h2>
-            <p class="text-gray-500 mb-4">輸入 1~100 的數字與電腦對決！贏了獲得豐富獎勵，輸了僅扣 5 代幣 (每次遊玩消耗 10 代幣)</p>
+            <p class="text-gray-500 mb-4">輸入 1~100 的數字與電腦對決！贏了獲得 +5 代幣，輸了代幣減 5 (每次遊玩消耗 10 代幣)</p>
             
             <div class="flex justify-center items-center space-x-4 mb-6">
                 <div class="bg-emerald-50 border-4 border-emerald-300 rounded-2xl p-4 w-44 shadow-md">
@@ -114,7 +119,7 @@
             </div>
             
             <h2 class="text-2xl font-bold text-emerald-700 mb-2 text-center">🛍️ 學生個人資訊與獎品兌換 🛍️</h2>
-            <p class="text-gray-500 mb-6 text-center">在此查看您的動物與代幣狀況，並使用代幣兌換老師設定的現有獎品！</p>
+            <p class="text-gray-500 mb-6 text-center">在此查看您的動物與代幣狀況，並使用代幣兌換心儀的獎品！</p>
             
             <!-- 學生詳細資訊卡片 -->
             <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-5 mb-8 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -122,7 +127,7 @@
                     <div class="text-4xl bg-white p-3 rounded-2xl shadow-inner border border-emerald-200">🧑‍🎓</div>
                     <div>
                         <div id="infoStudentName" class="text-xl font-bold text-emerald-900">載入中...</div>
-                        <div class="text-sm text-emerald-700 mt-0.5">代幣計算：動物園成體數 × 5 + 額外獲得代幣（初始為 0）</div>
+                        <div class="text-sm text-emerald-700 mt-0.5">代幣計算：動物園成體數 × 5 + 額外獲得代幣</div>
                     </div>
                 </div>
                 <div class="flex gap-3 text-center">
@@ -137,28 +142,33 @@
                 </div>
             </div>
 
-            <!-- 老師輸入獎品的管理/兌換區 -->
-            <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 mb-6">
-                <h3 class="text-lg font-bold text-amber-800 mb-2">🛠️ 教師專用：新增/設定可兌換的獎品</h3>
-                <div class="flex flex-wrap gap-2 items-center">
-                    <input type="text" id="newPrizeName" placeholder="獎品名稱 (如: 免寫作業卡)" class="border border-amber-300 rounded-xl px-3 py-1.5 text-sm flex-1 bg-white focus:outline-none">
-                    <input type="number" id="newPrizeCost" placeholder="所需代幣" min="1" class="border border-amber-300 rounded-xl px-3 py-1.5 text-sm w-28 bg-white focus:outline-none">
-                    <button onclick="addNewPrizeItem()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-1.5 rounded-xl text-sm transition-all shadow-sm">新增獎品項目</button>
-                </div>
-            </div>
-
-            <h3 class="text-xl font-bold text-emerald-700 mb-4">🎁 現有可兌換的獎品清單</h3>
+            <!-- 固定獎品兌換區 -->
+            <h3 class="text-xl font-bold text-emerald-700 mb-4">🎁 獎品兌換專區</h3>
             <div id="shopList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-                <!-- 動態載入商品 -->
+                <!-- 動態載入固定的4個獎品 -->
             </div>
             
             <h3 class="text-xl font-bold text-emerald-700 mb-4 border-t-2 pt-6">🎟️ 我已擁有的兌換券與獎品紀錄</h3>
+            <p class="text-xs text-gray-500 mb-3">💡 點擊卡片可切換「亮黃燈（已兌換/使用）」或「未亮燈（尚未兌換）」；若不需要可點擊刪除（代幣不退還，寵物保留）。</p>
             <div id="myCoupons" class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-2xl p-4 min-h-[100px] flex flex-wrap gap-3">
                 <!-- 動態載入個人背包 -->
             </div>
         </div>
 
     </main>
+
+    <!-- 自選獎品名稱輸入 Modal -->
+    <div id="customPrizeModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full border-4 border-emerald-300 text-center">
+            <h3 class="text-lg font-bold text-emerald-800 mb-2">🎁 自選獎品兌換</h3>
+            <p class="text-sm text-gray-500 mb-4">請輸入您想要兌換的自選獎品名稱（扣除 10 代幣）：</p>
+            <input type="text" id="customPrizeInput" placeholder="輸入獎品名稱..." class="w-full border-2 border-emerald-300 rounded-xl px-3 py-2 text-center font-bold text-emerald-800 mb-4 focus:outline-none">
+            <div class="flex space-x-2">
+                <button onclick="confirmCustomBuy()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl flex-1 shadow">確認兌換</button>
+                <button onclick="closeCustomModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold px-4 py-2 rounded-xl">取消</button>
+            </div>
+        </div>
+    </div>
 
     <!-- JavaScript 邏輯 -->
     <script>
@@ -169,14 +179,15 @@
         ];
 
         let gameData = JSON.parse(localStorage.getItem('cm309_game_data')) || {};
-        // 老師自訂的獎品清單 (預設幾樣，儲存在 localStorage 供全班共用)
-        let shopItems = JSON.parse(localStorage.getItem('cm309_shop_items')) || [
-            { id: 1, name: "免寫作業卡 1 次", cost: 30, icon: "📝" },
-            { id: 2, name: "換座位特權", cost: 50, icon: "🪑" },
-            { id: 3, name: "精美小貼紙包", cost: 15, icon: "✨" }
-        ];
-
         let currentSeatIndex = 0; 
+
+        // 固定的 4 個獎品項目
+        const shopItems = [
+            { id: 'seat', name: "指定座位", cost: 50, icon: "🪑" },
+            { id: 'book', name: "免抄聯絡簿 3 天", cost: 15, icon: "📝" },
+            { id: 'hw', name: "作業減免", cost: 40, icon: "✂️" },
+            { id: 'custom', name: "自選獎品", cost: 10, icon: "✨" }
+        ];
 
         function initApp() {
             const select = document.getElementById('studentSelect');
@@ -196,7 +207,6 @@
 
         function getStudentGameData(seatNum) {
             if (!gameData[seatNum]) {
-                // 初始額外代幣為 0
                 gameData[seatNum] = { extraCoins: 0, coupons: [] };
             }
             return gameData[seatNum];
@@ -213,13 +223,13 @@
             return myAdultPets.length;
         }
 
-        // 總代幣 = 成體數量 * 5 + 額外代幣
         function getTotalCoins(seatNum) {
             let petCount = getAdultPetCount(seatNum);
             let gData = getStudentGameData(seatNum);
             return (petCount * 5) + (gData.extraCoins || 0);
         }
 
+        // 扣除代幣邏輯 (優先扣除額外代幣，若不夠則扣除動物園成體，每隻折 5 代幣)
         function deductCoins(amount) {
             let seatNum = getCurrentSeatNum();
             let total = getTotalCoins(seatNum);
@@ -283,6 +293,7 @@
             activeBtn.classList.add('bg-emerald-500', 'text-white', 'shadow-md');
         }
 
+        // 1. 扭蛋機邏輯 (-10 代幣)
         function playGacha() {
             let seatNum = getCurrentSeatNum();
             if (getTotalCoins(seatNum) < 10) {
@@ -304,6 +315,7 @@
             updateView();
         }
 
+        // 2. 爬梯子畫面 (三個隨機給：代幣10、再來一次、謝謝惠顧)
         function playLadder(pathNum) {
             let seatNum = getCurrentSeatNum();
             if (getTotalCoins(seatNum) < 10) {
@@ -325,20 +337,26 @@
                 document.querySelectorAll('.ladder-btn').forEach(btn => btn.disabled = false);
 
                 const outcomes = [
-                    { text: "🌟 成功登頂！獲得 20 代幣加碼！", coin: 20 },
-                    { text: "🎈 獲得幸運微風，獲得 15 代幣！", coin: 15 },
-                    { text: "🎁 找到隱藏寶箱，獲得 10 代幣！", coin: 10 }
+                    { text: "🌟 獲得代幣 +10！", coin: 10, refund: false },
+                    { text: "🎈 再來一次！退回 10 代幣！", coin: 10, refund: true },
+                    { text: "💨 謝謝惠顧！再接再厲！", coin: 0, refund: false }
                 ];
                 let result = outcomes[Math.floor(Math.random() * outcomes.length)];
-                gData.extraCoins += result.coin;
+                
+                if (result.refund) {
+                    gData.extraCoins += 10; // 退回剛剛扣的
+                } else {
+                    gData.extraCoins += result.coin;
+                }
 
                 saveGameData();
-                statusText.innerHTML = `✨ 路線 ${pathNum} 挑戰成功！ <span class="text-amber-600 font-bold">${result.text}</span>`;
+                statusText.innerHTML = `✨ 路線 ${pathNum} 結果： <span class="text-amber-600 font-bold">${result.text}</span>`;
                 confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
                 updateView();
             }, 1500);
         }
 
+        // 3. 數字比大小邏輯 (獲勝+5，輸了代幣減5，玩一次消耗10)
         function playBattle() {
             let seatNum = getCurrentSeatNum();
             if (getTotalCoins(seatNum) < 10) {
@@ -355,25 +373,18 @@
             deductCoins(10);
             let gData = getStudentGameData(seatNum);
 
-            let isWin = Math.random() < 0.90;
-            let cNum;
-            if (isWin) {
-                cNum = Math.floor(Math.random() * pInput) + 1;
-            } else {
-                cNum = Math.floor(Math.random() * (100 - pInput)) + pInput + 1;
-                if (cNum > 100) cNum = 100;
-            }
-
+            let cNum = Math.floor(Math.random() * 100) + 1;
             document.getElementById('cpuNum').textContent = cNum;
             let resText = "";
 
             if (pInput >= cNum) {
-                gData.extraCoins += 25;
-                resText = "🎉 太神啦！你贏了電腦，獲得 25 代幣獎勵！";
+                gData.extraCoins += 5; // 獲勝獲得 5 代幣
+                resText = "🎉 挑戰成功！贏了電腦，獲得 +5 代幣！";
                 confetti({ particleCount: 130, spread: 90, origin: { y: 0.6 } });
             } else {
-                gData.extraCoins += 5;
-                resText = "😢 可惡差一點！安慰獎幫你補回 5 代幣！";
+                // 輸了代幣減 5 (扣除5代幣，若額外代幣不夠會自動換算寵物)
+                deductCoins(5);
+                resText = "😢 可惡輸給電腦了！代幣額外扣除 5 枚！";
             }
 
             saveGameData();
@@ -381,26 +392,7 @@
             updateView();
         }
 
-        // 老師新增獎品
-        function addNewPrizeItem() {
-            let name = document.getElementById('newPrizeName').value.trim();
-            let cost = parseInt(document.getElementById('newPrizeCost').value);
-
-            if (!name || isNaN(cost) || cost <= 0) {
-                alert('請輸入有效的獎品名稱與代幣花費！');
-                return;
-            }
-
-            let newId = shopItems.length > 0 ? shopItems[shopItems.length - 1].id + 1 : 1;
-            shopItems.push({ id: newId, name: name, cost: cost, icon: "🎁" });
-            
-            localStorage.setItem('cm309_shop_items', JSON.stringify(shopItems));
-            document.getElementById('newPrizeName').value = '';
-            document.getElementById('newPrizeCost').value = '';
-            renderShop();
-            alert(`✅ 成功新增獎品：【${name}】(需 ${cost} 代幣)！`);
-        }
-
+        // 4. 獎品兌換與自選
         function renderShop() {
             let container = document.getElementById('shopList');
             container.innerHTML = '';
@@ -415,15 +407,15 @@
                             <div class="text-sm text-amber-600 font-bold">需代幣：${item.cost} 枚</div>
                         </div>
                     </div>
-                    <button onclick="buyItem(${item.id})" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl shadow transition-all">兌換</button>
+                    <button onclick="handleBuy('${item.id}')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl shadow transition-all">兌換</button>
                 `;
                 container.appendChild(div);
             });
         }
 
-        function buyItem(itemId) {
-            let seatNum = getCurrentSeatNum();
+        function handleBuy(itemId) {
             let item = shopItems.find(i => i.id == itemId);
+            let seatNum = getCurrentSeatNum();
             let total = getTotalCoins(seatNum);
 
             if (total < item.cost) {
@@ -431,22 +423,51 @@
                 return;
             }
 
-            let success = deductCoins(item.cost);
+            if (itemId === 'custom') {
+                // 彈出輸入自選獎品名稱的對話框
+                document.getElementById('customPrizeModal').classList.remove('hidden');
+                document.getElementById('customPrizeInput').value = '';
+                setTimeout(() => document.getElementById('customPrizeInput').focus(), 100);
+            } else {
+                executeBuy(item.name, item.cost);
+            }
+        }
+
+        function closeCustomModal() {
+            document.getElementById('customPrizeModal').classList.add('hidden');
+        }
+
+        function confirmCustomBuy() {
+            let customName = document.getElementById('customPrizeInput').value.trim();
+            if (!customName) {
+                alert('請輸入自選獎品名稱！');
+                return;
+            }
+            closeCustomModal();
+            executeBuy(`自選獎品：${customName}`, 10);
+        }
+
+        function executeBuy(prizeName, cost) {
+            let success = deductCoins(cost);
             if (!success) {
                 alert('兌換扣款失敗！');
                 return;
             }
 
+            let seatNum = getCurrentSeatNum();
             let gData = getStudentGameData(seatNum);
             let serialCode = 'CM309-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-            gData.coupons.push({ name: item.name, code: serialCode, date: new Date().toLocaleDateString() });
+            
+            // isUsed: false 代表還沒兌換（不亮黃燈），true 代表已兌換（亮黃燈）
+            gData.coupons.push({ name: prizeName, code: serialCode, date: new Date().toLocaleDateString(), isUsed: false });
 
             saveGameData();
-            alert(`成功兌換【${item.name}】！\n您的兌換序號為：${serialCode}`);
+            alert(`成功兌換【${prizeName}】！\n序號：${serialCode}`);
             confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
             updateView();
         }
 
+        // 渲染背包紀錄 (支援點擊切換黃燈、刪除按鈕)
         function renderCoupons() {
             let container = document.getElementById('myCoupons');
             let seatNum = getCurrentSeatNum();
@@ -458,16 +479,43 @@
                 return;
             }
 
-            gData.coupons.forEach(c => {
+            gData.coupons.forEach((c, index) => {
+                let isUsed = !!c.isUsed;
                 let badge = document.createElement('div');
-                badge.className = "bg-white border-2 border-amber-300 rounded-xl p-3 shadow-sm flex flex-col items-start";
+                badge.className = `relative border-2 rounded-xl p-3 shadow-sm flex flex-col items-start transition-all cursor-pointer ${isUsed ? 'coupon-used border-yellow-400' : 'bg-white border-amber-300'}`;
+                
                 badge.innerHTML = `
-                    <span class="font-bold text-emerald-700 text-sm">🎁 ${c.name}</span>
+                    <button onclick="event.stopPropagation(); deleteCoupon(${index})" class="absolute top-2 right-2 text-red-400 hover:text-red-600 font-bold text-xs bg-white/80 px-1.5 py-0.5 rounded-full border border-red-200">✕ 刪除</button>
+                    <span class="font-bold text-emerald-700 text-sm pr-12">🎁 ${c.name}</span>
                     <span class="text-xs text-gray-500 font-mono mt-1">序號：${c.code}</span>
-                    <span class="text-[10px] text-gray-400 mt-0.5">日期：${c.date}</span>
+                    <div class="flex justify-between items-center w-full mt-2">
+                        <span class="text-[10px] text-gray-400">日期：${c.date}</span>
+                        <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${isUsed ? 'bg-amber-200 text-amber-800' : 'bg-gray-100 text-gray-500'}">
+                            ${isUsed ? '🟡 已向老師兌換' : '⚪ 尚未兌換(點我亮燈)'}
+                        </span>
+                    </div>
                 `;
+
+                // 點擊卡片切換亮黃燈狀態
+                badge.onclick = () => {
+                    c.isUsed = !c.isUsed;
+                    saveGameData();
+                    updateView();
+                };
+
                 container.appendChild(badge);
             });
+        }
+
+        // 刪除兌換券 (代幣不退還，寵物保留)
+        function deleteCoupon(index) {
+            let seatNum = getCurrentSeatNum();
+            let gData = getStudentGameData(seatNum);
+            if (confirm("確定要刪除這筆兌換紀錄嗎？（代幣不會退還，但寵物會完整保留）")) {
+                gData.coupons.splice(index, 1);
+                saveGameData();
+                updateView();
+            }
         }
 
         initApp();
