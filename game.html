@@ -41,7 +41,7 @@
             </div>
             <div class="bg-amber-100 border-2 border-amber-300 px-3.5 py-1.5 rounded-xl flex items-center space-x-1 shadow-inner">
                 <span class="text-xl">🪙</span>
-                <span class="text-sm font-bold text-amber-800">代幣：</span>
+                <span class="text-sm font-bold text-amber-800">代幣(分)：</span>
                 <span id="studentCoins" class="text-lg font-black text-amber-600">0</span>
             </div>
         </div>
@@ -61,7 +61,7 @@
         <!-- 1. 扭蛋機畫面 -->
         <div id="section-gacha" class="tab-content text-center py-6">
             <h2 class="text-2xl font-bold text-emerald-700 mb-2">✨ 歡樂扭蛋機 ✨</h2>
-            <p class="text-gray-500 mb-6">每次遊戲消耗 <span class="font-bold text-amber-600">10 代幣</span>（動物園成體 = 代幣來源），試試你的手氣抽大獎！</p>
+            <p class="text-gray-500 mb-6">每次遊戲消耗 <span class="font-bold text-amber-600">10 代幣</span>（每隻動物成體 = 5分），試試你的手氣抽大獎！</p>
             <div class="w-48 h-48 mx-auto bg-gradient-to-b from-pink-400 to-red-500 rounded-full flex items-center justify-center shadow-2xl border-8 border-white mb-6 relative animate-bounce">
                 <span class="text-7xl">🔮</span>
             </div>
@@ -109,11 +109,12 @@
 
         <!-- 4. 學生資訊與獎品兌換畫面 -->
         <div id="section-shop" class="tab-content hidden py-6">
-            <div class="text-center mb-6">
+            <div class="flex justify-between items-center mb-6">
                 <a href="index.html" class="inline-block bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold px-4 py-2 rounded-xl text-sm transition-all">⬅️ 返回班級管理主頁</a>
             </div>
+            
             <h2 class="text-2xl font-bold text-emerald-700 mb-2 text-center">🛍️ 學生個人資訊與獎品兌換 🛍️</h2>
-            <p class="text-gray-500 mb-6 text-center">在此查看您的動物與代幣狀況，並使用代幣兌換心儀的獎品！</p>
+            <p class="text-gray-500 mb-6 text-center">在此查看您的動物與代幣狀況，並使用代幣兌換老師設定的現有獎品！</p>
             
             <!-- 學生詳細資訊卡片 -->
             <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-5 mb-8 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -121,7 +122,7 @@
                     <div class="text-4xl bg-white p-3 rounded-2xl shadow-inner border border-emerald-200">🧑‍🎓</div>
                     <div>
                         <div id="infoStudentName" class="text-xl font-bold text-emerald-900">載入中...</div>
-                        <div class="text-sm text-emerald-700 mt-0.5">代幣計算：動物園成體數 × 5 + 額外獲得代幣</div>
+                        <div class="text-sm text-emerald-700 mt-0.5">代幣計算：動物園成體數 × 5 + 額外獲得代幣（初始為 0）</div>
                     </div>
                 </div>
                 <div class="flex gap-3 text-center">
@@ -136,7 +137,17 @@
                 </div>
             </div>
 
-            <h3 class="text-xl font-bold text-emerald-700 mb-4">🎁 可兌換的獎品清單</h3>
+            <!-- 老師輸入獎品的管理/兌換區 -->
+            <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 mb-6">
+                <h3 class="text-lg font-bold text-amber-800 mb-2">🛠️ 教師專用：新增/設定可兌換的獎品</h3>
+                <div class="flex flex-wrap gap-2 items-center">
+                    <input type="text" id="newPrizeName" placeholder="獎品名稱 (如: 免寫作業卡)" class="border border-amber-300 rounded-xl px-3 py-1.5 text-sm flex-1 bg-white focus:outline-none">
+                    <input type="number" id="newPrizeCost" placeholder="所需代幣" min="1" class="border border-amber-300 rounded-xl px-3 py-1.5 text-sm w-28 bg-white focus:outline-none">
+                    <button onclick="addNewPrizeItem()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-1.5 rounded-xl text-sm transition-all shadow-sm">新增獎品項目</button>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-bold text-emerald-700 mb-4">🎁 現有可兌換的獎品清單</h3>
             <div id="shopList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                 <!-- 動態載入商品 -->
             </div>
@@ -149,27 +160,23 @@
 
     </main>
 
-    <!-- JavaScript 邏輯：與主系統 cm309_students / cm309_pet_collection 完美同步 -->
+    <!-- JavaScript 邏輯 -->
     <script>
-        // 1. 讀取主系統的學生名單
         let students = JSON.parse(localStorage.getItem('cm309_students')) || [
             "1號", "2號", "3號", "4號", "5號", "6號", "7號", "8號", "9號", "10號",
             "11號", "12號", "13號", "14號", "15號", "16號", "17號", "18號", "19號", "20號",
             "21號", "22號", "23號", "24號", "25號"
         ];
 
-        // 2. 讀取各座號的額外代幣與背包紀錄（若無則自動初始化）
         let gameData = JSON.parse(localStorage.getItem('cm309_game_data')) || {};
-
-        let currentSeatIndex = 0; // 預設為第一位學生 (1號)
-
-        // 獎品清單資料
-        const shopItems = [
+        // 老師自訂的獎品清單 (預設幾樣，儲存在 localStorage 供全班共用)
+        let shopItems = JSON.parse(localStorage.getItem('cm309_shop_items')) || [
             { id: 1, name: "免寫作業卡 1 次", cost: 30, icon: "📝" },
             { id: 2, name: "換座位特權", cost: 50, icon: "🪑" },
-            { id: 3, name: "精美小貼紙包", cost: 15, icon: "✨" },
-            { id: 4, name: "神奇小餅乾", cost: 20, icon: "🍪" }
+            { id: 3, name: "精美小貼紙包", cost: 15, icon: "✨" }
         ];
+
+        let currentSeatIndex = 0; 
 
         function initApp() {
             const select = document.getElementById('studentSelect');
@@ -184,12 +191,13 @@
         }
 
         function getCurrentSeatNum() {
-            return currentSeatIndex + 1; // 1 ~ 25
+            return currentSeatIndex + 1; 
         }
 
         function getStudentGameData(seatNum) {
             if (!gameData[seatNum]) {
-                gameData[seatNum] = { extraCoins: 20, coupons: [] };
+                // 初始額外代幣為 0
+                gameData[seatNum] = { extraCoins: 0, coupons: [] };
             }
             return gameData[seatNum];
         }
@@ -199,23 +207,19 @@
             updateView();
         }
 
-        // 計算該座號的總代幣：主系統動物園成體數 * 5 + 額外代幣
-        function getTotalCoins(seatNum) {
-            let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
-            let myAdultPets = petCollection[seatNum] || [];
-            let petCount = myAdultPets.length; // 動物園內的成體數量
-
-            let gData = getStudentGameData(seatNum);
-            return (petCount * 5) + (gData.extraCoins || 0);
-        }
-
         function getAdultPetCount(seatNum) {
             let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
             let myAdultPets = petCollection[seatNum] || [];
             return myAdultPets.length;
         }
 
-        // 扣除代幣邏輯
+        // 總代幣 = 成體數量 * 5 + 額外代幣
+        function getTotalCoins(seatNum) {
+            let petCount = getAdultPetCount(seatNum);
+            let gData = getStudentGameData(seatNum);
+            return (petCount * 5) + (gData.extraCoins || 0);
+        }
+
         function deductCoins(amount) {
             let seatNum = getCurrentSeatNum();
             let total = getTotalCoins(seatNum);
@@ -229,12 +233,10 @@
             } else {
                 let remainder = amount - eCoins;
                 gData.extraCoins = 0;
-                // 若額外代幣不夠，則扣除動物園的成體換算（每隻值5代幣）
                 let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
                 let myAdultPets = petCollection[seatNum] || [];
                 
                 let petsToReduce = Math.ceil(remainder / 5);
-                // 從動物園移除指定數量的成體
                 myAdultPets.splice(0, petsToReduce);
                 petCollection[seatNum] = myAdultPets;
                 localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
@@ -257,11 +259,9 @@
             let pCount = getAdultPetCount(seatNum);
             let totalCoins = getTotalCoins(seatNum);
 
-            // 頂端列同步
             document.getElementById('studentPets').textContent = pCount;
             document.getElementById('studentCoins').textContent = totalCoins;
 
-            // 學生資訊區同步
             document.getElementById('infoStudentName').textContent = studentName;
             document.getElementById('infoPets').textContent = pCount + " 隻";
             document.getElementById('infoCoins').textContent = totalCoins + " 枚";
@@ -270,7 +270,6 @@
             renderCoupons();
         }
 
-        // 標籤切換
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => {
@@ -284,11 +283,10 @@
             activeBtn.classList.add('bg-emerald-500', 'text-white', 'shadow-md');
         }
 
-        // 1. 扭蛋機邏輯 (消耗 10 代幣)
         function playGacha() {
             let seatNum = getCurrentSeatNum();
             if (getTotalCoins(seatNum) < 10) {
-                alert('代幣不足 10 枚！快去主系統的寵物養成區累積動物成體來換取代幣吧！');
+                alert('代幣不足 10 枚！快去動物園累積成體寵物來換取代幣吧！');
                 return;
             }
             deductCoins(10);
@@ -306,7 +304,6 @@
             updateView();
         }
 
-        // 2. 爬梯子冒險動畫 (消耗 10 代幣)
         function playLadder(pathNum) {
             let seatNum = getCurrentSeatNum();
             if (getTotalCoins(seatNum) < 10) {
@@ -342,7 +339,6 @@
             }, 1500);
         }
 
-        // 3. 數字比大小邏輯 (消耗 10 代幣)
         function playBattle() {
             let seatNum = getCurrentSeatNum();
             if (getTotalCoins(seatNum) < 10) {
@@ -385,7 +381,26 @@
             updateView();
         }
 
-        // 4. 獎品兌換渲染與處理
+        // 老師新增獎品
+        function addNewPrizeItem() {
+            let name = document.getElementById('newPrizeName').value.trim();
+            let cost = parseInt(document.getElementById('newPrizeCost').value);
+
+            if (!name || isNaN(cost) || cost <= 0) {
+                alert('請輸入有效的獎品名稱與代幣花費！');
+                return;
+            }
+
+            let newId = shopItems.length > 0 ? shopItems[shopItems.length - 1].id + 1 : 1;
+            shopItems.push({ id: newId, name: name, cost: cost, icon: "🎁" });
+            
+            localStorage.setItem('cm309_shop_items', JSON.stringify(shopItems));
+            document.getElementById('newPrizeName').value = '';
+            document.getElementById('newPrizeCost').value = '';
+            renderShop();
+            alert(`✅ 成功新增獎品：【${name}】(需 ${cost} 代幣)！`);
+        }
+
         function renderShop() {
             let container = document.getElementById('shopList');
             container.innerHTML = '';
@@ -455,7 +470,6 @@
             });
         }
 
-        // 啟動初始化
         initApp();
     </script>
 </body>
