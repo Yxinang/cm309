@@ -11,9 +11,15 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Noto+Sans+TC:wght@500;700&display=swap');
         body { font-family: 'Fredoka', 'Noto Sans TC', sans-serif; background-color: #f0fdf4; }
+        @keyframes climbing {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(-5deg); }
+            100% { transform: translateY(-30px) rotate(5deg); }
+        }
+        .animate-climb { animation: climbing 0.4s infinite alternate; }
     </style>
 </head>
-<body class="min-h-0 text-gray-800 flex flex-col items-center p-4">
+<body class="min-h-screen text-gray-800 flex flex-col items-center p-4">
 
     <!-- 頂部導覽列 / 身分切換 -->
     <header class="w-full max-w-4xl bg-white shadow-md rounded-2xl p-4 mb-6 flex flex-wrap justify-between items-center border-4 border-emerald-300">
@@ -21,12 +27,17 @@
             <span class="text-3xl">🐱</span>
             <h1 class="text-2xl font-bold text-emerald-600">309 班級遊樂場與兌換</h1>
         </div>
-        <div class="flex items-center space-x-4">
+        <div class="flex flex-wrap items-center gap-3">
             <div class="flex items-center space-x-2 bg-emerald-50 px-3 py-1.5 rounded-xl border-2 border-emerald-200">
-                <label for="studentSelect" class="font-bold text-sm text-emerald-700">選擇學生：</label>
+                <label for="studentSelect" class="font-bold text-sm text-emerald-700">學生：</label>
                 <select id="studentSelect" onchange="switchStudent()" class="bg-white border border-emerald-300 rounded-lg px-2 py-1 font-bold text-emerald-800 focus:outline-none">
                     <!-- 動態載入學生 -->
                 </select>
+            </div>
+            <div class="bg-indigo-50 border-2 border-indigo-200 px-3 py-1.5 rounded-xl flex items-center space-x-1">
+                <span class="text-lg">🐶</span>
+                <span class="text-sm font-bold text-indigo-700">動物：</span>
+                <span id="studentPets" class="text-base font-black text-indigo-600">0</span>隻
             </div>
             <div class="bg-amber-100 border-2 border-amber-300 px-3.5 py-1.5 rounded-xl flex items-center space-x-1 shadow-inner">
                 <span class="text-xl">🪙</span>
@@ -37,68 +48,98 @@
     </header>
 
     <!-- 主要功能區塊 (標籤頁切換) -->
-    <main class="w-full max-w-4xl bg-white shadow-xl rounded-3xl p-6 border-4 border-emerald-200">
+    <main class="w-full max-w-4xl bg-white shadow-xl rounded-3xl p-6 border-4 border-emerald-200 mb-8">
         
         <!-- 導覽標籤 -->
-        <div class="flex justify-center space-x-2 sm:space-x-4 mb-6 border-b-2 border-gray-100 pb-4">
+        <div class="flex justify-center flex-wrap gap-2 mb-6 border-b-2 border-gray-100 pb-4">
             <button onclick="switchTab('gacha')" id="tab-gacha" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-base transition-all bg-emerald-500 text-white shadow-md">🎁 幸運扭蛋機</button>
-            <button onclick="switchTab('ladder')" id="tab-ladder" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-base transition-all bg-gray-100 text-gray-600 hover:bg-emerald-100">🧗 爬梯子冒險</button>
+            <button onclick="switchTab('ladder')" id="tab-ladder" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-base transition-all bg-gray-100 text-gray-600 hover:bg-emerald-100">🧗 神秘爬梯子</button>
             <button onclick="switchTab('battle')" id="tab-battle" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-base transition-all bg-gray-100 text-gray-600 hover:bg-emerald-100">⚔️ 數字比大小</button>
-            <button onclick="switchTab('shop')" id="tab-shop" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-base transition-all bg-gray-100 text-gray-600 hover:bg-emerald-100">🛍️ 獎品兌換區</button>
+            <button onclick="switchTab('shop')" id="tab-shop" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-base transition-all bg-gray-100 text-gray-600 hover:bg-emerald-100">🛍️ 學生資訊與獎品兌換</button>
         </div>
 
         <!-- 1. 扭蛋機畫面 -->
         <div id="section-gacha" class="tab-content text-center py-6">
             <h2 class="text-2xl font-bold text-emerald-700 mb-2">✨ 歡樂扭蛋機 ✨</h2>
-            <p class="text-gray-500 mb-6">每次消耗 <span class="font-bold text-amber-600">10 代幣</span>，試試你的手氣抽大獎！</p>
+            <p class="text-gray-500 mb-6">每次遊戲消耗 <span class="font-bold text-amber-600">10 代幣</span>（1隻動物 = 5代幣），試試你的手氣抽大獎！</p>
             <div class="w-48 h-48 mx-auto bg-gradient-to-b from-pink-400 to-red-500 rounded-full flex items-center justify-center shadow-2xl border-8 border-white mb-6 relative animate-bounce">
                 <span class="text-7xl">🔮</span>
             </div>
             <button onclick="playGacha()" class="bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xl px-8 py-3 rounded-2xl shadow-lg border-b-4 border-amber-600 active:translate-y-1 transition-all">轉扭蛋 (-10代幣)</button>
-            <div id="gachaResult" class="mt-6 text-xl font-bold text-emerald-600 h-10"></div>
+            <div id="gachaResult" class="mt-6 text-xl font-bold text-emerald-600 h-12 flex items-center justify-center"></div>
         </div>
 
         <!-- 2. 爬梯子畫面 -->
         <div id="section-ladder" class="tab-content hidden text-center py-6">
-            <h2 class="text-2xl font-bold text-emerald-700 mb-2">🧗 神秘爬梯子 🧗</h2>
-            <p class="text-gray-500 mb-6">選擇一條幸運路線，看看通往哪個獎勵！(消耗 5 代幣)</p>
-            <div class="flex justify-center space-x-4 mb-6">
-                <button onclick="playLadder(1)" class="bg-blue-400 hover:bg-blue-500 text-white font-bold px-6 py-3 rounded-2xl shadow-md border-b-4 border-blue-600">路線 1</button>
-                <button onclick="playLadder(2)" class="bg-purple-400 hover:bg-purple-500 text-white font-bold px-6 py-3 rounded-2xl shadow-md border-b-4 border-purple-600">路線 2</button>
-                <button onclick="playLadder(3)" class="bg-pink-400 hover:bg-pink-500 text-white font-bold px-6 py-3 rounded-2xl shadow-md border-b-4 border-pink-600">路線 3</button>
+            <h2 class="text-2xl font-bold text-emerald-700 mb-2">🧗 神秘爬梯子冒險 🧗</h2>
+            <p class="text-gray-500 mb-6">選擇一條幸運路線，觀看爬梯動畫並尋找寶箱！(每次消耗 10 代幣)</p>
+            
+            <div id="ladderAnimBox" class="h-28 bg-emerald-50 border-2 border-emerald-200 rounded-2xl mb-6 flex flex-col items-center justify-center relative overflow-hidden">
+                <div id="climberIcon" class="text-4xl transition-all duration-300">🧍‍♂️</div>
+                <div id="ladderStatusText" class="text-emerald-700 font-bold mt-2">請點選下方路線開始挑戰！</div>
             </div>
-            <div id="ladderResult" class="mt-6 text-xl font-bold text-purple-600 h-16 flex items-center justify-center bg-purple-50 rounded-2xl border-2 border-purple-200 p-4">請點選上方任一條路線開始挑戰！</div>
+
+            <div class="flex justify-center space-x-4 mb-6">
+                <button onclick="playLadder(1)" class="ladder-btn bg-blue-500 hover:bg-blue-600 text-white font-bold px-6 py-3 rounded-2xl shadow-md border-b-4 border-blue-700">路線 1</button>
+                <button onclick="playLadder(2)" class="ladder-btn bg-purple-500 hover:bg-purple-600 text-white font-bold px-6 py-3 rounded-2xl shadow-md border-b-4 border-purple-700">路線 2</button>
+                <button onclick="playLadder(3)" class="ladder-btn bg-pink-500 hover:bg-pink-600 text-white font-bold px-6 py-3 rounded-2xl shadow-md border-b-4 border-pink-700">路線 3</button>
+            </div>
         </div>
 
         <!-- 3. 比大小畫面 -->
         <div id="section-battle" class="tab-content hidden text-center py-6">
-            <h2 class="text-2xl font-bold text-emerald-700 mb-2">⚔️ 幸運數字比大小 ⚔️</h2>
-            <p class="text-gray-500 mb-6">與電腦對決！抽出的數字大於電腦即獲勝 (消耗 5 代幣，贏了拿 15 代幣！)</p>
-            <div class="flex justify-center items-center space-x-8 mb-8">
-                <div class="bg-emerald-50 border-4 border-emerald-300 rounded-2xl p-6 w-32 shadow-md">
-                    <div class="text-sm font-bold text-emerald-700 mb-1">你的數字</div>
-                    <div id="playerNum" class="text-4xl font-black text-emerald-600">?</div>
+            <h2 class="text-2xl font-bold text-emerald-700 mb-2">⚔️ 幸運數字比大小 (1-100) ⚔️</h2>
+            <p class="text-gray-500 mb-4">輸入 1~100 的數字與電腦對決！贏了獲得豐富獎勵，輸了僅扣 5 代幣 (每次遊玩消耗 10 代幣)</p>
+            
+            <div class="flex justify-center items-center space-x-4 mb-6">
+                <div class="bg-emerald-50 border-4 border-emerald-300 rounded-2xl p-4 w-44 shadow-md">
+                    <div class="text-sm font-bold text-emerald-700 mb-1">你的自選數字</div>
+                    <input type="number" id="playerInputNum" min="1" max="100" placeholder="請輸入1-100" class="w-full text-center text-2xl font-black text-emerald-600 bg-white border-2 border-emerald-300 rounded-xl py-1 focus:outline-none">
                 </div>
                 <span class="text-3xl font-black text-gray-400">VS</span>
-                <div class="bg-rose-50 border-4 border-rose-300 rounded-2xl p-6 w-32 shadow-md">
+                <div class="bg-rose-50 border-4 border-rose-300 rounded-2xl p-4 w-44 shadow-md">
                     <div class="text-sm font-bold text-rose-700 mb-1">電腦數字</div>
-                    <div id="cpuNum" class="text-4xl font-black text-rose-600">?</div>
+                    <div id="cpuNum" class="text-4xl font-black text-rose-600 h-11 flex items-center justify-center">?</div>
                 </div>
             </div>
-            <button onclick="playBattle()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xl px-8 py-3 rounded-2xl shadow-lg border-b-4 border-emerald-700 active:translate-y-1 transition-all">開始比大小 (-5代幣)</button>
-            <div id="battleResult" class="mt-6 text-xl font-bold text-emerald-600 h-10"></div>
+            
+            <button onclick="playBattle()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xl px-8 py-3 rounded-2xl shadow-lg border-b-4 border-emerald-700 active:translate-y-1 transition-all">送出數字對決 (-10代幣)</button>
+            <div id="battleResult" class="mt-6 text-xl font-bold text-emerald-600 h-12 flex items-center justify-center"></div>
         </div>
 
-        <!-- 4. 獎品兌換畫面 -->
+        <!-- 4. 學生資訊與獎品兌換畫面 -->
         <div id="section-shop" class="tab-content hidden py-6">
-            <h2 class="text-2xl font-bold text-emerald-700 mb-2 text-center">🛍️ 獎品與兌換券商城 🛍️</h2>
-            <p class="text-gray-500 mb-6 text-center">使用你的代幣兌換心儀的獎品！</p>
-            <div id="shopList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <h2 class="text-2xl font-bold text-emerald-700 mb-2 text-center">🛍️ 學生個人資訊與獎品兌換 🛍️</h2>
+            <p class="text-gray-500 mb-6 text-center">在此查看您的動物與代幣狀況，並使用代幣兌換心儀的獎品！</p>
+            
+            <!-- 學生詳細資訊卡片 -->
+            <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-5 mb-8 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="text-4xl bg-white p-3 rounded-2xl shadow-inner border border-emerald-200">🧑‍🎓</div>
+                    <div>
+                        <div id="infoStudentName" class="text-xl font-bold text-emerald-900">載入中...</div>
+                        <div class="text-sm text-emerald-700 mt-0.5">寵物區動物轉換規則：1 隻動物 = 5 代幣</div>
+                    </div>
+                </div>
+                <div class="flex gap-3 text-center">
+                    <div class="bg-white px-4 py-2 rounded-xl border border-emerald-200 shadow-sm">
+                        <div class="text-xs text-gray-500 font-bold">目前擁有動物</div>
+                        <div id="infoPets" class="text-lg font-black text-indigo-600">0 隻</div>
+                    </div>
+                    <div class="bg-white px-4 py-2 rounded-xl border border-amber-200 shadow-sm">
+                        <div class="text-xs text-gray-500 font-bold">總可用代幣</div>
+                        <div id="infoCoins" class="text-lg font-black text-amber-600">0 枚</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-bold text-emerald-700 mb-4">🎁 可兌換的獎品清單</h3>
+            <div id="shopList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                 <!-- 動態載入商品 -->
             </div>
             
-            <h3 class="text-xl font-bold text-emerald-700 mt-8 mb-4 border-t-2 pt-4">🎟️ 我已擁有的兌換券與獎品紀錄</h3>
-            <div id="myCoupons" class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-2xl p-4 min-h-[100px] flex flex-wrap gap-2">
+            <h3 class="text-xl font-bold text-emerald-700 mb-4 border-t-2 pt-6">🎟️ 我已擁有的兌換券與獎品紀錄</h3>
+            <div id="myCoupons" class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-2xl p-4 min-h-[100px] flex flex-wrap gap-3">
                 <!-- 動態載入個人背包 -->
             </div>
         </div>
@@ -107,13 +148,13 @@
 
     <!-- JavaScript 互動邏輯 -->
     <script>
-        // 模擬 309 班級學生與資料結構 (可與 localStorage 串接)
+        // 初始化 309 班級學生資料 (內含 pets 數量，1隻動物 = 5代幣)
         let students = JSON.parse(localStorage.getItem('cm309_students')) || [
-            { id: 1, name: "1號 小明", coins: 50, coupons: [] },
-            { id: 2, name: "2號 小華", coins: 40, coupons: [] },
-            { id: 3, name: "3號 小美", coins: 60, coupons: [] },
-            { id: 4, name: "4號 大寶", coins: 30, coupons: [] },
-            { id: 5, name: "5號 貝貝", coins: 80, coupons: [] }
+            { id: 1, name: "1號 小明", pets: 6, extraCoins: 20, coupons: [] }, // 6隻動物*5 = 30代幣 + 20額外代幣 = 50代幣
+            { id: 2, name: "2號 小華", pets: 4, extraCoins: 20, coupons: [] },
+            { id: 3, name: "3號 小美", pets: 8, extraCoins: 20, coupons: [] },
+            { id: 4, name: "4號 大寶", pets: 2, extraCoins: 20, coupons: [] },
+            { id: 5, name: "5號 貝貝", pets: 10, extraCoins: 30, coupons: [] }
         ];
 
         let currentStudentId = students[0].id;
@@ -126,7 +167,6 @@
             { id: 4, name: "神奇小餅乾", cost: 20, icon: "🍪" }
         ];
 
-        // 初始化下拉選單與畫面
         function initApp() {
             const select = document.getElementById('studentSelect');
             select.innerHTML = '';
@@ -148,9 +188,45 @@
             updateView();
         }
 
+        // 計算總代幣：動物數量 * 5 + 額外獲得的代幣
+        function getTotalCoins(student) {
+            return (student.pets * 5) + (student.extraCoins || 0);
+        }
+
+        // 扣除代幣（優先扣除額外代幣，不敷時可選擇扣動物或扣減 extraCoins）
+        function deductCoins(amount) {
+            let student = getCurrentStudent();
+            let total = getTotalCoins(student);
+            if (total < amount) return false;
+
+            // 優先從 extraCoins 扣，若不夠則扣減 pets 換算
+            if (student.extraCoins >= amount) {
+                student.extraCoins -= amount;
+            } else {
+                let remainder = amount - student.extraCoins;
+                student.extraCoins = 0;
+                let petsToReduce = Math.ceil(remainder / 5);
+                student.pets = Math.max(0, student.pets - petsToReduce);
+                // 找零或補回多扣的額外代幣
+                let refund = (petsToReduce * 5) - remainder;
+                student.extraCoins += refund;
+            }
+            return true;
+        }
+
         function updateView() {
             let student = getCurrentStudent();
-            document.getElementById('studentCoins').textContent = student.coins;
+            let totalCoins = getTotalCoins(student);
+
+            // 頂端列同步
+            document.getElementById('studentPets').textContent = student.pets;
+            document.getElementById('studentCoins').textContent = totalCoins;
+
+            // 學生資訊區同步
+            document.getElementById('infoStudentName').textContent = student.name;
+            document.getElementById('infoPets').textContent = student.pets + " 隻";
+            document.getElementById('infoCoins').textContent = totalCoins + " 枚";
+
             renderShop();
             renderCoupons();
             localStorage.setItem('cm309_students', JSON.stringify(students));
@@ -170,80 +246,107 @@
             activeBtn.classList.add('bg-emerald-500', 'text-white', 'shadow-md');
         }
 
-        // 1. 扭蛋機邏輯
+        // 1. 扭蛋機邏輯 (消耗 10 代幣)
         function playGacha() {
             let student = getCurrentStudent();
-            if (student.coins < 10) {
-                alert('代幣不足喔！多去收集一些代幣再來吧！');
+            if (getTotalCoins(student) < 10) {
+                alert('代幣不足 10 枚！需要收集更多動物或代幣才能玩喔！');
                 return;
             }
-            student.coins -= 10;
+            deductCoins(10);
             
             const prizes = ["小貼紙一張", "20點代幣加碼！", "神奇小餅乾", "銘謝惠顧(安慰獎5代幣)"];
             let reward = prizes[Math.floor(Math.random() * prizes.length)];
             
-            if(reward.includes("代幣加碼")) { student.coins += 20; }
-            if(reward.includes("銘謝惠顧")) { student.coins += 5; }
+            if(reward.includes("代幣加碼")) { student.extraCoins = (student.extraCoins || 0) + 20; }
+            if(reward.includes("銘謝惠顧")) { student.extraCoins = (student.extraCoins || 0) + 5; }
 
-            document.getElementById('gachaResult').innerHTML = `🎉 恭喜抽中了：<span class="text-amber-600">${reward}</span>！`;
+            document.getElementById('gachaResult').innerHTML = `🎉 恭喜抽中了：<span class="text-amber-600 font-black">${reward}</span>！`;
             confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
             updateView();
         }
 
-        // 2. 爬梯子邏輯
+        // 2. 爬梯子冒險動畫 (消耗 10 代幣)
         function playLadder(pathNum) {
             let student = getCurrentStudent();
-            if (student.coins < 5) {
-                alert('代幣不足 5 枚！');
+            if (getTotalCoins(student) < 10) {
+                alert('代幣不足 10 枚！');
                 return;
             }
-            student.coins -= 5;
+            deductCoins(10);
 
-            const outcomes = [
-                { text: "🌟 走對路！獲得 15 代幣！", coin: 15 },
-                { text: "🎈 遇到微風吹拂，獲得 10 代幣！", coin: 10 },
-                { text: "🍬 撿到掉落的小糖果，獲得 5 代幣！", coin: 5 }
-            ];
-            let result = outcomes[Math.floor(Math.random() * outcomes.length)];
-            student.coins += result.coin;
+            // 停用按鈕避免重複點擊
+            document.querySelectorAll('.ladder-btn').forEach(btn => btn.disabled = true);
+            let climber = document.getElementById('climberIcon');
+            let statusText = document.getElementById('ladderStatusText');
 
-            document.getElementById('ladderResult').innerHTML = `路線 ${pathNum} -> ${result.text}`;
-            confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
-            updateView();
+            climber.classList.add('animate-climb');
+            statusText.textContent = `🧗 正在選擇路線 ${pathNum} 努力向上爬中...`;
+
+            setTimeout(() => {
+                climber.classList.remove('animate-climb');
+                document.querySelectorAll('.ladder-btn').forEach(btn => btn.disabled = false);
+
+                const outcomes = [
+                    { text: "🌟 成功登頂！獲得 20 代幣加碼！", coin: 20 },
+                    { text: "🎈 獲得幸運微風，獲得 15 代幣！", coin: 15 },
+                    { text: "🎁 找到隱藏寶箱，獲得 10 代幣！", coin: 10 }
+                ];
+                let result = outcomes[Math.floor(Math.random() * outcomes.length)];
+                student.extraCoins = (student.extraCoins || 0) + result.coin;
+
+                statusText.innerHTML = `✨ 路線 ${pathNum} 挑戰成功！ <span class="text-amber-600 font-bold">${result.text}</span>`;
+                confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
+                updateView();
+            }, 1500);
         }
 
-        // 3. 比大小邏輯
+        // 3. 數字比大小邏輯 (自選 1-100，勝率 90%，輸了扣 5 代幣，玩一次消耗 10 代幣)
         function playBattle() {
             let student = getCurrentStudent();
-            if (student.coins < 5) {
-                alert('代幣不足 5 枚！');
+            if (getTotalCoins(student) < 10) {
+                alert('代幣不足 10 枚！');
                 return;
             }
-            student.coins -= 5;
 
-            let pNum = Math.floor(Math.random() * 90) + 10;
-            let cNum = Math.floor(Math.random() * 90) + 10;
+            let pInput = parseInt(document.getElementById('playerInputNum').value);
+            if (isNaN(pInput) || pInput < 1 || pInput > 100) {
+                alert('請先在欄位中輸入 1 到 100 之間的數字喔！');
+                return;
+            }
 
-            document.getElementById('playerNum').textContent = pNum;
-            document.getElementById('cpuNum').textContent = cNum;
+            deductCoins(10);
 
-            let resText = "";
-            if (pNum > cNum) {
-                student.coins += 15;
-                resText = "🎉 太棒了！你贏了，獲得 15 代幣！";
-                confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
-            } else if (pNum < cNum) {
-                resText = "😢 可惡！電腦比較大，再接再厲！";
+            // 勝率 90%：90% 機會讓電腦數字比玩家小（或相等讓玩家贏），10% 機會電腦贏
+            let isWin = Math.random() < 0.90;
+            let cNum;
+            if (isWin) {
+                // 電腦數字比玩家小或等於（確保玩家贏，若玩家輸入1則電腦為1）
+                cNum = Math.floor(Math.random() * pInput) + 1;
             } else {
-                student.coins += 5;
-                resText = "🤝 平手！退回本金 5 代幣！";
+                // 電腦數字比玩家大（玩家輸）
+                cNum = Math.floor(Math.random() * (100 - pInput)) + pInput + 1;
+                if (cNum > 100) cNum = 100;
+            }
+
+            document.getElementById('cpuNum').textContent = cNum;
+            let resText = "";
+
+            if (pInput >= cNum) {
+                student.extraCoins = (student.extraCoins || 0) + 25;
+                resText = "🎉 太神啦！你贏了電腦，獲得 25 代幣獎勵！";
+                confetti({ particleCount: 130, spread: 90, origin: { y: 0.6 } });
+            } else {
+                // 輸了只扣 5 代幣（原本扣10，這裡補回5等於只扣5）
+                student.extraCoins = (student.extraCoins || 0) + 5;
+                resText = "😢 可惡差一點！電腦比較大，安慰獎幫你補回部分代幣（僅扣 5 代幣）！";
             }
 
             document.getElementById('battleResult').textContent = resText;
             updateView();
         }
 
-        // 4. 獎品兌換渲染與邏輯
+        // 4. 獎品兌換渲染與處理
         function renderShop() {
             let container = document.getElementById('shopList');
             container.innerHTML = '';
@@ -255,10 +358,10 @@
                         <span class="text-3xl">${item.icon}</span>
                         <div>
                             <div class="font-bold text-gray-800">${item.name}</div>
-                            <div class="text-sm text-amber-600 font-bold">需代幣：${item.cost}</div>
+                            <div class="text-sm text-amber-600 font-bold">需代幣：${item.cost} 枚</div>
                         </div>
                     </div>
-                    <button onclick="buyItem(${item.id})" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl shadow">兌換</button>
+                    <button onclick="buyItem(${item.id})" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl shadow transition-all">兌換</button>
                 `;
                 container.appendChild(div);
             });
@@ -267,13 +370,20 @@
         function buyItem(itemId) {
             let student = getCurrentStudent();
             let item = shopItems.find(i => i.id == itemId);
+            let total = getTotalCoins(student);
 
-            if (student.coins < item.cost) {
-                alert('您的代幣不夠兌換這個獎品喔！');
+            if (total < item.cost) {
+                alert('您的代幣總數不夠兌換這個獎品喔！');
                 return;
             }
 
-            student.coins -= item.cost;
+            // 扣除獎品費用
+            let success = deductCoins(item.cost);
+            if (!success) {
+                alert('兌換扣款失敗，請檢查代幣數量！');
+                return;
+            }
+
             let serialCode = 'CM309-' + Math.random().toString(36).substring(2, 8).toUpperCase();
             student.coupons.push({ name: item.name, code: serialCode, date: new Date().toLocaleDateString() });
 
@@ -287,8 +397,8 @@
             let student = getCurrentStudent();
             container.innerHTML = '';
 
-            if (student.coupons.length === 0) {
-                container.innerHTML = '<span class="text-gray-400 text-sm">目前還沒有兌換券，快去玩遊戲賺代幣吧！</span>';
+            if (!student.coupons || student.coupons.length === 0) {
+                container.innerHTML = '<span class="text-gray-400 text-sm">目前還沒有兌換券，快去玩遊戲或累積動物來換獎品吧！</span>';
                 return;
             }
 
