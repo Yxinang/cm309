@@ -11,12 +11,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Noto+Sans+TC:wght@500;700&display=swap');
         body { font-family: 'Fredoka', 'Noto Sans TC', sans-serif; background-color: #f0fdf4; }
-        @keyframes climbing {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-15px) rotate(-5deg); }
-            100% { transform: translateY(-30px) rotate(5deg); }
-        }
-        .animate-climb { animation: climbing 0.4s infinite alternate; }
         .coupon-used {
             background-color: #fef08a !important;
             border-color: #eab308 !important;
@@ -66,7 +60,7 @@
         <!-- 1. 扭蛋機畫面 -->
         <div id="section-gacha" class="tab-content text-center py-6">
             <h2 class="text-2xl font-bold text-emerald-700 mb-2">✨ 歡樂扭蛋機 ✨</h2>
-            <p class="text-gray-500 mb-6">每次遊戲消耗 <span class="font-bold text-amber-600">10 代幣</span>（動物園成體每隻 = 5代幣），試試手氣抽特權或代幣大獎！</p>
+            <p class="text-gray-500 mb-6">每次遊戲消耗 <span class="font-bold text-amber-600">10 代幣</span>（動物園成體每隻 = 5代幣），試試手氣抽特權大獎！</p>
             <div class="w-48 h-48 mx-auto bg-gradient-to-b from-pink-400 to-red-500 rounded-full flex items-center justify-center shadow-2xl border-8 border-white mb-6 relative animate-bounce">
                 <span class="text-7xl">🔮</span>
             </div>
@@ -74,24 +68,37 @@
             <div id="gachaResult" class="mt-6 text-xl font-bold text-emerald-600 h-12 flex items-center justify-center"></div>
         </div>
 
-        <!-- 2. 爬梯子畫面 -->
+        <!-- 2. 爬梯子畫面 (正方形、5條路、有梯子動畫) -->
         <div id="section-ladder" class="tab-content hidden text-center py-6">
             <h2 class="text-2xl font-bold text-emerald-700 mb-2">🧗 神秘爬梯子冒險 🧗</h2>
-            <p class="text-gray-500 mb-6">選擇一條路線（代幣 +10、再來一次、謝謝惠顧隨機給），每次消耗 10 代幣！</p>
+            <p class="text-gray-500 mb-4">選擇 1~5 號路線，爬上梯子尋找驚喜（每次消耗 10 代幣）！</p>
             
-            <div id="ladderAnimBox" class="h-28 bg-emerald-50 border-2 border-emerald-200 rounded-2xl mb-6 flex flex-col items-center justify-center relative overflow-hidden">
-                <div id="climberIcon" class="text-4xl transition-all duration-300">🧍‍♂️</div>
-                <div id="ladderStatusText" class="text-emerald-700 font-bold mt-2">請點選下方路線開始挑戰！</div>
+            <!-- 正方形爬梯子畫布區塊 -->
+            <div id="ladderAnimBox" class="w-72 h-72 mx-auto bg-emerald-50 border-4 border-emerald-300 rounded-2xl mb-6 flex flex-col items-center justify-between p-4 relative overflow-hidden shadow-inner">
+                <!-- 梯子造型背景 -->
+                <div class="absolute inset-0 flex justify-around opacity-20 pointer-events-none">
+                    <div class="w-2 bg-emerald-700 h-full"></div>
+                    <div class="w-2 bg-emerald-700 h-full"></div>
+                    <div class="w-2 bg-emerald-700 h-full"></div>
+                    <div class="w-2 bg-emerald-700 h-full"></div>
+                    <div class="w-2 bg-emerald-700 h-full"></div>
+                </div>
+                <div class="text-xs font-bold text-emerald-600 bg-white/80 px-2 py-1 rounded-lg z-10">梯子頂端 🎁</div>
+                <div id="climberIcon" class="text-6xl transition-all duration-300 z-10">🧗‍♂️</div>
+                <div id="ladderStatusText" class="text-emerald-800 font-bold text-sm bg-white/90 px-3 py-1 rounded-xl shadow-sm z-10">請點選下方 5 條路開始！</div>
             </div>
 
-            <div class="flex justify-center space-x-4 mb-6">
-                <button onclick="playLadder(1)" class="ladder-btn bg-blue-500 hover:bg-blue-600 text-white font-bold px-6 py-3 rounded-2xl shadow-md border-b-4 border-blue-700">路線 1</button>
-                <button onclick="playLadder(2)" class="ladder-btn bg-purple-500 hover:bg-purple-600 text-white font-bold px-6 py-3 rounded-2xl shadow-md border-b-4 border-purple-700">路線 2</button>
-                <button onclick="playLadder(3)" class="ladder-btn bg-pink-500 hover:bg-pink-600 text-white font-bold px-6 py-3 rounded-2xl shadow-md border-b-4 border-pink-700">路線 3</button>
+            <!-- 5條路按鈕 -->
+            <div class="flex justify-center flex-wrap gap-2 mb-6">
+                <button onclick="playLadder(1)" class="ladder-btn bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-2.5 rounded-xl shadow-md border-b-4 border-blue-700">1號路</button>
+                <button onclick="playLadder(2)" class="ladder-btn bg-purple-500 hover:bg-purple-600 text-white font-bold px-4 py-2.5 rounded-xl shadow-md border-b-4 border-purple-700">2號路</button>
+                <button onclick="playLadder(3)" class="ladder-btn bg-pink-500 hover:bg-pink-600 text-white font-bold px-4 py-2.5 rounded-xl shadow-md border-b-4 border-pink-700">3號路</button>
+                <button onclick="playLadder(4)" class="ladder-btn bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2.5 rounded-xl shadow-md border-b-4 border-amber-700">4號路</button>
+                <button onclick="playLadder(5)" class="ladder-btn bg-teal-500 hover:bg-teal-600 text-white font-bold px-4 py-2.5 rounded-xl shadow-md border-b-4 border-teal-700">5號路</button>
             </div>
         </div>
 
-        <!-- 3. 比大小畫面 -->
+        <!-- 3. 比大小畫面 (獲勝+5，輸了-5) -->
         <div id="section-battle" class="tab-content hidden text-center py-6">
             <h2 class="text-2xl font-bold text-emerald-700 mb-2">⚔️ 幸運數字比大小 (1-100) ⚔️</h2>
             <p class="text-gray-500 mb-4">輸入 1~100 的數字與電腦對決！贏了獲得 +5 代幣，輸了代幣減 5 (每次遊玩消耗 10 代幣)</p>
@@ -119,7 +126,7 @@
             </div>
             
             <h2 class="text-2xl font-bold text-emerald-700 mb-2 text-center">🛍️ 學生個人資訊與獎品兌換 🛍️</h2>
-            <p class="text-gray-500 mb-6 text-center">在此查看您的動物與代幣狀況，並使用代幣兌換您想要的獎品！</p>
+            <p class="text-gray-500 mb-6 text-center">在此查看您的動物與代幣狀況，並使用代幣兌換心儀的獎品！</p>
             
             <!-- 學生詳細資訊卡片 -->
             <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-5 mb-8 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -148,14 +155,13 @@
                 <!-- 動態載入商品 -->
             </div>
             
-            <!-- 我已擁有的兌換券與獎品紀錄 (無序號) -->
             <h3 class="text-xl font-bold text-emerald-700 mb-4 border-t-2 pt-6">🎟️ 我已擁有的兌換券與獎品紀錄</h3>
             <p class="text-xs text-gray-500 mb-3">💡 點擊卡片可切換「亮黃燈（已向老師兌換）」或「未亮燈（尚未兌換）」；若不需要可點擊刪除（代幣不退還，寵物保留）。</p>
             <div id="myCoupons" class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-2xl p-4 min-h-[90px] flex flex-wrap gap-3 mb-8">
                 <!-- 動態載入個人背包 -->
             </div>
 
-            <!-- 🪙 代幣獲得紀錄專屬框 (單純紀錄，不須兌換) -->
+            <!-- 🪙 代幣獲得紀錄專屬框 -->
             <h3 class="text-xl font-bold text-amber-700 mb-4 border-t-2 pt-6">🪙 代幣獲得紀錄 (遊戲獎勵)</h3>
             <div id="myCoinLogs" class="bg-amber-50/60 border-2 border-dashed border-amber-300 rounded-2xl p-4 min-h-[90px] flex flex-wrap gap-3">
                 <!-- 動態載入代幣獲得歷程 -->
@@ -163,6 +169,18 @@
         </div>
 
     </main>
+
+    <!-- 💡 得獎項目彈跳視窗 Modal -->
+    <div id="rewardPopupModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full border-4 border-amber-400 text-center shadow-2xl animate-bounce">
+            <div class="text-6xl mb-3">🎉</div>
+            <h3 class="text-2xl font-black text-emerald-700 mb-2">恭喜獲得大獎！</h3>
+            <div id="rewardPopupContent" class="text-xl font-bold text-amber-600 bg-amber-50 border-2 border-amber-200 rounded-2xl py-4 px-2 my-4 shadow-inner">
+                獎品名稱
+            </div>
+            <button onclick="closeRewardPopup()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black text-lg px-6 py-2.5 rounded-xl shadow-md w-full">太棒了！收下</button>
+        </div>
+    </div>
 
     <!-- 自選獎品名稱輸入 Modal -->
     <div id="customPrizeModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
@@ -302,7 +320,17 @@
             activeBtn.classList.add('bg-emerald-500', 'text-white', 'shadow-md');
         }
 
-        // 1. 扭蛋機邏輯 (-10 代幣，獎項直接給特權或代幣)
+        function showRewardPopup(prizeName) {
+            document.getElementById('rewardPopupContent').textContent = prizeName;
+            document.getElementById('rewardPopupModal').classList.remove('hidden');
+            confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
+        }
+
+        function closeRewardPopup() {
+            document.getElementById('rewardPopupModal').classList.add('hidden');
+        }
+
+        // 1. 扭蛋機邏輯 (-10 代幣)
         function playGacha() {
             let seatNum = getCurrentSeatNum();
             if (getTotalCoins(seatNum) < 10) {
@@ -332,11 +360,11 @@
 
             saveGameData();
             document.getElementById('gachaResult').innerHTML = `🎉 恭喜扭蛋抽中：<span class="text-amber-600 font-black">${reward.name}</span>！`;
-            confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+            showRewardPopup(reward.name);
             updateView();
         }
 
-        // 2. 爬梯子畫面 (抽中代幣直接進代幣區)
+        // 2. 爬梯子畫面 (5條路，抽中代幣直接進代幣區，謝謝惠顧改為指定文字)
         function playLadder(pathNum) {
             let seatNum = getCurrentSeatNum();
             if (getTotalCoins(seatNum) < 10) {
@@ -360,13 +388,12 @@
                 const outcomes = [
                     { text: "🌟 獲得代幣 +10！", coin: 10, refund: false },
                     { text: "🎈 再來一次！退回 10 代幣！", coin: 10, refund: true },
-                    { text: "💨 謝謝惠顧！再接再厲！", coin: 0, refund: false }
+                    { text: "哇ㄛ，下次再來８～", coin: 0, refund: false }
                 ];
                 let result = outcomes[Math.floor(Math.random() * outcomes.length)];
                 
                 if (result.refund) {
-                    gData.extraCoins += 10; 
-                    gData.coinLogs.unshift({ text: `爬梯子再來一次 (退回代幣 +10)`, date: new Date().toLocaleDateString() });
+                    gData.extraCoins += 10; // 退回代幣不記錄在代幣獲得紀錄中
                 } else if (result.coin > 0) {
                     gData.extraCoins += result.coin;
                     gData.coinLogs.unshift({ text: `爬梯子獲得代幣 +${result.coin}`, date: new Date().toLocaleDateString() });
@@ -374,7 +401,11 @@
 
                 saveGameData();
                 statusText.innerHTML = `✨ 路線 ${pathNum} 結果： <span class="text-amber-600 font-bold">${result.text}</span>`;
-                confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
+                if (result.coin > 0 || result.refund) {
+                    showRewardPopup(result.text);
+                } else {
+                    alert(result.text);
+                }
                 updateView();
             }, 1500);
         }
@@ -404,10 +435,11 @@
                 gData.extraCoins += 5; // 獲勝獲得 5 代幣
                 gData.coinLogs.unshift({ text: `比大小獲勝代幣 +5`, date: new Date().toLocaleDateString() });
                 resText = "🎉 挑戰成功！贏了電腦，獲得 +5 代幣！";
-                confetti({ particleCount: 130, spread: 90, origin: { y: 0.6 } });
+                showRewardPopup("數字比大小獲勝 +5 代幣");
             } else {
                 deductCoins(5); // 輸了代幣減 5
                 resText = "😢 可惡輸給電腦了！代幣額外扣除 5 枚！";
+                alert(resText);
             }
 
             saveGameData();
@@ -483,11 +515,10 @@
 
             saveGameData();
             alert(`成功兌換【${prizeName}】！`);
-            confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
             updateView();
         }
 
-        // 渲染背包紀錄 (無序號，僅名稱與日期)
+        // 渲染背包紀錄 (無序號)
         function renderCoupons() {
             let container = document.getElementById('myCoupons');
             let seatNum = getCurrentSeatNum();
@@ -525,7 +556,7 @@
             });
         }
 
-        // 渲染代幣獲得紀錄框
+        // 渲染代幣獲得紀錄專屬框
         function renderCoinLogs() {
             let container = document.getElementById('myCoinLogs');
             let seatNum = getCurrentSeatNum();
