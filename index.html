@@ -371,10 +371,6 @@
         <div style="margin-bottom: 14px;">
           <a href="game.html" class="bg-emerald-500 text-white px-4 py-2 rounded-xl" style="display: inline-block; background-color: #10b981; color: white; padding: 8px 16px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.9rem;">🎮 點我去玩扭蛋與兌換獎品</a>
         </div>
-
-        <div class="student-grid" id="petsGrid"></div>
-      </div>
-    </section>
         <div class="student-grid" id="petsGrid"></div>
       </div>
     </section>
@@ -408,7 +404,6 @@
           </button>
         </div>
 
-        <!-- 第一層：四大分類 -->
         <div class="album-category-list" id="albumCategoryList">
           <button class="album-chip active" onclick="selectAlbumCategory('全部')">全部</button>
           <button class="album-chip" onclick="selectAlbumCategory('體育課')">體育課</button>
@@ -416,7 +411,6 @@
           <button class="album-chip" onclick="selectAlbumCategory('校園活動')">校園活動</button>
         </div>
 
-        <!-- 第二層：全班 / 個人座號 (共25個分層) -->
         <div class="album-sub-list" id="albumSubList">
           <button class="album-sub-chip active" onclick="selectAlbumSub('全班', '')">👥 全班</button>
           <button class="album-sub-chip" onclick="selectAlbumSub('個人', '1號')">1號</button>
@@ -569,6 +563,13 @@
           <button class="btn-submit" style="background:#059669;" onclick="manualAddPetXp(5)">+5 獎勵分</button>
           <button class="btn-submit" style="background:#f8fafc; color:#ef4444; border:1px solid #fca5a5;" onclick="manualAddPetXp(-1)">-1 扣分</button>
         </div>
+
+        <!-- 💡 老師專用：單獨刪除/重設該生寵物按鈕 -->
+        <div style="margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 10px;">
+          <button class="btn-submit" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; font-size:0.8rem; padding:8px;" onclick="resetSingleStudentPet()">
+            🗑️ 刪除/重設該生目前寵物 (重新領養)
+          </button>
+        </div>
       </div>
 
       <div id="petSelectView" style="display:none; text-align:left;">
@@ -591,27 +592,6 @@
         <div id="gardenTicketBadgeBelow" style="font-size:0.82rem; color:#b45309; font-weight:700; text-align:center;"></div>
         <button class="btn-submit" style="background:#94a3b8;" id="btnModalClose" onclick="closePetModal()">關閉視窗</button>
       </div>
-    </div>
-  </div>
-
-  <!-- 獎品/抽獎券選擇對話框 Modal -->
-  <div id="rewardRedeemModal" class="modal-overlay" style="z-index:110;">
-    <div class="modal-box" style="max-width:380px; text-align:center;">
-      <h3 style="color:#b45309; margin-bottom:8px;"><i class="fa-solid fa-gift"></i> 2隻寵物兌換獎勵</h3>
-      <p style="font-size:0.85rem; color:#64748b; margin-bottom:14px;">請選擇要兌換的獎勵類型：</p>
-      
-      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px;">
-        <button class="btn-submit" style="background:#10b981;" onclick="setRewardType('prize')">🎁 兌換小禮物（自訂名稱）</button>
-        <button class="btn-submit" style="background:#d97706;" onclick="setRewardType('ticket')">🎟️ 換抽獎券一張</button>
-      </div>
-
-      <div id="prizeInputArea" style="display:none; margin-bottom:14px; text-align:left;">
-        <label style="font-size:0.78rem; font-weight:700; color:#475569;">輸入小禮物名稱：</label>
-        <input type="text" id="rewardPrizeInput" class="form-control" placeholder="例如: 橡皮擦、免寫作業卡">
-        <button class="btn-submit" style="background:#eab308; margin-top:8px;" onclick="submitRewardRedeem('prize')">確認送出 (兩隻寵物亮黃燈)</button>
-      </div>
-
-      <button class="btn-submit" style="background:#94a3b8;" onclick="closeRewardModal()">取消返回</button>
     </div>
   </div>
 
@@ -726,7 +706,6 @@
       { id: 'fox', name: '赤狐', stages: ['🥚', '🦊', '🦊'], desc: '野生動物' }
     ];
 
-    // 💡 每一階段設定：第一階段 20分，第二階段 20分，第三階段 15分 (總計 55 分滿等)
     const PET_REQ = [20, 20, 15]; 
 
     let storedStudents = JSON.parse(localStorage.getItem('cm309_students'));
@@ -770,7 +749,6 @@
     let lastClickedSeat = null;
     let syncDebounceTimer = null;
     let firstSelectedPetIndex = null;
-    let selectedRedeemIndex = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('zh-TW');
@@ -1486,11 +1464,10 @@
       }
     }
 
-    // === 🐾 寵物養成系統 (全面修復加分與新座號連動) ===
+    // === 🐾 寵物養成系統 ===
     function addPetXp(seat, amount) {
       let seatNum = parseInt(seat);
       if (!petState[seatNum]) {
-        // 若為新座號或尚未初始化，自動派發預設蛋
         petState[seatNum] = { petId: 'cat_orange', stage: 1, xp: 0 };
       }
       let p = petState[seatNum];
@@ -1527,7 +1504,7 @@
         const cat = PET_CATALOG.find(c => c.id === p.petId) || PET_CATALOG[0];
         const isMystery = p.stage === 1;
         const isCompleted = p.stage > 3;
-        const emoji = isMystery ? '🥚' : cat.stages[Math.min(p.stage - 1, 2)];
+        const emoji = isMystery ? '🥚' : (cat ? cat.stages[Math.min(p.stage - 1, 2)] : '🐱');
         let stageName = isCompleted ? '圓滿成長' : (p.stage===1?'蛋':(p.stage===2?'幼體':'成體'));
         let progressPercent = isCompleted ? 100 : Math.floor((p.xp / PET_REQ[p.stage - 1]) * 100);
         
@@ -1550,38 +1527,61 @@
       const selectView = document.getElementById('petSelectView');
       const gardenView = document.getElementById('petGardenView');
       
-      manageView.style.display = 'block';
-      selectView.style.display = 'none';
-      gardenView.style.display = 'none';
-      document.getElementById('btnViewGarden').style.display = 'block';
-      document.getElementById('btnModalClose').textContent = '關閉視窗';
-      document.getElementById('btnModalClose').onclick = closePetModal;
-
-      updateTicketBadgeBelow(seat);
-
-      const cat = PET_CATALOG.find(c => c.id === p.petId) || PET_CATALOG[0];
-      const isMystery = p.stage === 1;
-      const isCompleted = p.stage > 3;
-      document.getElementById('petModalEmoji').textContent = isMystery ? '🥚' : cat.stages[Math.min(p.stage - 1, 2)];
-      document.getElementById('petModalEmoji').className = `pet-emoji s${Math.min(p.stage, 4)}`;
-      
-      let stageName = isCompleted ? '圓滿成長' : (p.stage===1?'第一階段：蛋':(p.stage===2?'第二階段：幼體':'第三階段：成體'));
-      let displayName = isMystery ? '神秘的蛋' : cat.name;
-      document.getElementById('petModalName').textContent = `${displayName} (${stageName})`;
-      
-      const progressArea = document.getElementById('petModalProgressArea');
-      const actionArea = document.getElementById('petModalActionArea');
-      const completeArea = document.getElementById('petModalCompleteArea');
-
-      if(isCompleted) {
-         progressArea.style.display = 'none'; actionArea.style.display = 'none'; completeArea.style.display = 'block';
+      // 若該學生寵物已收成且尚未選新蛋 (petId 為空)
+      if (!p.petId && p.stage === 1 && p.xp === 0) {
+        manageView.style.display = 'none';
+        selectView.style.display = 'block';
+        gardenView.style.display = 'none';
+        document.getElementById('btnViewGarden').style.display = 'none';
+        document.getElementById('btnModalClose').textContent = '關閉視窗';
+        document.getElementById('btnModalClose').onclick = closePetModal;
       } else {
-         progressArea.style.display = 'block'; actionArea.style.display = 'flex'; completeArea.style.display = 'none';
-         let req = PET_REQ[p.stage - 1];
-         document.getElementById('petModalXpText').textContent = `${p.xp} / ${req}`;
-         document.getElementById('petModalProgressBar').style.width = `${(p.xp/req)*100}%`;
+        manageView.style.display = 'block';
+        selectView.style.display = 'none';
+        gardenView.style.display = 'none';
+        document.getElementById('btnViewGarden').style.display = 'block';
+        document.getElementById('btnModalClose').textContent = '關閉視窗';
+        document.getElementById('btnModalClose').onclick = closePetModal;
+
+        updateTicketBadgeBelow(seat);
+
+        const cat = PET_CATALOG.find(c => c.id === p.petId) || PET_CATALOG[0];
+        const isMystery = p.stage === 1;
+        const isCompleted = p.stage > 3;
+        document.getElementById('petModalEmoji').textContent = isMystery ? '🥚' : (cat ? cat.stages[Math.min(p.stage - 1, 2)] : '🐱');
+        document.getElementById('petModalEmoji').className = `pet-emoji s${Math.min(p.stage, 4)}`;
+        
+        let stageName = isCompleted ? '圓滿成長' : (p.stage===1?'第一階段：蛋':(p.stage===2?'第二階段：幼體':'第三階段：成體'));
+        let displayName = isMystery ? '神秘的蛋' : (cat ? cat.name : '未知寵物');
+        document.getElementById('petModalName').textContent = `${displayName} (${stageName})`;
+        
+        const progressArea = document.getElementById('petModalProgressArea');
+        const actionArea = document.getElementById('petModalActionArea');
+        const completeArea = document.getElementById('petModalCompleteArea');
+
+        if(isCompleted) {
+           progressArea.style.display = 'none'; actionArea.style.display = 'none'; completeArea.style.display = 'block';
+        } else {
+           progressArea.style.display = 'block'; actionArea.style.display = 'flex'; completeArea.style.display = 'none';
+           let req = PET_REQ[p.stage - 1];
+           document.getElementById('petModalXpText').textContent = `${p.xp} / ${req}`;
+           document.getElementById('petModalProgressBar').style.width = `${(p.xp/req)*100}%`;
+        }
       }
       document.getElementById('petManageModal').classList.add('active');
+    }
+
+    // 💡 老師專用：單獨重設該生寵物
+    function resetSingleStudentPet() {
+      const seat = currentSelectedStudent.seat;
+      if (confirm(`確定要重設 ${currentSelectedStudent.name} 的目前寵物嗎？將重新抽蛋（目前積分保留）。`)) {
+        const randomPet = PET_CATALOG[Math.floor(Math.random() * PET_CATALOG.length)];
+        petState[seat].petId = randomPet.id;
+        openPetModal(seat, currentSelectedStudent.name);
+        renderPetsGrid();
+        syncToFirebase();
+        alert("✅ 已成功重設寵物！");
+      }
     }
 
     function updateTicketBadgeBelow(seat) {
@@ -1596,6 +1596,7 @@
       }
     }
 
+    // 💡 真正隨機從 20 種品種中抽出一隻
     function selectMysteryPet() {
       const seat = currentSelectedStudent.seat;
       const randomPet = PET_CATALOG[Math.floor(Math.random() * PET_CATALOG.length)];
@@ -1611,7 +1612,10 @@
       const seat = currentSelectedStudent.seat; const p = petState[seat];
       if(!petCollection[seat]) petCollection[seat] = [];
       petCollection[seat].push({ petId: p.petId, prize: null, redeemed: false, pairId: null }); 
-      delete petState[seat];
+      
+      // 送進動物園後，重設為空白讓學生重新抽蛋
+      petState[seat] = { petId: null, stage: 1, xp: 0 };
+      
       openPetModal(seat, currentSelectedStudent.name); 
       renderPetsGrid();
       syncToFirebase();
@@ -1677,8 +1681,8 @@
           }
 
           div.innerHTML = `
-            <div class="emoji">${cat.stages[2]}</div>
-            <div class="name">${cat.name}</div>
+            <div class="emoji">${cat ? cat.stages[2] : '🐾'}</div>
+            <div class="name">${cat ? cat.name : '神秘動物'}</div>
             ${statusHtml}
           `;
 
