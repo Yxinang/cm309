@@ -63,10 +63,10 @@
             <button onclick="switchTab('shop')" id="tab-shop" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-base transition-all bg-gray-100 text-gray-600 hover:bg-emerald-100">🛍️ 學生資訊與獎品兌換</button>
         </div>
 
-        <!-- 1. 扭蛋機畫面 (獎品已更新為您的 7 項特權) -->
+        <!-- 1. 扭蛋機畫面 -->
         <div id="section-gacha" class="tab-content text-center py-6">
             <h2 class="text-2xl font-bold text-emerald-700 mb-2">✨ 歡樂扭蛋機 ✨</h2>
-            <p class="text-gray-500 mb-6">每次遊戲消耗 <span class="font-bold text-amber-600">10 代幣</span>（動物園成體每隻 = 5代幣），試試手氣抽班級獨家特權大獎！</p>
+            <p class="text-gray-500 mb-6">每次遊戲消耗 <span class="font-bold text-amber-600">10 代幣</span>（動物園成體每隻 = 5代幣），試試手氣抽特權或代幣大獎！</p>
             <div class="w-48 h-48 mx-auto bg-gradient-to-b from-pink-400 to-red-500 rounded-full flex items-center justify-center shadow-2xl border-8 border-white mb-6 relative animate-bounce">
                 <span class="text-7xl">🔮</span>
             </div>
@@ -74,7 +74,7 @@
             <div id="gachaResult" class="mt-6 text-xl font-bold text-emerald-600 h-12 flex items-center justify-center"></div>
         </div>
 
-        <!-- 2. 爬梯子畫面 (三個隨機給：代幣10、再來一次、謝謝惠顧) -->
+        <!-- 2. 爬梯子畫面 -->
         <div id="section-ladder" class="tab-content hidden text-center py-6">
             <h2 class="text-2xl font-bold text-emerald-700 mb-2">🧗 神秘爬梯子冒險 🧗</h2>
             <p class="text-gray-500 mb-6">選擇一條路線（代幣 +10、再來一次、謝謝惠顧隨機給），每次消耗 10 代幣！</p>
@@ -91,7 +91,7 @@
             </div>
         </div>
 
-        <!-- 3. 比大小畫面 (獲勝+5，輸了-5，消耗10) -->
+        <!-- 3. 比大小畫面 -->
         <div id="section-battle" class="tab-content hidden text-center py-6">
             <h2 class="text-2xl font-bold text-emerald-700 mb-2">⚔️ 幸運數字比大小 (1-100) ⚔️</h2>
             <p class="text-gray-500 mb-4">輸入 1~100 的數字與電腦對決！贏了獲得 +5 代幣，輸了代幣減 5 (每次遊玩消耗 10 代幣)</p>
@@ -142,16 +142,23 @@
                 </div>
             </div>
 
-            <!-- 獎品兌換區 (指定座位50、免抄聯絡簿3天15、作業減免40、自選獎品10) -->
+            <!-- 獎品兌換區 -->
             <h3 class="text-xl font-bold text-emerald-700 mb-4">🎁 獎品兌換專區</h3>
             <div id="shopList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                 <!-- 動態載入商品 -->
             </div>
             
+            <!-- 我已擁有的兌換券與獎品紀錄 (無序號) -->
             <h3 class="text-xl font-bold text-emerald-700 mb-4 border-t-2 pt-6">🎟️ 我已擁有的兌換券與獎品紀錄</h3>
-            <p class="text-xs text-gray-500 mb-3">💡 點擊卡片可切換「亮黃燈（已兌換/使用）」或「未亮燈（尚未兌換）」；若不需要可點擊刪除（代幣不退還，寵物保留）。</p>
-            <div id="myCoupons" class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-2xl p-4 min-h-[100px] flex flex-wrap gap-3">
+            <p class="text-xs text-gray-500 mb-3">💡 點擊卡片可切換「亮黃燈（已向老師兌換）」或「未亮燈（尚未兌換）」；若不需要可點擊刪除（代幣不退還，寵物保留）。</p>
+            <div id="myCoupons" class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-2xl p-4 min-h-[90px] flex flex-wrap gap-3 mb-8">
                 <!-- 動態載入個人背包 -->
+            </div>
+
+            <!-- 🪙 代幣獲得紀錄專屬框 (單純紀錄，不須兌換) -->
+            <h3 class="text-xl font-bold text-amber-700 mb-4 border-t-2 pt-6">🪙 代幣獲得紀錄 (遊戲獎勵)</h3>
+            <div id="myCoinLogs" class="bg-amber-50/60 border-2 border-dashed border-amber-300 rounded-2xl p-4 min-h-[90px] flex flex-wrap gap-3">
+                <!-- 動態載入代幣獲得歷程 -->
             </div>
         </div>
 
@@ -181,7 +188,6 @@
         let gameData = JSON.parse(localStorage.getItem('cm309_game_data')) || {};
         let currentSeatIndex = 0; 
 
-        // 💡 依您的需求設定的 4 種固定兌換獎品
         const shopItems = [
             { id: 'seat', name: "指定座位", cost: 50, icon: "🪑" },
             { id: 'book', name: "免抄聯絡簿 3 天", cost: 15, icon: "📝" },
@@ -207,7 +213,10 @@
 
         function getStudentGameData(seatNum) {
             if (!gameData[seatNum]) {
-                gameData[seatNum] = { extraCoins: 0, coupons: [] };
+                gameData[seatNum] = { extraCoins: 0, coupons: [], coinLogs: [] };
+            }
+            if (!gameData[seatNum].coinLogs) {
+                gameData[seatNum].coinLogs = [];
             }
             return gameData[seatNum];
         }
@@ -229,7 +238,6 @@
             return (petCount * 5) + (gData.extraCoins || 0);
         }
 
-        // 扣除代幣邏輯 (優先扣除額外代幣，若不夠則扣除動物園成體，每隻折 5 代幣)
         function deductCoins(amount) {
             let seatNum = getCurrentSeatNum();
             let total = getTotalCoins(seatNum);
@@ -278,6 +286,7 @@
 
             renderShop();
             renderCoupons();
+            renderCoinLogs();
         }
 
         function switchTab(tabName) {
@@ -293,7 +302,7 @@
             activeBtn.classList.add('bg-emerald-500', 'text-white', 'shadow-md');
         }
 
-        // 1. 扭蛋機邏輯 (-10 代幣，獎品為您的 7 項特權)
+        // 1. 扭蛋機邏輯 (-10 代幣，獎項直接給特權或代幣)
         function playGacha() {
             let seatNum = getCurrentSeatNum();
             if (getTotalCoins(seatNum) < 10) {
@@ -304,31 +313,30 @@
             let gData = getStudentGameData(seatNum);
             
             const gachaPrizes = [
-                "打掃工作免除兩次",
-                "單一桌遊保管一日",
-                "小獎品任選一個",
-                "代幣大贈送：送10個代幣",
-                "上課可在遊憩區上課（但不能打擾同學）",
-                "午餐排第一個",
-                "午休豁免權（免午睡，可做自己的事不配登記，但不能打擾同學）"
+                { name: "打掃工作免除兩次", type: "prize" },
+                { name: "單一桌遊保管一日", type: "prize" },
+                { name: "小獎品任選一個", type: "prize" },
+                { name: "代幣大贈送：送10個代幣", type: "coin", val: 10 },
+                { name: "上課可在遊憩區上課（但不能打擾同學）", type: "prize" },
+                { name: "午餐排第一個", type: "prize" },
+                { name: "午休豁免權（免午睡，可做自己的事不配登記，但不能打擾同學）", type: "prize" }
             ];
             let reward = gachaPrizes[Math.floor(Math.random() * gachaPrizes.length)];
             
-            if(reward.includes("送10個代幣")) { 
-                gData.extraCoins += 10; 
+            if(reward.type === "coin") { 
+                gData.extraCoins += reward.val;
+                gData.coinLogs.unshift({ text: `扭蛋獲得代幣 +${reward.val}`, date: new Date().toLocaleDateString() });
+            } else {
+                gData.coupons.push({ name: `[扭蛋特權] ${reward.name}`, date: new Date().toLocaleDateString(), isUsed: false });
             }
 
-            // 同時將扭蛋抽到的特權自動存入背包中
-            let serialCode = 'CM309-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-            gData.coupons.push({ name: `[扭蛋特權] ${reward}`, code: serialCode, date: new Date().toLocaleDateString(), isUsed: false });
-
             saveGameData();
-            document.getElementById('gachaResult').innerHTML = `🎉 恭喜扭蛋抽中：<span class="text-amber-600 font-black">${reward}</span>！`;
+            document.getElementById('gachaResult').innerHTML = `🎉 恭喜扭蛋抽中：<span class="text-amber-600 font-black">${reward.name}</span>！`;
             confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
             updateView();
         }
 
-        // 2. 爬梯子畫面 (三個隨機給：代幣10、再來一次、謝謝惠顧)
+        // 2. 爬梯子畫面 (抽中代幣直接進代幣區)
         function playLadder(pathNum) {
             let seatNum = getCurrentSeatNum();
             if (getTotalCoins(seatNum) < 10) {
@@ -358,8 +366,10 @@
                 
                 if (result.refund) {
                     gData.extraCoins += 10; 
-                } else {
+                    gData.coinLogs.unshift({ text: `爬梯子再來一次 (退回代幣 +10)`, date: new Date().toLocaleDateString() });
+                } else if (result.coin > 0) {
                     gData.extraCoins += result.coin;
+                    gData.coinLogs.unshift({ text: `爬梯子獲得代幣 +${result.coin}`, date: new Date().toLocaleDateString() });
                 }
 
                 saveGameData();
@@ -392,6 +402,7 @@
 
             if (pInput >= cNum) {
                 gData.extraCoins += 5; // 獲勝獲得 5 代幣
+                gData.coinLogs.unshift({ text: `比大小獲勝代幣 +5`, date: new Date().toLocaleDateString() });
                 resText = "🎉 挑戰成功！贏了電腦，獲得 +5 代幣！";
                 confetti({ particleCount: 130, spread: 90, origin: { y: 0.6 } });
             } else {
@@ -467,17 +478,16 @@
 
             let seatNum = getCurrentSeatNum();
             let gData = getStudentGameData(seatNum);
-            let serialCode = 'CM309-' + Math.random().toString(36).substring(2, 8).toUpperCase();
             
-            gData.coupons.push({ name: prizeName, code: serialCode, date: new Date().toLocaleDateString(), isUsed: false });
+            gData.coupons.push({ name: prizeName, date: new Date().toLocaleDateString(), isUsed: false });
 
             saveGameData();
-            alert(`成功兌換【${prizeName}】！\n序號：${serialCode}`);
+            alert(`成功兌換【${prizeName}】！`);
             confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
             updateView();
         }
 
-        // 渲染背包紀錄
+        // 渲染背包紀錄 (無序號，僅名稱與日期)
         function renderCoupons() {
             let container = document.getElementById('myCoupons');
             let seatNum = getCurrentSeatNum();
@@ -497,7 +507,6 @@
                 badge.innerHTML = `
                     <button onclick="event.stopPropagation(); deleteCoupon(${index})" class="absolute top-2 right-2 text-red-400 hover:text-red-600 font-bold text-xs bg-white/80 px-1.5 py-0.5 rounded-full border border-red-200">✕ 刪除</button>
                     <span class="font-bold text-emerald-700 text-sm pr-12">🎁 ${c.name}</span>
-                    <span class="text-xs text-gray-500 font-mono mt-1">序號：${c.code}</span>
                     <div class="flex justify-between items-center w-full mt-2">
                         <span class="text-[10px] text-gray-400">日期：${c.date}</span>
                         <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${isUsed ? 'bg-amber-200 text-amber-800' : 'bg-gray-100 text-gray-500'}">
@@ -513,6 +522,29 @@
                 };
 
                 container.appendChild(badge);
+            });
+        }
+
+        // 渲染代幣獲得紀錄框
+        function renderCoinLogs() {
+            let container = document.getElementById('myCoinLogs');
+            let seatNum = getCurrentSeatNum();
+            let gData = getStudentGameData(seatNum);
+            container.innerHTML = '';
+
+            if (!gData.coinLogs || gData.coinLogs.length === 0) {
+                container.innerHTML = '<span class="text-gray-400 text-sm">目前尚無代幣獲得紀錄。</span>';
+                return;
+            }
+
+            gData.coinLogs.forEach(log => {
+                let logBadge = document.createElement('div');
+                logBadge.className = "bg-white border border-amber-200 rounded-xl px-3 py-2 shadow-sm flex flex-col text-xs";
+                logBadge.innerHTML = `
+                    <span class="font-bold text-amber-800">🪙 ${log.text}</span>
+                    <span class="text-[10px] text-gray-400 mt-0.5">${log.date}</span>
+                `;
+                container.appendChild(logBadge);
             });
         }
 
