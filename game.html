@@ -68,14 +68,12 @@
             <div id="gachaResult" class="mt-6 text-xl font-bold text-emerald-600 h-12 flex items-center justify-center"></div>
         </div>
 
-        <!-- 2. 爬梯子畫面 (正方形、5條路、有梯子動畫) -->
+        <!-- 2. 爬梯子畫面 -->
         <div id="section-ladder" class="tab-content hidden text-center py-6">
             <h2 class="text-2xl font-bold text-emerald-700 mb-2">🧗 神秘爬梯子冒險 🧗</h2>
             <p class="text-gray-500 mb-4">選擇 1~5 號路線，爬上梯子尋找驚喜（每次消耗 10 代幣）！</p>
             
-            <!-- 正方形爬梯子畫布區塊 -->
             <div id="ladderAnimBox" class="w-72 h-72 mx-auto bg-emerald-50 border-4 border-emerald-300 rounded-2xl mb-6 flex flex-col items-center justify-between p-4 relative overflow-hidden shadow-inner">
-                <!-- 梯子造型背景 -->
                 <div class="absolute inset-0 flex justify-around opacity-20 pointer-events-none">
                     <div class="w-2 bg-emerald-700 h-full"></div>
                     <div class="w-2 bg-emerald-700 h-full"></div>
@@ -88,7 +86,6 @@
                 <div id="ladderStatusText" class="text-emerald-800 font-bold text-sm bg-white/90 px-3 py-1 rounded-xl shadow-sm z-10">請點選下方 5 條路開始！</div>
             </div>
 
-            <!-- 5條路按鈕 -->
             <div class="flex justify-center flex-wrap gap-2 mb-6">
                 <button onclick="playLadder(1)" class="ladder-btn bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-2.5 rounded-xl shadow-md border-b-4 border-blue-700">1號路</button>
                 <button onclick="playLadder(2)" class="ladder-btn bg-purple-500 hover:bg-purple-600 text-white font-bold px-4 py-2.5 rounded-xl shadow-md border-b-4 border-purple-700">2號路</button>
@@ -98,7 +95,7 @@
             </div>
         </div>
 
-        <!-- 3. 比大小畫面 (獲勝+5，輸了-5) -->
+        <!-- 3. 比大小畫面 -->
         <div id="section-battle" class="tab-content hidden text-center py-6">
             <h2 class="text-2xl font-bold text-emerald-700 mb-2">⚔️ 幸運數字比大小 (1-100) ⚔️</h2>
             <p class="text-gray-500 mb-4">輸入 1~100 的數字與電腦對決！贏了獲得 +5 代幣，輸了代幣減 5 (每次遊玩消耗 10 代幣)</p>
@@ -170,15 +167,15 @@
 
     </main>
 
-    <!-- 💡 得獎項目彈跳視窗 Modal -->
+    <!-- 💡 固定且不跳動的得獎特寫視窗 Modal -->
     <div id="rewardPopupModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-3xl p-8 max-w-sm w-full border-4 border-amber-400 text-center shadow-2xl animate-bounce">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full border-4 border-amber-400 text-center shadow-2xl">
             <div class="text-6xl mb-3">🎉</div>
             <h3 class="text-2xl font-black text-emerald-700 mb-2">恭喜獲得大獎！</h3>
             <div id="rewardPopupContent" class="text-xl font-bold text-amber-600 bg-amber-50 border-2 border-amber-200 rounded-2xl py-4 px-2 my-4 shadow-inner">
                 獎品名稱
             </div>
-            <button onclick="closeRewardPopup()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black text-lg px-6 py-2.5 rounded-xl shadow-md w-full">太棒了！收下</button>
+            <button onclick="closeRewardPopup()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black text-lg px-6 py-3 rounded-2xl shadow-md w-full transition-all">太棒了！收下</button>
         </div>
     </div>
 
@@ -364,7 +361,7 @@
             updateView();
         }
 
-        // 2. 爬梯子畫面 (5條路，抽中代幣直接進代幣區，謝謝惠顧改為指定文字)
+        // 2. 爬梯子畫面 (5條路，謝謝惠顧改為指定文字)
         function playLadder(pathNum) {
             let seatNum = getCurrentSeatNum();
             if (getTotalCoins(seatNum) < 10) {
@@ -386,14 +383,14 @@
                 document.querySelectorAll('.ladder-btn').forEach(btn => btn.disabled = false);
 
                 const outcomes = [
-                    { text: "🌟 獲得代幣 +10！", coin: 10, refund: false },
-                    { text: "🎈 再來一次！退回 10 代幣！", coin: 10, refund: true },
-                    { text: "哇ㄛ，下次再來８～", coin: 0, refund: false }
+                    { text: "🌟 獲得代幣 +10！", coin: 10, refund: false, isCoin: true },
+                    { text: "🎈 再來一次！退回 10 代幣！", coin: 10, refund: true, isCoin: false },
+                    { text: "哇ㄛ，下次再來８～", coin: 0, refund: false, isCoin: false }
                 ];
                 let result = outcomes[Math.floor(Math.random() * outcomes.length)];
                 
                 if (result.refund) {
-                    gData.extraCoins += 10; // 退回代幣不記錄在代幣獲得紀錄中
+                    gData.extraCoins += 10; 
                 } else if (result.coin > 0) {
                     gData.extraCoins += result.coin;
                     gData.coinLogs.unshift({ text: `爬梯子獲得代幣 +${result.coin}`, date: new Date().toLocaleDateString() });
@@ -401,10 +398,11 @@
 
                 saveGameData();
                 statusText.innerHTML = `✨ 路線 ${pathNum} 結果： <span class="text-amber-600 font-bold">${result.text}</span>`;
+                
                 if (result.coin > 0 || result.refund) {
                     showRewardPopup(result.text);
                 } else {
-                    alert(result.text);
+                    showRewardPopup(result.text);
                 }
                 updateView();
             }, 1500);
@@ -432,14 +430,14 @@
             let resText = "";
 
             if (pInput >= cNum) {
-                gData.extraCoins += 5; // 獲勝獲得 5 代幣
+                gData.extraCoins += 5; 
                 gData.coinLogs.unshift({ text: `比大小獲勝代幣 +5`, date: new Date().toLocaleDateString() });
                 resText = "🎉 挑戰成功！贏了電腦，獲得 +5 代幣！";
                 showRewardPopup("數字比大小獲勝 +5 代幣");
             } else {
-                deductCoins(5); // 輸了代幣減 5
+                deductCoins(5); 
                 resText = "😢 可惡輸給電腦了！代幣額外扣除 5 枚！";
-                alert(resText);
+                showRewardPopup("比大小輸了 代幣 -5");
             }
 
             saveGameData();
@@ -518,7 +516,6 @@
             updateView();
         }
 
-        // 渲染背包紀錄 (無序號)
         function renderCoupons() {
             let container = document.getElementById('myCoupons');
             let seatNum = getCurrentSeatNum();
@@ -556,7 +553,6 @@
             });
         }
 
-        // 渲染代幣獲得紀錄專屬框
         function renderCoinLogs() {
             let container = document.getElementById('myCoinLogs');
             let seatNum = getCurrentSeatNum();
