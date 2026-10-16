@@ -563,13 +563,6 @@
           <button class="btn-submit" style="background:#059669;" onclick="manualAddPetXp(5)">+5 獎勵分</button>
           <button class="btn-submit" style="background:#f8fafc; color:#ef4444; border:1px solid #fca5a5;" onclick="manualAddPetXp(-1)">-1 扣分</button>
         </div>
-
-        <!-- 💡 老師專用：單獨刪除/重設該生寵物按鈕 -->
-        <div style="margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 10px;">
-          <button class="btn-submit" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; font-size:0.8rem; padding:8px;" onclick="resetSingleStudentPet()">
-            🗑️ 刪除/重設該生目前寵物 (重新領養)
-          </button>
-        </div>
       </div>
 
       <div id="petSelectView" style="display:none; text-align:left;">
@@ -590,6 +583,14 @@
       <div style="margin-top:20px; display:flex; flex-direction:column; gap:8px;">
         <button class="btn-submit" style="background:#0ea5e9;" id="btnViewGarden" onclick="showPetGarden()">🌳 查看專屬動物園與獎勵兌換</button>
         <div id="gardenTicketBadgeBelow" style="font-size:0.82rem; color:#b45309; font-weight:700; text-align:center;"></div>
+        
+        <!-- 💡 刪除選項移至視窗最下方 -->
+        <div style="border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 4px;">
+          <button class="btn-submit" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; font-size:0.8rem; padding:8px;" onclick="resetSingleStudentPet()">
+            🗑️ 刪除/重設該生目前寵物 (重新抽蛋)
+          </button>
+        </div>
+
         <button class="btn-submit" style="background:#94a3b8;" id="btnModalClose" onclick="closePetModal()">關閉視窗</button>
       </div>
     </div>
@@ -726,6 +727,9 @@
     let currentAlbumTargetSeat = '';   
 
     let petState = JSON.parse(localStorage.getItem('cm309_pets')) || INITIAL_PETS;
+    
+    // 💡 測試學生的分數重設歸零 (例如指定座號或直接清除當前測試)
+    // 若要將所有學生的測試寵物重設，可在此確保初始化
     let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
     let cleanAssignment = JSON.parse(localStorage.getItem('cm309_cleanAssign')) || {};
 
@@ -1527,7 +1531,6 @@
       const selectView = document.getElementById('petSelectView');
       const gardenView = document.getElementById('petGardenView');
       
-      // 若該學生寵物已收成且尚未選新蛋 (petId 為空)
       if (!p.petId && p.stage === 1 && p.xp === 0) {
         manageView.style.display = 'none';
         selectView.style.display = 'block';
@@ -1571,16 +1574,16 @@
       document.getElementById('petManageModal').classList.add('active');
     }
 
-    // 💡 老師專用：單獨重設該生寵物
     function resetSingleStudentPet() {
       const seat = currentSelectedStudent.seat;
-      if (confirm(`確定要重設 ${currentSelectedStudent.name} 的目前寵物嗎？將重新抽蛋（目前積分保留）。`)) {
+      if (confirm(`確定要重設 ${currentSelectedStudent.name} 的目前寵物嗎？分數會歸零並重新抽蛋。`)) {
+        // 💡 測試學生的分數重設歸零與重新抽蛋
         const randomPet = PET_CATALOG[Math.floor(Math.random() * PET_CATALOG.length)];
-        petState[seat].petId = randomPet.id;
+        petState[seat] = { petId: randomPet.id, stage: 1, xp: 0 };
         openPetModal(seat, currentSelectedStudent.name);
         renderPetsGrid();
         syncToFirebase();
-        alert("✅ 已成功重設寵物！");
+        alert("✅ 已成功將該生寵物與分數重設歸零！");
       }
     }
 
@@ -1596,7 +1599,6 @@
       }
     }
 
-    // 💡 真正隨機從 20 種品種中抽出一隻
     function selectMysteryPet() {
       const seat = currentSelectedStudent.seat;
       const randomPet = PET_CATALOG[Math.floor(Math.random() * PET_CATALOG.length)];
@@ -1613,7 +1615,6 @@
       if(!petCollection[seat]) petCollection[seat] = [];
       petCollection[seat].push({ petId: p.petId, prize: null, redeemed: false, pairId: null }); 
       
-      // 送進動物園後，重設為空白讓學生重新抽蛋
       petState[seat] = { petId: null, stage: 1, xp: 0 };
       
       openPetModal(seat, currentSelectedStudent.name); 
@@ -1621,7 +1622,6 @@
       syncToFirebase();
     }
 
-    // === 🌳 查看專屬動物園與雙寵物兌換獎勵 ===
     function showPetGarden() {
       document.getElementById('petManageView').style.display = 'none';
       document.getElementById('petSelectView').style.display = 'none';
