@@ -180,7 +180,7 @@
                 </div>
             </div>
 
-            <!-- 獎品兌換專區 (指定座位50、免抄聯絡簿40、作業減免30、小獎品10) -->
+            <!-- 獎品兌換專區 -->
             <h3 class="text-xl font-bold text-emerald-700 mb-4">🎁 獎品兌換專區</h3>
             <div id="shopList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                 <!-- 動態載入商品 -->
@@ -350,7 +350,6 @@
                 opt.textContent = name;
                 select.appendChild(opt);
             });
-            // 初始化確保當前座號資料存在
             getStudentGameData(getCurrentSeatNum());
             updateView();
         }
@@ -372,12 +371,11 @@
 
         function switchStudent() {
             currentSeatIndex = parseInt(document.getElementById('studentSelect').value);
-            let seatNum = getCurrentSeatNum();
-            // 切換座號時確保該座號資料已建立
-            getStudentGameData(seatNum);
+            getStudentGameData(getCurrentSeatNum());
             updateView();
         }
 
+        // 💡 完整與主系統（index.html）同步抓取動物園成體數
         function getAdultPetCount(seatNum) {
             let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
             let myAdultPets = petCollection[seatNum] || [];
@@ -726,7 +724,7 @@
                     document.getElementById('dynamicPrizeModal').classList.remove('hidden');
                     setTimeout(() => document.getElementById('dynamicPrizeInput').focus(), 100);
                 } else if (wonPrize.type === "ticket") {
-                    gData.tickets.push({ name: "扭蛋卷", date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
+                    gData.tickets.push({ name: "扭蛋卷", date: new Date().toLocaleDateString(), isUsed: false });
                     saveGameData();
                     resText = `🎉 挑戰成功！贏了電腦，獲得：${wonPrize.text}！`;
                     showRewardPopup(wonPrize.text);
@@ -758,7 +756,7 @@
                 let gData = getStudentGameData(seatNum);
                 let fullName = pendingDynamicReward.prefix + val;
                 if (pendingDynamicReward.type === 'tickets') {
-                    gData.tickets.push({ name: fullName, date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
+                    gData.tickets.push({ name: fullName, date: new Date().toLocaleDateString(), isUsed: false });
                 } else {
                     gData.specials.push({ name: fullName, date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
                 }
@@ -769,7 +767,7 @@
             }
         }
 
-        // 4. 獎品兌換與背包管理 (指定座位50、免抄聯絡簿40、作業減免30、小獎品10)
+        // 4. 獎品兌換與背包管理
         function renderShop() {
             let container = document.getElementById('shopList');
             container.innerHTML = '';
@@ -853,7 +851,7 @@
             updateView();
         }
 
-        // 第一區：獎品卷與扭蛋卷 (未兌換在上，已兌換亮黃燈自動排在最下方)
+        // 第一區：獎品卷與扭蛋卷
         function renderTickets() {
             let container = document.getElementById('ticketCouponsArea');
             let seatNum = getCurrentSeatNum();
@@ -925,7 +923,7 @@
             }
         }
 
-        // 第二區：其他項目獎品與特權 (未兌換在上，已兌換亮黃燈自動排在最下方)
+        // 第二區：其他項目獎品與特權
         function renderSpecials() {
             let container = document.getElementById('specialCouponsArea');
             let seatNum = getCurrentSeatNum();
@@ -1037,7 +1035,7 @@
             }
         }
 
-        // Firebase 雲端同步與讀取
+        // 💡 完整與主系統（index.html）同步讀取與寫入 Firebase
         function fetchFromFirebase() {
             if (!firebaseDbUrl) return;
             fetch(`${firebaseDbUrl.trim().endsWith('/') ? firebaseDbUrl.trim().slice(0, -1) : firebaseDbUrl.trim()}/classroomData.json`)
