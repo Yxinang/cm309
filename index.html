@@ -312,7 +312,7 @@
       </div>
     </section>
 
-    <!-- 第六部分：寵物養成系統 (兩隻成體配對兌換：扭蛋卷或10代幣) -->
+    <!-- 第六部分：寵物養成系統 -->
     <section id="tab-pets" class="page-section">
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-paw text-secondary"></i> 班級神秘寵物樂園</div>
@@ -362,24 +362,7 @@
       </div>
 
       <div class="card">
-        <div class="card-title"><i class="fa-solid fa-pen-to-square text-danger"></i> 發佈新公告</div>
-        <form onsubmit="handleCreateAnnouncement(event)" style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:12px;">
-          <input type="text" id="newAnnoDept" class="form-control" style="margin-bottom:8px;" placeholder="單位標籤 (如:學務處、三年九班導師)" required>
-          <input type="text" id="newAnnoTitle" class="form-control" style="margin-bottom:8px;" placeholder="公告標題" required>
-          <textarea id="newAnnoContent" class="form-control" rows="3" style="margin-bottom:8px;" placeholder="詳細說明內容..." required></textarea>
-          <button type="submit" class="btn-submit"><i class="fa-solid fa-cloud-arrow-up"></i> 發佈公告並同步至雲端</button>
-        </form>
-        <div id="manageBulletinList"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><i class="fa-solid fa-table text-primary"></i> 2. Google 試算表 (記錄點名/作業/傷病日誌)</div>
-        <input type="url" id="sheetsApiUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
-        <button class="btn-submit" style="margin-top:8px; background:#059669;" onclick="saveSheetsUrl()">儲存試算表連結</button>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><i class="fa-solid fa-users-gear"></i> 3. 學生座號設定 (每行一個座號)</div>
+        <div class="card-title"><i class="fa-solid fa-users-gear"></i> 2. 學生座號設定 (每行一個座號)</div>
         <textarea id="studentRosterInput" class="form-control" rows="8" placeholder="每行一個座號..."></textarea>
         <button class="btn-submit" style="margin-top:8px;" onclick="saveStudentRoster()">儲存座號設定</button>
       </div>
@@ -456,10 +439,10 @@
         </div>
       </div>
 
-      <!-- 💡 動物園與雙寵物配對兌換區 (扭蛋卷或10代幣) -->
+      <!-- 動物園與雙寵物配對兌換區 -->
       <div id="petGardenView" style="display:none; text-align:left;">
         <div id="gardenTicketSummary" class="ticket-summary-box"></div>
-        <p style="font-size:0.8rem; color:#64748b; margin-top:10px;"><i class="fa-solid fa-circle-info"></i> <strong>2隻成體配對兌換</strong>：點擊第1隻成體後，再點擊第2隻成體即可選擇換「扭蛋卷」或「10代幣」（兩隻同時亮黃燈）。點擊已兌換的其中一隻可取消。</p>
+        <p style="font-size:0.8rem; color:#64748b; margin-top:10px;"><i class="fa-solid fa-circle-info"></i> <strong>2隻成體配對兌換（扭蛋卷或10代幣）</strong>：點擊第1隻成體後，再點擊第2隻成體即可選擇獎勵（兩隻同時亮黃燈）。點擊已兌換的其中一隻可取消。</p>
         <div class="garden-grid" id="gardenGrid"></div>
       </div>
 
@@ -478,7 +461,7 @@
     </div>
   </div>
 
-  <!-- 💡 雙寵物配對兌換選擇 Modal (扭蛋卷或10代幣) -->
+  <!-- 💡 雙寵物配對兌換選擇 Modal (換扭蛋卷或10代幣，完美連動 game.html) -->
   <div id="rewardRedeemModal" class="modal-overlay" style="z-index:110;">
     <div class="modal-box" style="max-width:380px; text-align:center;">
       <h3 style="color:#b45309; margin-bottom:8px;"><i class="fa-solid fa-gift"></i> 2隻寵物配對兌換獎勵</h3>
@@ -569,21 +552,17 @@
 
     let sheetsWebhookUrl = localStorage.getItem('cm309_sheets_url') || "";
     let firebaseDbUrl = localStorage.getItem('cm309_firebase_url') || "";
-
     let announcements = JSON.parse(localStorage.getItem('cm309_announcements')) || [];
     
     let petState = JSON.parse(localStorage.getItem('cm309_pets')) || INITIAL_PETS;
     let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
     let cleanAssignment = JSON.parse(localStorage.getItem('cm309_cleanAssign')) || {};
-
     let correctionBoxes = JSON.parse(localStorage.getItem('cm309_corrBoxes')) || [
       { id: 'box_1', title: '國語甲本', students: [] },
       { id: 'box_2', title: '數學習作', students: [] }
     ];
-
     let cleanlinessAssignment = JSON.parse(localStorage.getItem('cm309_cleanlinessAssign')) || {};
     let cleanlinessAwarded = JSON.parse(localStorage.getItem('cm309_cleanlinessAwarded')) || {};
-
     let attendanceState = JSON.parse(localStorage.getItem('cm309_attState')) || {}; 
     let interactiveHwState = JSON.parse(localStorage.getItem('cm309_hwState')) || {}; 
     let teethLampState = JSON.parse(localStorage.getItem('cm309_teethState')) || {};  
@@ -596,7 +575,7 @@
     let lastClickedSeat = null;
     let syncDebounceTimer = null;
     let firstSelectedPetIndex = null;
-    let selectedRedeemPair = null; // 記錄雙寵物配對索引 {idx1, idx2}
+    let selectedRedeemPair = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('zh-TW');
@@ -607,8 +586,6 @@
       initSortables();
       initCleanlinessSortables();
       renderAllGrids();
-      renderBulletins();
-      renderManageBulletins();
       updateCloudBadge();
 
       if (firebaseDbUrl) {
@@ -767,8 +744,6 @@
 
             renderAllGrids();
             renderPetsGrid();
-            renderBulletins();
-            renderManageBulletins();
             document.getElementById('studentRosterInput').value = students.join('\n');
             updateCloudBadge();
             if (!silent) alert("✅ 已成功從 Firebase 同步最新狀態！");
@@ -1177,59 +1152,7 @@
       sendToSheets({ category: "每日點名", student: "全班", detail: txt }); alert(`已上傳至 Google 試算表！\n${txt}`);
     }
 
-    // === 公告管理 ===
-    function renderBulletins() {
-      const container = document.getElementById('bulletinListContainer'); container.innerHTML = '';
-      if (announcements.length === 0) return container.innerHTML = '<li style="padding:16px; color:#94a3b8; text-align:center;">目前尚無公告</li>';
-      announcements.forEach((anno, index) => {
-        container.innerHTML += `
-          <li class="bulletin-item" onclick="viewAnnouncement(${index})">
-            <div><span class="bulletin-badge">${anno.dept}</span><strong>${anno.title}</strong></div>
-            <i class="fa-solid fa-chevron-right" style="color:#94a3b8;"></i>
-          </li>`;
-      });
-    }
-    function viewAnnouncement(index) {
-      const anno = announcements[index];
-      document.getElementById('annoTitle').textContent = anno.title;
-      document.getElementById('annoContent').textContent = anno.content;
-      document.getElementById('announcementModal').classList.add('active');
-    }
-    function closeAnnouncementModal() { document.getElementById('announcementModal').classList.remove('active'); }
-    function renderManageBulletins() {
-      const list = document.getElementById('manageBulletinList'); list.innerHTML = '';
-      announcements.forEach((anno, index) => {
-        list.innerHTML += `
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border:1px solid var(--border); border-radius:8px; margin-bottom:6px; background:#fff;">
-            <div><span class="bulletin-badge">${anno.dept}</span><strong>${anno.title}</strong></div>
-            <button class="btn-del" onclick="deleteAnnouncement(${index})"><i class="fa-solid fa-trash-can"></i></button>
-          </div>`;
-      });
-    }
-    function handleCreateAnnouncement(e) {
-      e.preventDefault();
-      const dept = document.getElementById('newAnnoDept').value.trim();
-      const title = document.getElementById('newAnnoTitle').value.trim();
-      const content = document.getElementById('newAnnoContent').value.trim();
-      announcements.unshift({ id: Date.now(), dept, title, content });
-      document.getElementById('newAnnoDept').value = '';
-      document.getElementById('newAnnoTitle').value = '';
-      document.getElementById('newAnnoContent').value = '';
-      renderBulletins();
-      renderManageBulletins();
-      alert('✅ 公告發佈成功！');
-      syncToFirebase();
-    }
-    function deleteAnnouncement(index) {
-      if (confirm(`確定刪除此公告？`)) {
-        announcements.splice(index, 1);
-        renderBulletins();
-        renderManageBulletins();
-        syncToFirebase();
-      }
-    }
-
-    // === 🐾 寵物養成系統 (兩隻成體配對兌換：扭蛋卷或10代幣) ===
+    // === 🐾 寵物養成系統 ===
     function addPetXp(seat, amount) {
       let seatNum = parseInt(seat);
       if (!petState[seatNum]) {
@@ -1382,7 +1305,6 @@
       syncToFirebase();
     }
 
-    // === 🌳 查看專屬動物園與雙寵物配對兌換 (扭蛋卷或10代幣) ===
     function showPetGarden() {
       document.getElementById('petManageView').style.display = 'none';
       document.getElementById('petSelectView').style.display = 'none';
@@ -1482,6 +1404,7 @@
       selectedRedeemPair = null;
     }
 
+    // 💡 完整連動 game.html 背包格式 (支援換扭蛋卷或10代幣)
     function choosePairReward(type) {
       const seat = currentSelectedStudent.seat;
       const pets = petCollection[seat];
@@ -1492,14 +1415,15 @@
       let gameData = JSON.parse(localStorage.getItem('cm309_game_data')) || {};
       let gData = gameData[seat] || { extraCoins: 0, tickets: [], specials: [], coinLogs: [] };
       if (!gameData[seat]) gameData[seat] = gData;
+      if (!gData.tickets) gData.tickets = [];
+      if (!gData.coinLogs) gData.coinLogs = [];
 
       if (type === 'ticket') {
-        prizeDesc = "扭蛋卷一張";
+        prizeDesc = "扭蛋卷";
         gData.tickets.push({ name: "扭蛋卷 (點擊設定名稱)", date: new Date().toLocaleDateString(), isUsed: false });
       } else {
         prizeDesc = "10個代幣";
         gData.extraCoins += 10;
-        if (!gData.coinLogs) gData.coinLogs = [];
         gData.coinLogs.unshift({ text: `動物園雙寵物兌換獲得代幣 +10`, date: new Date().toLocaleDateString() });
       }
 
@@ -1543,7 +1467,7 @@
     }
 
     function resetAllPets() {
-      if(confirm("⚠️ 警告：確定要刪除全班寵物與寵物園嗎？")) {
+      if(confirm("⚠️ 警告:確定要刪除全班寵物與寵物園嗎？")) {
         petState = {}; petCollection = {};
         alert("✅ 全班寵物紀錄已清除！");
         if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
@@ -1574,7 +1498,7 @@
     function saveSheetsUrl() { 
       sheetsWebhookUrl = document.getElementById('sheetsApiUrlInput').value.trim(); 
       localStorage.setItem('cm309_sheets_url', sheetsWebhookUrl); 
-      alert("試算表 Webhook 已儲存！日誌功能已就緒。"); 
+      alert("試算表 Webhook 已儲存！"); 
     }
   </script>
 </body>
