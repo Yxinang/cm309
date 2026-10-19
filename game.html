@@ -57,10 +57,10 @@
             <button onclick="switchTab('shop')" id="tab-shop" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-base transition-all bg-gray-100 text-gray-600 hover:bg-emerald-100">🛍️ 學生資訊與獎品兌換</button>
         </div>
 
-        <!-- 1. 三種扭蛋機畫面 -->
+        <!-- 1. 三種扭蛋機畫面 (支援扭蛋卷或10代幣) -->
         <div id="section-gacha" class="tab-content text-center py-6">
             <h2 class="text-2xl font-bold text-emerald-700 mb-2">✨ 三大專屬扭蛋機 ✨</h2>
-            <p class="text-gray-500 mb-6">每次抽扭蛋消耗 <span class="font-bold text-amber-600">10 代幣</span>（動物園成體每隻 = 5代幣），請選擇扭蛋機類型：</p>
+            <p class="text-gray-500 mb-6">可使用 <span class="font-bold text-emerald-600">1 張扭蛋卷</span> 或 <span class="font-bold text-amber-600">10 代幣</span> 遊玩，請選擇扭蛋機類型：</p>
             
             <!-- 選擇扭蛋機種類按鈕 -->
             <div class="flex justify-center flex-wrap gap-3 mb-6">
@@ -79,12 +79,12 @@
                 <div class="w-40 h-40 mx-auto bg-gradient-to-b from-pink-400 to-red-500 rounded-full flex items-center justify-center shadow-xl border-8 border-white mb-4 relative animate-pulse">
                     <span class="text-6xl">🔮</span>
                 </div>
-                <button onclick="playGacha()" class="bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-lg px-8 py-3 rounded-2xl shadow-lg border-b-4 border-amber-600 active:translate-y-1 transition-all">轉這台扭蛋 (-10代幣)</button>
+                <button onclick="playGacha()" class="bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-lg px-8 py-3 rounded-2xl shadow-lg border-b-4 border-amber-600 active:translate-y-1 transition-all">轉這台扭蛋 (優先用扭蛋卷或10代幣)</button>
                 <div id="gachaResult" class="mt-4 text-xl font-bold text-emerald-700 h-10 flex items-center justify-center"></div>
             </div>
         </div>
 
-        <!-- 2. 爬梯子畫面 (5條路，獎品項目顯示在最下面) -->
+        <!-- 2. 爬梯子畫面 -->
         <div id="section-ladder" class="tab-content hidden text-center py-6">
             <h2 class="text-2xl font-bold text-emerald-700 mb-2">🧗 神秘爬梯子冒險 🧗</h2>
             <p class="text-gray-500 mb-4">選擇 1~5 號路線爬梯子（每次消耗 10 代幣）！</p>
@@ -110,19 +110,18 @@
                 <button onclick="playLadder(5)" class="ladder-btn bg-teal-500 hover:bg-teal-600 text-white font-bold px-4 py-2.5 rounded-xl shadow-md border-b-4 border-teal-700">5號路</button>
             </div>
 
-            <!-- 獎品項目顯示在最下面 (無機率、無解釋框) -->
             <div class="max-w-md mx-auto bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 text-left shadow-sm">
                 <div class="text-sm font-bold text-amber-800 mb-2">🧗 爬梯子可能獲得的獎品項目：</div>
                 <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside font-medium">
                     <li>代幣五個</li>
                     <li>獎品一個</li>
-                    <li>哇ㄛ，下次再來８～ (謝謝惠顧)</li>
+                    <li>哇ㄛ，下次再來８～</li>
                     <li>大獎代幣 15 個</li>
                 </ul>
             </div>
         </div>
 
-        <!-- 3. 比大小畫面 (90%勝率) -->
+        <!-- 3. 比大小畫面 -->
         <div id="section-battle" class="tab-content hidden text-center py-6">
             <h2 class="text-2xl font-bold text-emerald-700 mb-2">⚔️ 幸運數字比大小 (1-100) ⚔️</h2>
             <p class="text-gray-500 mb-4">輸入 1~100 的數字與電腦對決（勝率 90%）！每次遊玩消耗 10 代幣。</p>
@@ -206,7 +205,7 @@
 
     </main>
 
-    <!-- 💡 得獎項目彈跳視窗 Modal (固定不跳動) -->
+    <!-- 得獎特寫視窗 Modal -->
     <div id="rewardPopupModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full border-4 border-amber-400 text-center shadow-2xl">
             <div class="text-6xl mb-3">🎉</div>
@@ -218,13 +217,11 @@
         </div>
     </div>
 
-    <!-- 💡 扭蛋機解釋說明管理 Modal -->
+    <!-- 扭蛋機解釋說明管理 Modal -->
     <div id="explainModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl p-6 max-w-lg w-full border-4 border-emerald-300">
             <h3 id="explainModalTitle" class="text-lg font-bold text-emerald-800 mb-3">📖 編輯獎品解釋說明</h3>
-            <div id="explainFieldsContainer" class="space-y-3 mb-4 max-h-60 overflow-y-auto pr-1">
-                <!-- 動態載入解釋輸入框 -->
-            </div>
+            <div id="explainFieldsContainer" class="space-y-3 mb-4 max-h-60 overflow-y-auto pr-1"></div>
             <div class="flex space-x-2">
                 <button onclick="saveExplanations()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl flex-1 shadow">儲存解釋</button>
                 <button onclick="closeExplainModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold px-4 py-2 rounded-xl">關閉</button>
@@ -232,7 +229,7 @@
         </div>
     </div>
 
-    <!-- 💡 獎品卷命名輸入 Modal -->
+    <!-- 獎品卷命名輸入 Modal -->
     <div id="ticketNameModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full border-4 border-emerald-300 text-center">
             <h3 class="text-lg font-bold text-emerald-800 mb-2">🎟️ 獎品卷名稱設定</h3>
@@ -245,7 +242,7 @@
         </div>
     </div>
 
-    <!-- 💡 第二區獎品輸入時間 Modal -->
+    <!-- 第二區獎品輸入時間 Modal -->
     <div id="specialTimeModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full border-4 border-emerald-300 text-center">
             <h3 class="text-lg font-bold text-emerald-800 mb-2">🟡 標記已向老師兌換</h3>
@@ -348,6 +345,49 @@
             return (petCount * 5) + (gData.extraCoins || 0);
         }
 
+        // 💡 扣除代幣或優先消耗扭蛋卷邏輯
+        function useGachaTicketOrCoins() {
+            let seatNum = getCurrentSeatNum();
+            let gData = getStudentGameData(seatNum);
+
+            // 檢查背包裡有沒有未使用的「扭蛋卷」
+            let ticketIdx = gData.tickets.findIndex(t => t.name.includes("扭蛋卷") && !t.isUsed);
+            if (ticketIdx !== -1) {
+                // 優先使用扭蛋卷
+                gData.tickets.splice(ticketIdx, 1);
+                saveGameData();
+                return true;
+            }
+
+            // 若沒有扭蛋卷，則檢查代幣是否足夠 10 枚
+            let total = getTotalCoins(seatNum);
+            if (total < 10) {
+                alert('您的代幣不足 10 枚，且背包中沒有扭蛋卷！');
+                return false;
+            }
+
+            // 扣除 10 代幣
+            let eCoins = gData.extraCoins || 0;
+            if (eCoins >= 10) {
+                gData.extraCoins = eCoins - 10;
+            } else {
+                let remainder = 10 - eCoins;
+                gData.extraCoins = 0;
+                let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
+                let myAdultPets = petCollection[seatNum] || [];
+                
+                let petsToReduce = Math.ceil(remainder / 5);
+                myAdultPets.splice(0, petsToReduce);
+                petCollection[seatNum] = myAdultPets;
+                localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
+
+                let refund = (petsToReduce * 5) - remainder;
+                gData.extraCoins += refund;
+            }
+            saveGameData();
+            return true;
+        }
+
         function deductCoins(amount) {
             let seatNum = getCurrentSeatNum();
             let total = getTotalCoins(seatNum);
@@ -394,6 +434,7 @@
             document.getElementById('infoPets').textContent = pCount + " 隻";
             document.getElementById('infoCoins').textContent = totalCoins + " 枚";
 
+            renderShop();
             renderTickets();
             renderSpecials();
             renderCoinLogs();
@@ -422,7 +463,6 @@
             document.getElementById('rewardPopupModal').classList.add('hidden');
         }
 
-        // 選擇扭蛋機類型
         function selectGachaType(type) {
             selectedGachaType = type;
             document.querySelectorAll('.gacha-type-btn').forEach(btn => {
@@ -436,7 +476,6 @@
             document.getElementById('currentGachaTitle').textContent = `目前選擇：${gachaConfigs[type].title}`;
         }
 
-        // 開啟解釋說明管理 Modal
         function openExplainModal() {
             let conf = gachaConfigs[selectedGachaType];
             document.getElementById('explainModalTitle').textContent = `📖 編輯 ${conf.title} 各項獎品解釋`;
@@ -453,7 +492,7 @@
                 container.appendChild(div);
             });
 
-            document.getElementById('explainModal.explainModal') || document.getElementById('explainModal').classList.remove('hidden');
+            document.getElementById('explainModal').classList.remove('hidden');
         }
 
         function closeExplainModal() {
@@ -471,18 +510,15 @@
             alert("✅ 獎品解釋說明已成功儲存！");
         }
 
-        // 1. 扭蛋機邏輯 (根據權重隨機抽獎)
+        // 1. 扭蛋機邏輯 (支援用扭蛋卷或10代幣)
         function playGacha() {
+            let canPlay = useGachaTicketOrCoins();
+            if (!canPlay) return;
+
             let seatNum = getCurrentSeatNum();
-            if (getTotalCoins(seatNum) < 10) {
-                alert('代幣不足 10 枚！快去動物園累積成體寵物來換取代幣吧！');
-                return;
-            }
-            deductCoins(10);
             let gData = getStudentGameData(seatNum);
             let conf = gachaConfigs[selectedGachaType];
 
-            // 權重隨機抽選
             let totalProb = conf.items.reduce((sum, item) => sum + item.prob, 0);
             let rand = Math.random() * totalProb;
             let currentSum = 0;
@@ -497,19 +533,13 @@
             }
 
             let rewardName = chosenItem.name;
-            let isTicket = rewardName.includes("獎品") || rewardName.includes("免抄聯絡簿") || rewardName.includes("減半") || rewardName.includes("豁免權") || rewardName.includes("金牌") || rewardName.includes("大師") || rewardName.includes("第一") || rewardName.includes("保管") || rewardName.includes("桌遊");
-
             if (rewardName.includes("代幣")) {
                 let match = rewardName.match(/\d+/);
                 let coinVal = match ? parseInt(match[0]) : 5;
                 gData.extraCoins += coinVal;
                 gData.coinLogs.unshift({ text: `${conf.title}獲得代幣 +${coinVal}`, date: new Date().toLocaleDateString() });
-            } else if (rewardName.includes("獎品一個")) {
-                gData.tickets.push({ name: "獎品卷 (點擊設定名稱)", date: new Date().toLocaleDateString(), isUsed: false });
-            } else if (isTicket) {
-                gData.specials.push({ name: rewardName, date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
             } else {
-                gData.tickets.push({ name: `[扭蛋] ${rewardName}`, date: new Date().toLocaleDateString(), isUsed: false });
+                gData.specials.push({ name: `${rewardName}`, date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
             }
 
             saveGameData();
@@ -518,7 +548,7 @@
             updateView();
         }
 
-        // 2. 爬梯子畫面 (5條路，獎品項目顯示在最下面)
+        // 2. 爬梯子畫面
         function playLadder(pathNum) {
             let seatNum = getCurrentSeatNum();
             if (getTotalCoins(seatNum) < 10) {
@@ -539,7 +569,6 @@
                 climber.classList.remove('animate-climb');
                 document.querySelectorAll('.ladder-btn').forEach(btn => btn.disabled = false);
 
-                // 權重機率：代幣五個(35)、獎品一個(35)、謝謝惠顧(20)、大獎代幣15個(10)
                 let outcomes = [
                     { text: "代幣五個", type: "coin", val: 5, prob: 35 },
                     { text: "獎品一個", type: "prize", prob: 35 },
@@ -573,7 +602,7 @@
             }, 1500);
         }
 
-        // 3. 數字比大小邏輯 (90%勝率，獎品：代幣10、獎品一個、扭蛋卷一張、代幣30)
+        // 3. 數字比大小邏輯
         function playBattle() {
             let seatNum = getCurrentSeatNum();
             if (getTotalCoins(seatNum) < 10) {
@@ -590,7 +619,6 @@
             deductCoins(10);
             let gData = getStudentGameData(seatNum);
 
-            // 90% 勝率
             let isWin = Math.random() < 0.90;
             let cNum;
             if (isWin) {
@@ -604,7 +632,6 @@
             let resText = "";
 
             if (pInput >= cNum) {
-                // 獲勝隨機獎品機率：代幣10(40)、獎品一個(35)、扭蛋卷一張(20)、代幣30(5)
                 let battlePrizes = [
                     { text: "代幣 10 個", type: "coin", val: 10, prob: 40 },
                     { text: "獎品一個", type: "prize", prob: 35 },
@@ -635,7 +662,7 @@
                 resText = `🎉 挑戰成功！贏了電腦，獲得：${wonPrize.text}！`;
                 showRewardPopup(wonPrize.text);
             } else {
-                deductCoins(5); // 輸了代幣減 5
+                deductCoins(5); 
                 resText = "😢 可惡輸給電腦了！代幣額外扣除 5 枚！";
                 showRewardPopup("比大小輸了 代幣 -5");
             }
@@ -650,7 +677,6 @@
             let container = document.getElementById('shopList');
             container.innerHTML = '';
             
-            // 指定座位50、免抄聯絡簿3天15、作業減免40、自選獎品10
             const shopItems = [
                 { id: 'seat', name: "指定座位", cost: 50, icon: "🪑" },
                 { id: 'book', name: "免抄聯絡簿 3 天", cost: 15, icon: "📝" },
@@ -723,8 +749,6 @@
 
             let seatNum = getCurrentSeatNum();
             let gData = getStudentGameData(seatNum);
-            
-            // 放入第二區（特權獎品區）
             gData.specials.push({ name: prizeName, date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
 
             saveGameData();
@@ -732,7 +756,7 @@
             updateView();
         }
 
-        // 渲染第一區：獎品卷與扭蛋卷
+        // 第一區：獎品卷與扭蛋卷
         function renderTickets() {
             let container = document.getElementById('ticketCouponsArea');
             let seatNum = getCurrentSeatNum();
@@ -740,7 +764,7 @@
             container.innerHTML = '';
 
             if (!gData.tickets || gData.tickets.length === 0) {
-                container.innerHTML = '<span class="text-gray-400 text-sm">目前尚無獎品卷或扭蛋卷，快去玩扭蛋或遊戲贏取吧！</span>';
+                container.innerHTML = '<span class="text-gray-400 text-sm">目前尚無獎品卷或扭蛋卷。</span>';
                 return;
             }
 
@@ -753,7 +777,6 @@
                     <span class="text-[10px] text-gray-400 mt-2">日期：${t.date} (點擊設定名稱)</span>
                 `;
 
-                // 點擊後開啟輸入框設定實際獎品名稱
                 badge.onclick = () => {
                     activeTicketIndex = index;
                     document.getElementById('ticketNameModal').classList.remove('hidden');
@@ -783,11 +806,11 @@
                 saveGameData();
                 closeTicketNameModal();
                 updateView();
-                alert(`✅ 獎品名稱已更新為：【${nameVal}】！`);
+                alert(`✅ 名稱已更新為：【${nameVal}】！`);
             }
         }
 
-        // 渲染第二區：其他項目獎品與特權
+        // 第二區：其他項目獎品與特權
         function renderSpecials() {
             let container = document.getElementById('specialCouponsArea');
             let seatNum = getCurrentSeatNum();
@@ -815,7 +838,6 @@
                     </div>
                 `;
 
-                // 點擊後跳出輸入時間對話框並亮黃燈
                 badge.onclick = () => {
                     activeSpecialIndex = index;
                     document.getElementById('specialTimeModal').classList.remove('hidden');
@@ -842,7 +864,7 @@
             let gData = getStudentGameData(seatNum);
             if (activeSpecialIndex !== null && gData.specials[activeSpecialIndex]) {
                 gData.specials[activeSpecialIndex].timeStr = timeVal;
-                gData.specials[activeSpecialIndex].isUsed = true; // 儲存後亮黃燈
+                gData.specials[activeSpecialIndex].isUsed = true;
                 saveGameData();
                 closeSpecialTimeModal();
                 updateView();
@@ -850,7 +872,7 @@
             }
         }
 
-        // 渲染第三區：代幣獲得紀錄
+        // 第三區：代幣獲得紀錄
         function renderCoinLogs() {
             let container = document.getElementById('myCoinLogs');
             let seatNum = getCurrentSeatNum();
