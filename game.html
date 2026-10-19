@@ -57,19 +57,17 @@
             <button onclick="switchTab('shop')" id="tab-shop" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-base transition-all bg-gray-100 text-gray-600 hover:bg-emerald-100">🛍️ 學生資訊與獎品兌換</button>
         </div>
 
-        <!-- 1. 三種扭蛋機畫面 (支援扭蛋卷或10代幣) -->
+        <!-- 1. 三種扭蛋機畫面 -->
         <div id="section-gacha" class="tab-content text-center py-6">
             <h2 class="text-2xl font-bold text-emerald-700 mb-2">✨ 三大專屬扭蛋機 ✨</h2>
             <p class="text-gray-500 mb-6">可使用 <span class="font-bold text-emerald-600">1 張扭蛋卷</span> 或 <span class="font-bold text-amber-600">10 代幣</span> 遊玩，請選擇扭蛋機類型：</p>
             
-            <!-- 選擇扭蛋機種類按鈕 -->
             <div class="flex justify-center flex-wrap gap-3 mb-6">
                 <button onclick="selectGachaType('homework')" id="gacha-btn-homework" class="gacha-type-btn bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-2xl shadow border-2 border-emerald-600">📚 功課方面扭蛋機</button>
                 <button onclick="selectGachaType('service')" id="gacha-btn-service" class="gacha-type-btn bg-gray-100 text-gray-700 font-bold px-5 py-2.5 rounded-2xl shadow border-2 border-gray-300">🧹 班級服務扭蛋機</button>
                 <button onclick="selectGachaType('boardgame')" id="gacha-btn-boardgame" class="gacha-type-btn bg-gray-100 text-gray-700 font-bold px-5 py-2.5 rounded-2xl shadow border-2 border-gray-300">🎲 桌遊類扭蛋機</button>
             </div>
 
-            <!-- 扭蛋機主體與解釋說明管理 -->
             <div class="bg-emerald-50 border-2 border-emerald-200 rounded-3xl p-6 max-w-xl mx-auto mb-6 relative">
                 <div class="flex justify-between items-center mb-4">
                     <span id="currentGachaTitle" class="text-lg font-black text-emerald-800">目前選擇：功課方面扭蛋機</span>
@@ -114,7 +112,7 @@
                 <div class="text-sm font-bold text-amber-800 mb-2">🧗 爬梯子可能獲得的獎品項目：</div>
                 <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside font-medium">
                     <li>代幣五個</li>
-                    <li>獎品一個</li>
+                    <li>獎品一個 (獎品卷)</li>
                     <li>哇ㄛ，下次再來８～</li>
                     <li>大獎代幣 15 個</li>
                 </ul>
@@ -145,7 +143,7 @@
                 <div class="text-sm font-bold text-blue-800 mb-2">⚔️ 比大小獲勝可能獲得的獎勵：</div>
                 <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside font-medium">
                     <li>代幣 10 個</li>
-                    <li>獎品一個</li>
+                    <li>獎品一個 (獎品卷)</li>
                     <li>扭蛋卷一張</li>
                     <li>代幣 30 個</li>
                 </ul>
@@ -266,7 +264,6 @@
         let gameData = JSON.parse(localStorage.getItem('cm309_game_data')) || {};
         let currentSeatIndex = 0; 
 
-        // 三種扭蛋機獎品清單與機率設定 (不顯示機率)
         let gachaConfigs = JSON.parse(localStorage.getItem('cm309_gacha_configs')) || {
             homework: {
                 title: "📚 功課方面扭蛋機",
@@ -319,6 +316,8 @@
         }
 
         function getStudentGameData(seatNum) {
+            // 💡 確保每次切換座號時，正確從 localStorage 讀取該生的獨立紀錄
+            gameData = JSON.parse(localStorage.getItem('cm309_game_data')) || {};
             if (!gameData[seatNum]) {
                 gameData[seatNum] = { extraCoins: 0, tickets: [], specials: [], coinLogs: [] };
             }
@@ -345,28 +344,27 @@
             return (petCount * 5) + (gData.extraCoins || 0);
         }
 
-        // 💡 扣除代幣或優先消耗扭蛋卷邏輯
+        // 💡 完美修復：精準辨識背包中的「扭蛋卷」或消耗 10 代幣
         function useGachaTicketOrCoins() {
             let seatNum = getCurrentSeatNum();
             let gData = getStudentGameData(seatNum);
 
-            // 檢查背包裡有沒有未使用的「扭蛋卷」
+            // 1. 優先尋找背包第一區有沒有包含「扭蛋卷」且未使用的項目
             let ticketIdx = gData.tickets.findIndex(t => t.name.includes("扭蛋卷") && !t.isUsed);
             if (ticketIdx !== -1) {
-                // 優先使用扭蛋卷
                 gData.tickets.splice(ticketIdx, 1);
                 saveGameData();
                 return true;
             }
 
-            // 若沒有扭蛋卷，則檢查代幣是否足夠 10 枚
+            // 2. 若沒有扭蛋卷，檢查代幣是否足夠 10 枚
             let total = getTotalCoins(seatNum);
             if (total < 10) {
                 alert('您的代幣不足 10 枚，且背包中沒有扭蛋卷！');
                 return false;
             }
 
-            // 扣除 10 代幣
+            // 3. 扣除 10 代幣
             let eCoins = gData.extraCoins || 0;
             if (eCoins >= 10) {
                 gData.extraCoins = eCoins - 10;
@@ -510,7 +508,7 @@
             alert("✅ 獎品解釋說明已成功儲存！");
         }
 
-        // 1. 扭蛋機邏輯 (支援用扭蛋卷或10代幣)
+        // 1. 扭蛋機邏輯
         function playGacha() {
             let canPlay = useGachaTicketOrCoins();
             if (!canPlay) return;
