@@ -188,7 +188,7 @@
 
             <!-- 第一區：獎品卷／扭蛋卷專區 -->
             <h3 class="text-xl font-bold text-emerald-700 mb-3">🎟️ 第一區：獎品卷與扭蛋卷</h3>
-            <p class="text-xs text-gray-500 mb-3">💡 抽中的獎品卷或扭蛋卷會顯示在這裡，點擊後可輸入實際兌換的獎品名稱並儲存！</p>
+            <p class="text-xs text-gray-500 mb-3">💡 抽中的獎品卷或扭蛋卷會顯示在這裡，未兌換在上，已兌換（亮黃燈）會自動排在最下方！點擊卡片可設定領取時間。</p>
             <div id="ticketCouponsArea" class="bg-emerald-50/60 border-2 border-dashed border-emerald-300 rounded-2xl p-4 min-h-[90px] flex flex-wrap gap-3 mb-8">
                 <!-- 動態載入獎品卷 -->
             </div>
@@ -233,14 +233,15 @@
         </div>
     </div>
 
-    <!-- 獎品卷命名輸入 Modal -->
+    <!-- 獎品卷名稱設定 Modal -->
     <div id="ticketNameModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full border-4 border-emerald-300 text-center">
-            <h3 class="text-lg font-bold text-emerald-800 mb-2">🎟️ 獎品卷名稱設定</h3>
-            <p class="text-sm text-gray-500 mb-4">請輸入您實際兌換的獎品名稱：</p>
-            <input type="text" id="ticketNameInput" placeholder="例如: 精美筆記本..." class="w-full border-2 border-emerald-300 rounded-xl px-3 py-2 text-center font-bold text-emerald-800 mb-4 focus:outline-none">
+            <h3 class="text-lg font-bold text-emerald-800 mb-2">🎟️ 獎品卷設定</h3>
+            <p class="text-sm text-gray-500 mb-4">請輸入獎品名稱與領取時間：</p>
+            <input type="text" id="ticketNameInput" placeholder="例如: 精美筆記本..." class="w-full border-2 border-emerald-300 rounded-xl px-3 py-2 text-center font-bold text-emerald-800 mb-3 focus:outline-none">
+            <input type="text" id="ticketTimeInput" placeholder="輸入領取時間（例：今日下午）..." class="w-full border-2 border-emerald-300 rounded-xl px-3 py-2 text-center font-bold text-emerald-800 mb-4 focus:outline-none">
             <div class="flex space-x-2">
-                <button onclick="confirmTicketName()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl flex-1 shadow">儲存名稱</button>
+                <button onclick="confirmTicketName()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2 rounded-xl flex-1 shadow">儲存並亮黃燈</button>
                 <button onclick="closeTicketNameModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold px-4 py-2 rounded-xl">取消</button>
             </div>
         </div>
@@ -720,7 +721,7 @@
                     document.getElementById('dynamicPrizeModal').classList.remove('hidden');
                     setTimeout(() => document.getElementById('dynamicPrizeInput').focus(), 100);
                 } else if (wonPrize.type === "ticket") {
-                    gData.tickets.push({ name: "扭蛋卷", date: new Date().toLocaleDateString(), isUsed: false });
+                    gData.tickets.push({ name: "扭蛋卷", date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
                     saveGameData();
                     resText = `🎉 挑戰成功！贏了電腦，獲得：${wonPrize.text}！`;
                     showRewardPopup(wonPrize.text);
@@ -752,7 +753,7 @@
                 let gData = getStudentGameData(seatNum);
                 let fullName = pendingDynamicReward.prefix + val;
                 if (pendingDynamicReward.type === 'tickets') {
-                    gData.tickets.push({ name: fullName, date: new Date().toLocaleDateString(), isUsed: false });
+                    gData.tickets.push({ name: fullName, date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
                 } else {
                     gData.specials.push({ name: fullName, date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
                 }
@@ -847,7 +848,7 @@
             updateView();
         }
 
-        // 第一區：獎品卷與扭蛋卷
+        // 第一區：獎品卷與扭蛋卷 (未兌換在上，已兌換亮黃燈自動排在最下方)
         function renderTickets() {
             let container = document.getElementById('ticketCouponsArea');
             let seatNum = getCurrentSeatNum();
@@ -859,19 +860,34 @@
                 return;
             }
 
-            gData.tickets.forEach((t, index) => {
+            let sortedTickets = [...gData.tickets].sort((a, b) => {
+                let aUsed = !!a.isUsed ? 1 : 0;
+                let bUsed = !!b.isUsed ? 1 : 0;
+                return aUsed - bUsed;
+            });
+
+            sortedTickets.forEach((t) => {
+                let originalIndex = gData.tickets.indexOf(t);
+                let isUsed = !!t.isUsed;
                 let badge = document.createElement('div');
-                badge.className = "relative bg-white border-2 border-emerald-300 rounded-xl p-3 shadow-sm flex flex-col items-start cursor-pointer hover:border-emerald-500 transition-all";
+                badge.className = `relative border-2 rounded-xl p-3 shadow-sm flex flex-col items-start transition-all cursor-pointer ${isUsed ? 'coupon-used border-yellow-400' : 'bg-white border-emerald-300'}`;
+                
                 badge.innerHTML = `
-                    <button onclick="event.stopPropagation(); deleteTicket(${index})" class="absolute top-2 right-2 text-red-400 hover:text-red-600 font-bold text-xs bg-white/80 px-1.5 py-0.5 rounded-full border border-red-200">✕ 刪除</button>
+                    <button onclick="event.stopPropagation(); deleteTicket(${originalIndex})" class="absolute top-2 right-2 text-red-400 hover:text-red-600 font-bold text-xs bg-white/80 px-1.5 py-0.5 rounded-full border border-red-200">✕ 刪除</button>
                     <span class="font-bold text-emerald-700 text-sm pr-12">🎟️ ${t.name}</span>
-                    <span class="text-[10px] text-gray-400 mt-2">日期：${t.date} (點擊設定名稱)</span>
+                    <div class="flex justify-between items-center w-full mt-2">
+                        <span class="text-[10px] text-gray-500">${t.timeStr ? '⏱️ 領用時間：' + t.timeStr : '日期：' + t.date}</span>
+                        <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${isUsed ? 'bg-amber-200 text-amber-800' : 'bg-gray-100 text-gray-500'}">
+                            ${isUsed ? '🟡 已領取/使用' : '⚪ 未領取(點我設定)'}
+                        </span>
+                    </div>
                 `;
 
                 badge.onclick = () => {
-                    activeTicketIndex = index;
+                    activeTicketIndex = originalIndex;
                     document.getElementById('ticketNameModal').classList.remove('hidden');
                     document.getElementById('ticketNameInput').value = t.name.includes("點擊") ? "" : t.name;
+                    document.getElementById('ticketTimeInput').value = t.timeStr || "";
                     setTimeout(() => document.getElementById('ticketNameInput').focus(), 100);
                 };
 
@@ -885,7 +901,8 @@
         }
 
         function confirmTicketName() {
-            let nameVal = document.getElementById('ticketNameInput').value.trim();
+            let nameVal = document.getElementById('ticketNameInput'].value.trim();
+            let timeVal = document.getElementById('ticketTimeInput').value.trim();
             if (!nameVal) {
                 alert('請輸入有效的獎品名稱！');
                 return;
@@ -894,10 +911,12 @@
             let gData = getStudentGameData(seatNum);
             if (activeTicketIndex !== null && gData.tickets[activeTicketIndex]) {
                 gData.tickets[activeTicketIndex].name = nameVal;
+                gData.tickets[activeTicketIndex].timeStr = timeVal || "已兌換";
+                gData.tickets[activeTicketIndex].isUsed = true;
                 saveGameData();
                 closeTicketNameModal();
                 updateView();
-                alert(`✅ 名稱已更新為：【${nameVal}】！`);
+                alert(`✅ 獎品卷已更新並點亮黃燈！`);
             }
         }
 
