@@ -350,6 +350,8 @@
                 opt.textContent = name;
                 select.appendChild(opt);
             });
+            // 初始化確保當前座號資料存在
+            getStudentGameData(getCurrentSeatNum());
             updateView();
         }
 
@@ -370,6 +372,9 @@
 
         function switchStudent() {
             currentSeatIndex = parseInt(document.getElementById('studentSelect').value);
+            let seatNum = getCurrentSeatNum();
+            // 切換座號時確保該座號資料已建立
+            getStudentGameData(seatNum);
             updateView();
         }
 
@@ -901,7 +906,7 @@
         }
 
         function confirmTicketName() {
-            let nameVal = document.getElementById('ticketNameInput'].value.trim();
+            let nameVal = document.getElementById('ticketNameInput').value.trim();
             let timeVal = document.getElementById('ticketTimeInput').value.trim();
             if (!nameVal) {
                 alert('請輸入有效的獎品名稱！');
