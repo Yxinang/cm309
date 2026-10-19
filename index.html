@@ -346,7 +346,7 @@
       </div>
     </section>
 
-    <!-- 設定頁面 -->
+    <!-- 設定頁面 (已補回 Google 試算表連結設定區塊) -->
     <section id="tab-settings" class="page-section">
       <div class="card" style="border: 2px solid #2563eb;">
         <div class="card-title"><i class="fa-solid fa-database text-primary"></i> 1. 全班即時資料庫 (Firebase 雙向同步)</div>
@@ -361,8 +361,15 @@
         </button>
       </div>
 
+      <!-- 💡 已補回：Google 試算表連結設定 -->
       <div class="card">
-        <div class="card-title"><i class="fa-solid fa-users-gear"></i> 2. 學生座號設定 (每行一個座號)</div>
+        <div class="card-title"><i class="fa-solid fa-table text-primary"></i> 2. Google 試算表 (記錄點名/作業/傷病日誌)</div>
+        <input type="url" id="sheetsApiUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
+        <button class="btn-submit" style="margin-top:8px; background:#059669;" onclick="saveSheetsUrl()">儲存試算表連結</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-users-gear"></i> 3. 學生座號設定 (每行一個座號)</div>
         <textarea id="studentRosterInput" class="form-control" rows="8" placeholder="每行一個座號..."></textarea>
         <button class="btn-submit" style="margin-top:8px;" onclick="saveStudentRoster()">儲存座號設定</button>
       </div>
@@ -461,7 +468,7 @@
     </div>
   </div>
 
-  <!-- 💡 雙寵物配對兌換選擇 Modal (換扭蛋卷或10代幣，完美連動 game.html) -->
+  <!-- 💡 雙寵物配對兌換選擇 Modal -->
   <div id="rewardRedeemModal" class="modal-overlay" style="z-index:110;">
     <div class="modal-box" style="max-width:380px; text-align:center;">
       <h3 style="color:#b45309; margin-bottom:8px;"><i class="fa-solid fa-gift"></i> 2隻寵物配對兌換獎勵</h3>
@@ -1404,7 +1411,6 @@
       selectedRedeemPair = null;
     }
 
-    // 💡 完整連動 game.html 背包格式 (支援換扭蛋卷或10代幣)
     function choosePairReward(type) {
       const seat = currentSelectedStudent.seat;
       const pets = petCollection[seat];
@@ -1467,7 +1473,7 @@
     }
 
     function resetAllPets() {
-      if(confirm("⚠️ 警告:確定要刪除全班寵物與寵物園嗎？")) {
+      if(confirm("⚠️ 警告：確定要刪除全班寵物與寵物園嗎？")) {
         petState = {}; petCollection = {};
         alert("✅ 全班寵物紀錄已清除！");
         if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
