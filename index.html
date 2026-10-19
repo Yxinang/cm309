@@ -110,7 +110,7 @@
     }
 
     .drag-tag {
-      background: #fff; border: 1.5px solid var(--border); border-radius: 6px;
+      background: #fff; border: 1px solid var(--border); border-radius: 6px;
       padding: 6px 4px; font-size: 0.88rem; font-weight: 700; display: inline-flex;
       justify-content: center; align-items: center; gap: 4px; cursor: grab; user-select: none; transition: all 0.15s;
       text-align: center;
@@ -126,54 +126,8 @@
     .form-control { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; outline: none; }
     .btn-submit { width: 100%; padding: 12px; background: var(--primary); color: #fff; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; }
     
-    .album-category-list { display: flex; gap: 8px; margin-bottom: 8px; overflow-x: auto; padding-bottom: 4px; }
-    .album-sub-list { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; align-items: center; background: #f8fafc; padding: 8px; border-radius: 8px; border: 1px solid var(--border); }
-    .album-chip { padding: 6px 14px; background: #e2e8f0; border-radius: 20px; font-size: 0.85rem; cursor: pointer; border: none; white-space: nowrap; font-weight: 600; }
-    .album-chip.active { background: var(--primary); color: #fff; }
-    .album-sub-chip { padding: 4px 10px; background: #fff; border: 1px solid var(--border); border-radius: 16px; font-size: 0.78rem; cursor: pointer; white-space: nowrap; color: #475569; font-weight: 600; }
-    .album-sub-chip.active { background: #059669; color: #fff; border-color: #059669; }
-
-    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-    .gallery-item { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: #fff; position: relative; }
-    .gallery-item img { width: 100%; height: 120px; object-fit: cover; background: #eee; cursor: zoom-in; }
-    .gallery-item .desc { padding: 8px; font-size: 0.8rem; line-height: 1.4; }
-    .gallery-item .tag-badge { font-size: 0.68rem; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; margin-right: 4px; display: inline-block; font-weight: 700; }
-    .gallery-item .btn-del-img { position: absolute; top:4px; right:4px; background:rgba(0,0,0,0.6); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; z-index:10;}
-    
-    .bulletin-list { list-style: none; }
-    .bulletin-item { padding: 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-    .bulletin-badge { font-size: 0.72rem; padding: 3px 6px; border-radius: 4px; background: #fee2e2; color: #b91c1c; margin-right: 6px; }
-    .bulletin-has-img { font-size: 0.75rem; color: #2563eb; margin-left: 6px; }
-    
-    .anno-img-container {
-      width: 100%; max-height: 60vh; border-radius: 8px; overflow: hidden;
-      margin-bottom: 12px; border: 1px solid var(--border); position: relative;
-      background: #0f172a; display: flex; justify-content: center; align-items: center; cursor: zoom-in;
-    }
-    .anno-img-container img {
-      width: auto; height: auto; max-width: 100%; max-height: 60vh;
-      object-fit: contain; image-rendering: -webkit-optimize-contrast;
-    }
-    .anno-img-hint {
-      position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.7);
-      color: #fff; font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; pointer-events: none;
-    }
-
-    #imageViewerModal {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 200;
-      display: none; justify-content: center; align-items: center; padding: 10px;
-      backdrop-filter: blur(6px); cursor: zoom-out;
-    }
-    #imageViewerModal.active { display: flex; animation: fadeIn 0.15s; }
-    #imageViewerModal img {
-      max-width: 98vw; max-height: 96vh; object-fit: contain; border-radius: 4px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.7); image-rendering: -webkit-optimize-contrast;
-    }
-    #imageViewerModal .close-btn {
-      position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.3);
-      border: none; color: #fff; font-size: 1.5rem; width: 44px; height: 44px;
-      border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center;
-    }
+    .form-chip { padding: 6px 14px; background: #e2e8f0; border-radius: 20px; font-size: 0.85rem; cursor: pointer; border: none; white-space: nowrap; font-weight: 600; }
+    .form-chip.active { background: var(--primary); color: #fff; }
 
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; padding: 16px; }
     .modal-overlay.active { display: flex; animation: fadeIn 0.15s; }
@@ -252,8 +206,6 @@
     <button class="tab-btn" onclick="switchTab('tab-interactive')"><i class="fa-solid fa-chalkboard-user"></i><span>師生互動</span></button>
     <button class="tab-btn" onclick="switchTab('tab-pets')" style="color:#059669;"><i class="fa-solid fa-paw"></i><span>寵物養成</span></button>
     <button class="tab-btn" onclick="switchTab('tab-records')"><i class="fa-solid fa-notes-medical"></i><span>傷病溝通</span></button>
-    <button class="tab-btn" onclick="switchTab('tab-album')"><i class="fa-solid fa-images"></i><span>相簿</span></button>
-    <button class="tab-btn" onclick="switchTab('tab-bulletin')"><i class="fa-solid fa-bullhorn"></i><span>公告</span></button>
     <button class="tab-btn" onclick="switchTab('tab-settings')"><i class="fa-solid fa-gear"></i><span>設定</span></button>
   </nav>
 
@@ -277,12 +229,12 @@
     <!-- 第五部分：師生互動版 -->
     <section id="tab-interactive" class="page-section">
       <div style="display:flex; gap:8px; margin-bottom:12px; overflow-x:auto;">
-        <button class="album-chip active" id="btn-sub-hw" onclick="switchInteractiveMode('hw')">1.作業繳交</button>
-        <button class="album-chip" id="btn-sub-correction" onclick="switchInteractiveMode('correction')">2.作業訂正</button>
-        <button class="album-chip" id="btn-sub-cleanliness" onclick="switchInteractiveMode('cleanliness')">3.整潔大師</button>
-        <button class="album-chip" id="btn-sub-clean" onclick="switchInteractiveMode('clean')">4.打掃工作</button>
-        <button class="album-chip" id="btn-sub-teeth" onclick="switchInteractiveMode('teeth')">5.潔牙高手</button>
-        <button class="album-chip" id="btn-sub-mouthwash" onclick="switchInteractiveMode('mouthwash')">6.漱口水</button>
+        <button class="form-chip active" id="btn-sub-hw" onclick="switchInteractiveMode('hw')">1.作業繳交</button>
+        <button class="form-chip" id="btn-sub-correction" onclick="switchInteractiveMode('correction')">2.作業訂正</button>
+        <button class="form-chip" id="btn-sub-cleanliness" onclick="switchInteractiveMode('cleanliness')">3.整潔大師</button>
+        <button class="form-chip" id="btn-sub-clean" onclick="switchInteractiveMode('clean')">4.打掃工作</button>
+        <button class="form-chip" id="btn-sub-teeth" onclick="switchInteractiveMode('teeth')">5.潔牙高手</button>
+        <button class="form-chip" id="btn-sub-mouthwash" onclick="switchInteractiveMode('mouthwash')">6.漱口水</button>
       </div>
 
       <div class="card">
@@ -360,7 +312,7 @@
       </div>
     </section>
 
-    <!-- 第六部分：寵物養成系統 -->
+    <!-- 第六部分：寵物養成系統 (兩隻成體配對兌換：扭蛋卷或10代幣) -->
     <section id="tab-pets" class="page-section">
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-paw text-secondary"></i> 班級神秘寵物樂園</div>
@@ -394,70 +346,6 @@
       </div>
     </section>
 
-    <!-- 第四部分：學生相簿 -->
-    <section id="tab-album" class="page-section">
-      <div class="card">
-        <div class="card-title" style="justify-content:space-between;">
-          <span><i class="fa-solid fa-photo-film"></i> 班級活動相簿</span>
-          <button class="btn-upload" onclick="openPhotoModal()" style="font-size:0.75rem; padding:6px 10px;">
-            <i class="fa-solid fa-plus"></i> 新增照片
-          </button>
-        </div>
-
-        <div class="album-category-list" id="albumCategoryList">
-          <button class="album-chip active" onclick="selectAlbumCategory('全部')">全部</button>
-          <button class="album-chip" onclick="selectAlbumCategory('體育課')">體育課</button>
-          <button class="album-chip" onclick="selectAlbumCategory('生活寫真')">生活寫真</button>
-          <button class="album-chip" onclick="selectAlbumCategory('校園活動')">校園活動</button>
-        </div>
-
-        <div class="album-sub-list" id="albumSubList">
-          <button class="album-sub-chip active" onclick="selectAlbumSub('全班', '')">👥 全班</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '1號')">1號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '2號')">2號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '3號')">3號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '4號')">4號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '5號')">5號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '6號')">6號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '7號')">7號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '8號')">8號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '9號')">9號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '10號')">10號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '11號')">11號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '12號')">12號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '13號')">13號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '14號')">14號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '15號')">15號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '16號')">16號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '17號')">17號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '18號')">18號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '19號')">19號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '20號')">20號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '21號')">21號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '22號')">22號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '23號')">23號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '24號')">24號</button>
-          <button class="album-sub-chip" onclick="selectAlbumSub('個人', '25號')">25號</button>
-        </div>
-
-        <div class="gallery-grid" id="albumGallery"></div>
-      </div>
-    </section>
-
-    <!-- 第七部分：校園公告專區 -->
-    <section id="tab-bulletin" class="page-section">
-      <div class="card">
-        <div class="card-title" style="justify-content:space-between;">
-          <span><i class="fa-solid fa-bullhorn text-danger"></i> 校園重要公告專區</span>
-          <button onclick="fetchFromFirebase(false)" style="font-size:0.8rem; padding:4px 10px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; cursor:pointer; color:#2563eb;">
-            <i class="fa-solid fa-rotate"></i> 重新整理公告
-          </button>
-        </div>
-        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">點擊公告標題即可查看詳細內容；點擊照片可放大 2K 超高清全螢幕檢視。</p>
-        <ul class="bulletin-list" id="bulletinListContainer"></ul>
-      </div>
-    </section>
-
     <!-- 設定頁面 -->
     <section id="tab-settings" class="page-section">
       <div class="card" style="border: 2px solid #2563eb;">
@@ -479,12 +367,6 @@
           <input type="text" id="newAnnoDept" class="form-control" style="margin-bottom:8px;" placeholder="單位標籤 (如:學務處、三年九班導師)" required>
           <input type="text" id="newAnnoTitle" class="form-control" style="margin-bottom:8px;" placeholder="公告標題" required>
           <textarea id="newAnnoContent" class="form-control" rows="3" style="margin-bottom:8px;" placeholder="詳細說明內容..." required></textarea>
-          
-          <div class="form-group" style="margin-bottom:8px;">
-            <label style="font-size:0.8rem; font-weight:600; color:#475569;">📷 附上海報或照片 (高清還原)：</label>
-            <input type="file" id="newAnnoImageFile" class="form-control" accept="image/*" style="padding:6px;">
-          </div>
-
           <button type="submit" class="btn-submit"><i class="fa-solid fa-cloud-arrow-up"></i> 發佈公告並同步至雲端</button>
         </form>
         <div id="manageBulletinList"></div>
@@ -574,9 +456,10 @@
         </div>
       </div>
 
+      <!-- 💡 動物園與雙寵物配對兌換區 (扭蛋卷或10代幣) -->
       <div id="petGardenView" style="display:none; text-align:left;">
         <div id="gardenTicketSummary" class="ticket-summary-box"></div>
-        <p style="font-size:0.8rem; color:#64748b; margin-top:10px;"><i class="fa-solid fa-circle-info"></i> <strong>2隻寵物換1次獎勵（自由選禮物或抽獎券）</strong>：點擊第1隻成體後，再點擊第2隻成體即可進行配對兌換（亮黃燈）。點擊已兌換的其中一隻可取消。</p>
+        <p style="font-size:0.8rem; color:#64748b; margin-top:10px;"><i class="fa-solid fa-circle-info"></i> <strong>2隻成體配對兌換</strong>：點擊第1隻成體後，再點擊第2隻成體即可選擇換「扭蛋卷」或「10代幣」（兩隻同時亮黃燈）。點擊已兌換的其中一隻可取消。</p>
         <div class="garden-grid" id="gardenGrid"></div>
       </div>
 
@@ -584,7 +467,6 @@
         <button class="btn-submit" style="background:#0ea5e9;" id="btnViewGarden" onclick="showPetGarden()">🌳 查看專屬動物園與獎勵兌換</button>
         <div id="gardenTicketBadgeBelow" style="font-size:0.82rem; color:#b45309; font-weight:700; text-align:center;"></div>
         
-        <!-- 💡 刪除選項移至視窗最下方 -->
         <div style="border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 4px;">
           <button class="btn-submit" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; font-size:0.8rem; padding:8px;" onclick="resetSingleStudentPet()">
             🗑️ 刪除/重設該生目前寵物 (重新抽蛋)
@@ -596,50 +478,19 @@
     </div>
   </div>
 
-  <!-- 照片上傳 Modal -->
-  <div id="photoUploadModal" class="modal-overlay">
-    <div class="modal-box">
-      <h3>上傳新照片</h3>
-      <div class="form-group">
-        <label style="font-size:0.8rem; font-weight:600; color:#475569;">分類相簿：</label>
-        <select id="uploadPhotoCat" class="form-control">
-          <option value="體育課">體育課</option>
-          <option value="生活寫真">生活寫真</option>
-          <option value="校園活動">校園活動</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label style="font-size:0.8rem; font-weight:600; color:#475569;">指定座號（選填，若為個人寫真請選擇）：</label>
-        <select id="uploadPhotoStudent" class="form-control">
-          <option value="">(不指定，全班共用)</option>
-        </select>
-      </div>
-      <div class="form-group"><input type="text" id="uploadPhotoDesc" class="form-control" placeholder="照片描述 (選填)"></div>
-      <div class="form-group"><input type="file" id="uploadPhotoFile" class="form-control" accept="image/*"></div>
-      <button class="btn-submit" onclick="processAndSavePhoto()">壓縮並儲存</button>
-      <button class="btn-submit" style="margin-top:8px; background:#94a3b8;" onclick="document.getElementById('photoUploadModal').classList.remove('active')">取消</button>
-    </div>
-  </div>
-
-  <!-- 公告詳情 Modal -->
-  <div id="announcementModal" class="modal-overlay">
-    <div class="modal-box">
-      <h3 id="annoTitle" style="margin-bottom:10px;">公告標題</h3>
+  <!-- 💡 雙寵物配對兌換選擇 Modal (扭蛋卷或10代幣) -->
+  <div id="rewardRedeemModal" class="modal-overlay" style="z-index:110;">
+    <div class="modal-box" style="max-width:380px; text-align:center;">
+      <h3 style="color:#b45309; margin-bottom:8px;"><i class="fa-solid fa-gift"></i> 2隻寵物配對兌換獎勵</h3>
+      <p style="font-size:0.85rem; color:#64748b; margin-bottom:14px;">請選擇您想兌換的項目：</p>
       
-      <div id="annoImgContainer" class="anno-img-container" style="display:none;" onclick="openImageViewer(document.getElementById('annoImg').src)">
-        <img id="annoImg" src="" alt="公告附圖">
-        <span class="anno-img-hint"><i class="fa-solid fa-magnifying-glass-plus"></i> 點擊放大 2K 超清全圖</span>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px;">
+        <button class="btn-submit" style="background:#10b981;" onclick="choosePairReward('ticket')">🎁 換扭蛋卷一張</button>
+        <button class="btn-submit" style="background:#d97706;" onclick="choosePairReward('coin')">🪙 換 10 個代幣</button>
       </div>
 
-      <p id="annoContent" style="margin:14px 0; font-size:0.95rem; line-height:1.6; color:#475569; white-space:pre-wrap;"></p>
-      <button class="btn-submit" onclick="closeAnnouncementModal()">了解關閉</button>
+      <button class="btn-submit" style="background:#94a3b8;" onclick="closeRewardModal()">取消返回</button>
     </div>
-  </div>
-
-  <!-- 超清全螢幕大圖燈箱 Modal -->
-  <div id="imageViewerModal" onclick="closeImageViewer()">
-    <button class="close-btn" onclick="closeImageViewer()"><i class="fa-solid fa-xmark"></i></button>
-    <img id="imageViewerImg" src="" alt="全螢幕照片">
   </div>
 
   <script>
@@ -720,16 +571,8 @@
     let firebaseDbUrl = localStorage.getItem('cm309_firebase_url') || "";
 
     let announcements = JSON.parse(localStorage.getItem('cm309_announcements')) || [];
-    let albums = JSON.parse(localStorage.getItem('cm309_albums')) || [];
     
-    let currentAlbumCategory = '全部';
-    let currentAlbumSubMode = '全班'; 
-    let currentAlbumTargetSeat = '';   
-
     let petState = JSON.parse(localStorage.getItem('cm309_pets')) || INITIAL_PETS;
-    
-    // 💡 測試學生的分數重設歸零 (例如指定座號或直接清除當前測試)
-    // 若要將所有學生的測試寵物重設，可在此確保初始化
     let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
     let cleanAssignment = JSON.parse(localStorage.getItem('cm309_cleanAssign')) || {};
 
@@ -753,6 +596,7 @@
     let lastClickedSeat = null;
     let syncDebounceTimer = null;
     let firstSelectedPetIndex = null;
+    let selectedRedeemPair = null; // 記錄雙寵物配對索引 {idx1, idx2}
 
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('zh-TW');
@@ -765,7 +609,6 @@
       renderAllGrids();
       renderBulletins();
       renderManageBulletins();
-      renderAlbum();
       updateCloudBadge();
 
       if (firebaseDbUrl) {
@@ -789,12 +632,6 @@
       const select = document.getElementById('recordStudentSelect');
       select.innerHTML = '';
       students.forEach((name, i) => { select.add(new Option(`${name}`, `${name}`)); });
-
-      const albumSelect = document.getElementById('uploadPhotoStudent');
-      if (albumSelect) {
-        albumSelect.innerHTML = '<option value="">(不指定，全班共用)</option>';
-        students.forEach(name => { albumSelect.add(new Option(name, name)); });
-      }
     }
 
     function updateCloudBadge(status) {
@@ -844,7 +681,6 @@
       localStorage.setItem('cm309_pets', JSON.stringify(petState));
       localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
       localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
-      localStorage.setItem('cm309_albums', JSON.stringify(albums));
       localStorage.setItem('cm309_cleanAssign', JSON.stringify(cleanAssignment));
       localStorage.setItem('cm309_corrBoxes', JSON.stringify(correctionBoxes));
       localStorage.setItem('cm309_cleanlinessAssign', JSON.stringify(cleanlinessAssignment));
@@ -865,7 +701,6 @@
           petState,
           petCollection,
           announcements,
-          albums,
           cleanAssignment,
           correctionBoxes,
           cleanlinessAssignment,
@@ -911,7 +746,6 @@
             }
             petCollection = data.petCollection || {};
             announcements = data.announcements || [];
-            albums = data.albums || [];
             cleanAssignment = data.cleanAssignment || {};
             if (data.correctionBoxes) correctionBoxes = data.correctionBoxes;
             cleanlinessAssignment = data.cleanlinessAssignment || {};
@@ -926,7 +760,6 @@
             localStorage.setItem('cm309_pets', JSON.stringify(petState));
             localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
             localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
-            localStorage.setItem('cm309_albums', JSON.stringify(albums));
             localStorage.setItem('cm309_cleanAssign', JSON.stringify(cleanAssignment));
             localStorage.setItem('cm309_corrBoxes', JSON.stringify(correctionBoxes));
             localStorage.setItem('cm309_cleanlinessAssign', JSON.stringify(cleanlinessAssignment));
@@ -936,7 +769,6 @@
             renderPetsGrid();
             renderBulletins();
             renderManageBulletins();
-            renderAlbum();
             document.getElementById('studentRosterInput').value = students.join('\n');
             updateCloudBadge();
             if (!silent) alert("✅ 已成功從 Firebase 同步最新狀態！");
@@ -953,7 +785,7 @@
     // === 師生互動區切換 ===
     function switchInteractiveMode(mode) {
       currentInteractiveMode = mode;
-      document.querySelectorAll('#tab-interactive .album-chip').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#tab-interactive .form-chip').forEach(b => b.classList.remove('active'));
       document.getElementById('btn-sub-' + mode).classList.add('active');
 
       const title = document.getElementById('currentInteractiveTitleDisplay');
@@ -989,7 +821,6 @@
       renderInteractiveGrid();
     }
 
-    // === 2. 作業訂正專區 ===
     function renderCorrectionBoard() {
       const pool = document.getElementById('correctionPool');
       pool.innerHTML = '';
@@ -1088,7 +919,6 @@
       syncToFirebase();
     }
 
-    // === 3. 整潔大師看板 ===
     function initCleanlinessSortables() {
       const zones = ['cleanlinessPool', 'zone-clean-tidy', 'zone-clean-chair', 'zone-clean-messy', 'zone-clean-bag', 'zone-clean-align'];
       zones.forEach(zId => {
@@ -1139,7 +969,6 @@
       });
     }
 
-    // === 4. 打掃看板 ===
     function initSortables() {
       const zones = ['zone-unassigned', 'zone-classroom', 'zone-corridor', 'zone-mop', 'zone-window', 'zone-blackboard', 'zone-trash'];
       zones.forEach(z => {
@@ -1201,7 +1030,6 @@
       syncToFirebase();
     }
 
-    // === 師生互動看板網格 ===
     function renderInteractiveGrid() {
       if (currentInteractiveMode === 'clean' || currentInteractiveMode === 'correction' || currentInteractiveMode === 'cleanliness') return;
       const container = document.getElementById('interactiveGrid'); container.innerHTML = '';
@@ -1353,112 +1181,45 @@
     function renderBulletins() {
       const container = document.getElementById('bulletinListContainer'); container.innerHTML = '';
       if (announcements.length === 0) return container.innerHTML = '<li style="padding:16px; color:#94a3b8; text-align:center;">目前尚無公告</li>';
-      
       announcements.forEach((anno, index) => {
-        const hasImgIcon = anno.imgSrc ? `<span class="bulletin-has-img"><i class="fa-solid fa-image"></i> 附圖</span>` : '';
         container.innerHTML += `
           <li class="bulletin-item" onclick="viewAnnouncement(${index})">
-            <div>
-              <span class="bulletin-badge">${anno.dept}</span>
-              <strong>${anno.title}</strong>
-              ${hasImgIcon}
-            </div>
+            <div><span class="bulletin-badge">${anno.dept}</span><strong>${anno.title}</strong></div>
             <i class="fa-solid fa-chevron-right" style="color:#94a3b8;"></i>
           </li>`;
       });
     }
-
     function viewAnnouncement(index) {
       const anno = announcements[index];
       document.getElementById('annoTitle').textContent = anno.title;
       document.getElementById('annoContent').textContent = anno.content;
-      const imgContainer = document.getElementById('annoImgContainer');
-      const imgEl = document.getElementById('annoImg');
-      if (anno.imgSrc) {
-        imgEl.src = anno.imgSrc;
-        imgContainer.style.display = 'flex';
-      } else {
-        imgContainer.style.display = 'none';
-      }
       document.getElementById('announcementModal').classList.add('active');
     }
-
     function closeAnnouncementModal() { document.getElementById('announcementModal').classList.remove('active'); }
-
-    function openImageViewer(src) {
-      if(!src) return;
-      document.getElementById('imageViewerImg').src = src;
-      document.getElementById('imageViewerModal').classList.add('active');
-    }
-    function closeImageViewer() {
-      document.getElementById('imageViewerModal').classList.remove('active');
-    }
-
     function renderManageBulletins() {
       const list = document.getElementById('manageBulletinList'); list.innerHTML = '';
       announcements.forEach((anno, index) => {
-        const hasImg = anno.imgSrc ? '<span style="font-size:0.75rem; color:#2563eb; margin-left:4px;">[附圖]</span>' : '';
         list.innerHTML += `
-          <div class="manage-bulletin-item" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border:1px solid var(--border); border-radius:8px; margin-bottom:6px; background:#fff;">
-            <div><span class="bulletin-badge">${anno.dept}</span><strong>${anno.title}</strong>${hasImg}</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border:1px solid var(--border); border-radius:8px; margin-bottom:6px; background:#fff;">
+            <div><span class="bulletin-badge">${anno.dept}</span><strong>${anno.title}</strong></div>
             <button class="btn-del" onclick="deleteAnnouncement(${index})"><i class="fa-solid fa-trash-can"></i></button>
           </div>`;
       });
     }
-
     function handleCreateAnnouncement(e) {
       e.preventDefault();
       const dept = document.getElementById('newAnnoDept').value.trim();
       const title = document.getElementById('newAnnoTitle').value.trim();
       const content = document.getElementById('newAnnoContent').value.trim();
-      const file = document.getElementById('newAnnoImageFile').files[0];
-
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let w = img.width, h = img.height;
-            const MAX_DIM = 2048;
-            if (w > MAX_DIM || h > MAX_DIM) {
-              if (w > h) {
-                h = Math.round((h * MAX_DIM) / w);
-                w = MAX_DIM;
-              } else {
-                w = Math.round((w * MAX_DIM) / h);
-                h = MAX_DIM;
-              }
-            }
-            canvas.width = w; canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-            ctx.drawImage(img, 0, 0, w, h);
-            
-            const compressedImg = canvas.toDataURL('image/jpeg', 0.88);
-            saveAnnoAndSync(dept, title, content, compressedImg);
-          };
-          img.src = event.target.result;
-        };
-        reader.readAsDataURL(file);
-      } else {
-        saveAnnoAndSync(dept, title, content, null);
-      }
-    }
-
-    function saveAnnoAndSync(dept, title, content, imgSrc) {
-      announcements.unshift({ id: Date.now(), dept, title, content, imgSrc });
+      announcements.unshift({ id: Date.now(), dept, title, content });
       document.getElementById('newAnnoDept').value = '';
       document.getElementById('newAnnoTitle').value = '';
       document.getElementById('newAnnoContent').value = '';
-      document.getElementById('newAnnoImageFile').value = '';
       renderBulletins();
       renderManageBulletins();
-      alert('✅ 高清公告發佈成功！');
+      alert('✅ 公告發佈成功！');
       syncToFirebase();
     }
-
     function deleteAnnouncement(index) {
       if (confirm(`確定刪除此公告？`)) {
         announcements.splice(index, 1);
@@ -1468,7 +1229,7 @@
       }
     }
 
-    // === 🐾 寵物養成系統 ===
+    // === 🐾 寵物養成系統 (兩隻成體配對兌換：扭蛋卷或10代幣) ===
     function addPetXp(seat, amount) {
       let seatNum = parseInt(seat);
       if (!petState[seatNum]) {
@@ -1577,7 +1338,6 @@
     function resetSingleStudentPet() {
       const seat = currentSelectedStudent.seat;
       if (confirm(`確定要重設 ${currentSelectedStudent.name} 的目前寵物嗎？分數會歸零並重新抽蛋。`)) {
-        // 💡 測試學生的分數重設歸零與重新抽蛋
         const randomPet = PET_CATALOG[Math.floor(Math.random() * PET_CATALOG.length)];
         petState[seat] = { petId: randomPet.id, stage: 1, xp: 0 };
         openPetModal(seat, currentSelectedStudent.name);
@@ -1593,9 +1353,9 @@
       const pairedCount = myPets.filter(item => item.redeemed).length / 2;
       const badge = document.getElementById('gardenTicketBadgeBelow');
       if (adultCount > 0) {
-        badge.innerHTML = `🌟 目前動物園成體：${adultCount} 隻 ｜ 累計已換獎勵：<strong style="color:#d97706; font-size:0.95rem;">${pairedCount} 組</strong>`;
+        badge.innerHTML = `🌟 目前動物園成體：${adultCount} 隻 ｜ 已換獎勵：<strong style="color:#d97706; font-size:0.95rem;">${pairedCount} 組</strong>`;
       } else {
-        badge.innerHTML = `🎟️ 培育 2 隻動物成體即可配對兌換 1 次獎勵！`;
+        badge.innerHTML = `🎟️ 培育 2 隻動物成體即可配對兌換獎勵！`;
       }
     }
 
@@ -1622,6 +1382,7 @@
       syncToFirebase();
     }
 
+    // === 🌳 查看專屬動物園與雙寵物配對兌換 (扭蛋卷或10代幣) ===
     function showPetGarden() {
       document.getElementById('petManageView').style.display = 'none';
       document.getElementById('petSelectView').style.display = 'none';
@@ -1654,7 +1415,7 @@
       const summaryBox = document.getElementById('gardenTicketSummary');
       summaryBox.innerHTML = `
         <div>🦁 成體總數：<strong>${adultCount} 隻</strong></div>
-        <div style="font-size:1rem; color:#b45309;">🎁 已兌換獎勵：<strong>${pairedCount} 組</strong> (每2隻換1次)</div>
+        <div style="font-size:1rem; color:#b45309;">🎁 已換獎勵：<strong>${pairedCount} 組</strong> (每2隻換1次)</div>
       `;
 
       if (myPets.length === 0) {
@@ -1711,51 +1472,50 @@
     }
 
     function openRewardModal(idx1, idx2) {
-      selectedRedeemIndex = { idx1, idx2 };
-      document.getElementById('prizeInputArea').style.display = 'none';
-      document.getElementById('rewardPrizeInput').value = '';
+      selectedRedeemPair = { idx1, idx2 };
       document.getElementById('rewardRedeemModal').classList.add('active');
     }
 
     function closeRewardModal() {
       document.getElementById('rewardRedeemModal').classList.remove('active');
       firstSelectedPetIndex = null;
-      selectedRedeemIndex = null;
+      selectedRedeemPair = null;
     }
 
-    function setRewardType(type) {
-      if (type === 'prize') {
-        document.getElementById('prizeInputArea').style.display = 'block';
-        setTimeout(() => document.getElementById('rewardPrizeInput').focus(), 100);
-      } else {
-        submitRewardRedeem('ticket', '🎟️ 抽獎券一張');
-      }
-    }
-
-    function submitRewardRedeem(type, customName = '') {
-      let prizeName = customName;
-      if (type === 'prize') {
-        prizeName = document.getElementById('rewardPrizeInput').value.trim();
-        if (!prizeName) return alert("請輸入小禮物名稱！");
-      }
-
+    function choosePairReward(type) {
       const seat = currentSelectedStudent.seat;
       const pets = petCollection[seat];
-      const { idx1, idx2 } = selectedRedeemIndex;
+      const { idx1, idx2 } = selectedRedeemPair;
       const pairToken = 'pair_' + Date.now();
 
+      let prizeDesc = "";
+      let gameData = JSON.parse(localStorage.getItem('cm309_game_data')) || {};
+      let gData = gameData[seat] || { extraCoins: 0, tickets: [], specials: [], coinLogs: [] };
+      if (!gameData[seat]) gameData[seat] = gData;
+
+      if (type === 'ticket') {
+        prizeDesc = "扭蛋卷一張";
+        gData.tickets.push({ name: "扭蛋卷 (點擊設定名稱)", date: new Date().toLocaleDateString(), isUsed: false });
+      } else {
+        prizeDesc = "10個代幣";
+        gData.extraCoins += 10;
+        if (!gData.coinLogs) gData.coinLogs = [];
+        gData.coinLogs.unshift({ text: `動物園雙寵物兌換獲得代幣 +10`, date: new Date().toLocaleDateString() });
+      }
+
       pets[idx1].redeemed = true;
-      pets[idx1].prize = prizeName;
+      pets[idx1].prize = prizeDesc;
       pets[idx1].pairId = pairToken;
 
       pets[idx2].redeemed = true;
-      pets[idx2].prize = prizeName;
+      pets[idx2].prize = prizeDesc;
       pets[idx2].pairId = pairToken;
 
+      localStorage.setItem('cm309_game_data', JSON.stringify(gameData));
       closeRewardModal();
       renderPetGardenContent();
       syncToFirebase();
-      alert(`✅ 雙寵物兌換成功！已獲得【${prizeName}】，兩隻寵物已同步亮黃燈！`);
+      alert(`✅ 雙寵物配對成功！已成功換取【${prizeDesc}】，兩隻寵物已同步亮黃燈！`);
     }
 
     function cancelPairRedeem(index) {
@@ -1792,127 +1552,6 @@
     }
 
     function closePetModal() { document.getElementById('petManageModal').classList.remove('active'); }
-
-    // === 💡 兩層式相簿控制核心 ===
-    function openPhotoModal() { 
-      document.getElementById('uploadPhotoFile').value = '';
-      document.getElementById('uploadPhotoDesc').value = '';
-      document.getElementById('photoUploadModal').classList.add('active'); 
-    }
-
-    function selectAlbumCategory(catName) {
-      currentAlbumCategory = catName;
-      const chips = document.querySelectorAll('#albumCategoryList .album-chip');
-      chips.forEach(b => {
-        if (b.textContent === catName) b.classList.add('active');
-        else b.classList.remove('active');
-      });
-      renderAlbum();
-    }
-
-    function selectAlbumSub(mode, seatName) {
-      currentAlbumSubMode = mode;
-      currentAlbumTargetSeat = seatName;
-      const subChips = document.querySelectorAll('#albumSubList .album-sub-chip');
-      subChips.forEach(b => {
-        if (mode === '全班' && b.textContent.includes('全班')) b.classList.add('active');
-        else if (mode === '個人' && b.textContent === seatName) b.classList.add('active');
-        else b.classList.remove('active');
-      });
-      renderAlbum();
-    }
-
-    function renderAlbum() {
-      const container = document.getElementById('albumGallery');
-      container.innerHTML = '';
-
-      const filtered = albums.filter(alb => {
-        let matchCat = (currentAlbumCategory === '全部' || alb.cat === currentAlbumCategory);
-        let matchSub = true;
-        if (currentAlbumSubMode === '全班') {
-          matchSub = (!alb.studentSeat || alb.studentSeat === '');
-        } else {
-          matchSub = (alb.studentSeat === currentAlbumTargetSeat);
-        }
-        return matchCat && matchSub;
-      });
-
-      if (filtered.length === 0) {
-        let scopeText = currentAlbumSubMode === '全班' ? '全班' : currentAlbumTargetSeat;
-        container.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:#94a3b8; padding:30px;">目前【${currentAlbumCategory} ➔ ${scopeText}】尚無照片，點擊右上角「新增照片」開始上傳！</p>`;
-        return;
-      }
-
-      filtered.forEach((alb) => {
-        const originalIndex = albums.indexOf(alb);
-        const seatBadge = alb.studentSeat ? `<span class="tag-badge">👤 ${alb.studentSeat}</span>` : `<span class="tag-badge" style="background:#dcfce7; color:#15803d;">👥 全班</span>`;
-        container.innerHTML += `
-          <div class="gallery-item">
-            <button class="btn-del-img" onclick="deletePhoto(${originalIndex})"><i class="fa-solid fa-xmark"></i></button>
-            <img src="${alb.src}" onclick="openImageViewer('${alb.src}')" alt="相簿照片">
-            <div class="desc">
-              <div>${seatBadge}<span style="color:#64748b;">${alb.cat}</span></div>
-              <strong>${alb.desc||'未命名'}</strong>
-            </div>
-          </div>`;
-      });
-    }
-
-    function deletePhoto(idx) { 
-      if(confirm("確定刪除這張照片？")) { 
-        albums.splice(idx, 1); 
-        renderAlbum(); 
-        syncToFirebase();
-      } 
-    }
-
-    function processAndSavePhoto() {
-      const fileInput = document.getElementById('uploadPhotoFile');
-      if (!fileInput.files || fileInput.files.length === 0) return alert("請選擇照片檔案！");
-      const file = fileInput.files[0];
-      
-      const cat = document.getElementById('uploadPhotoCat').value;
-      const studentSeat = document.getElementById('uploadPhotoStudent').value; 
-      const desc = document.getElementById('uploadPhotoDesc').value.trim();
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas'); 
-          let w = img.width, h = img.height;
-          const MAX_DIM = 1200; 
-          if(w > MAX_DIM || h > MAX_DIM) {
-            if(w > h) { h = Math.round((h * MAX_DIM) / w); w = MAX_DIM; }
-            else { w = Math.round((w * MAX_DIM) / h); h = MAX_DIM; }
-          }
-          canvas.width = w; canvas.height = h;
-          const ctx = canvas.getContext('2d');
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = 'high';
-          ctx.drawImage(img, 0, 0, w, h);
-
-          try { 
-            albums.unshift({ 
-              cat, 
-              studentSeat: studentSeat, 
-              desc, 
-              src: canvas.toDataURL('image/jpeg', 0.85),
-              time: Date.now()
-            }); 
-            document.getElementById('photoUploadModal').classList.remove('active'); 
-            renderAlbum(); 
-            syncToFirebase();
-            alert("✅ 相片已成功壓縮並上傳！");
-          } catch(err) { 
-            alert("記憶體容量已滿，請刪除部分舊照片後再試。"); 
-            albums.shift(); 
-          }
-        }; 
-        img.src = e.target.result;
-      }; 
-      reader.readAsDataURL(file);
-    }
 
     // === Google 試算表日誌寫入 ===
     function handleRecordSubmit(e) {
