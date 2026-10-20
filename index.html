@@ -525,7 +525,6 @@
       25: { petId: 'whale', type: 'animal', stage: 1, xp: 10 }
     };
 
-    // 🐾 動物與昆蟲目錄
     const ANIMAL_CATALOG = [
       { id: 'cockroach', name: '小強', type: 'animal', stages: ['🥚', '🪲', '🪳'], desc: '生命力強' },
       { id: 'dragonfly', name: '蜻蜓', type: 'animal', stages: ['🥚', '🐛', '🪰'], desc: '飛行高手' },
@@ -542,7 +541,6 @@
       { id: 'lion', name: '獅王', type: 'animal', stages: ['🥚', '🦁', '🦁'], desc: '野生動物' }
     ];
 
-    // 🌱 自然生態目錄 (植物與天氣狀態，各佔 10 分)
     const ECO_CATALOG = [
       { id: 'sunflower', name: '向日葵', type: 'eco', stages: ['🌱', '🌿', '🌻'], desc: '朝氣蓬勃' },
       { id: 'cactus', name: '仙人掌', type: 'eco', stages: ['🌱', '🌵', '🌵'], desc: '堅韌耐旱' },
@@ -587,7 +585,7 @@
     let clickTimeout = null;
     let lastClickedSeat = null;
     let syncDebounceTimer = null;
-    let firstSelectedGardenIndex = null; // 記錄動物園選中的配對索引 {type, index}
+    let firstSelectedGardenIndex = null;
     let selectedRedeemPair = null;
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -724,7 +722,9 @@
             if (data.petState && Object.keys(data.petState).length > 0) {
               petState = data.petState;
             }
-            petCollection = data.petCollection || {};
+            if (data.petCollection && Object.keys(data.petCollection).length > 0) {
+              petCollection = data.petCollection;
+            }
             announcements = data.announcements || [];
             cleanAssignment = data.cleanAssignment || {};
             if (data.correctionBoxes) correctionBoxes = data.correctionBoxes;
@@ -1280,9 +1280,6 @@
 
       const animals = myItems.filter(item => (!item.type || item.type === 'animal'));
       const ecos = myItems.filter(item => item.type === 'eco');
-      
-      const animalPaired = animals.filter(item => item.redeemed).length / 2;
-      const ecoPaired = ecos.filter(item => item.redeemed).length / 2;
 
       const summaryBox = document.getElementById('gardenTicketSummary');
       summaryBox.innerHTML = `
@@ -1290,11 +1287,10 @@
         <div style="font-size:0.9rem; color:#b45309;">🌱 生態總數：<strong>${ecos.length} 個</strong></div>
       `;
 
-      // 渲染上方動物區
       if (animals.length === 0) {
         animalGrid.innerHTML = '<p style="color:#64748b; font-size:0.75rem; grid-column:1/-1;">尚無動物成體</p>';
       } else {
-        animals.forEach((item, indexInAll) => {
+        animals.forEach((item) => {
           let realIdx = myItems.indexOf(item);
           const cat = ANIMAL_CATALOG.find(c => c.id === item.petId) || ANIMAL_CATALOG[4];
           const isRedeemed = !!item.redeemed;
@@ -1321,11 +1317,10 @@
         });
       }
 
-      // 渲染下方生態區
       if (ecos.length === 0) {
         ecoGrid.innerHTML = '<p style="color:#64748b; font-size:0.75rem; grid-column:1/-1;">尚無自然生態項目</p>';
       } else {
-        ecos.forEach((item, indexInAll) => {
+        ecos.forEach((item) => {
           let realIdx = myItems.indexOf(item);
           const ecoItem = ECO_CATALOG.find(c => c.id === item.petId) || ECO_CATALOG[0];
           const isRedeemed = !!item.redeemed;
@@ -1372,7 +1367,6 @@
         firstSelectedGardenIndex = null;
         renderPetGardenContent();
       } else {
-        // 必須同區域（動物配動物、生態配生態）才能配對
         if (firstSelectedGardenIndex.type !== category) {
           alert("⚠️ 只能選擇同類型的項目進行配對（動物配動物、生態配生態）！");
           return;
