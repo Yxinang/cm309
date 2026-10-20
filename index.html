@@ -135,10 +135,13 @@
     .modal-options { display: flex; flex-direction: column; gap: 8px; }
     .opt-btn { padding: 12px; border-radius: 8px; border: 1.5px solid var(--border); background: #fff; text-align: left; font-size: 0.95rem; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px; }
 
-    /* 💡 原本精美生動的動物圖示樣式 */
-    .pet-img { display: block; width: 50px; height: 50px; object-fit: contain; margin: 4px auto; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .pet-btn:hover .pet-img { transform: translateY(-3px) scale(1.1); }
-    .pet-progress-bg { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; margin-top: 6px; }
+    .pet-emoji { display: block; text-align: center; margin: 4px 0; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .pet-emoji.s1 { font-size: 24px; }
+    .pet-emoji.s2 { font-size: 32px; transform: scale(1.1); }
+    .pet-emoji.s3 { font-size: 46px; transform: scale(1.2); }
+    .pet-emoji.s4 { font-size: 46px; transform: scale(1.2); text-shadow: 0 0 15px #fde047; }
+    .pet-btn:hover .pet-emoji { transform: translateY(-3px) scale(1.1); }
+    .pet-progress-bg { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 6px; }
     .pet-progress-fill { height: 100%; background: #10b981; transition: width 0.4s ease-out; }
     .pet-info { font-size: 0.65rem; color: #64748b; margin-top: 4px; display: flex; justify-content: space-between; width: 100%; }
     .pet-select-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
@@ -147,10 +150,9 @@
     .pet-card .emoji { font-size: 36px; margin-bottom: 4px; }
     .pet-card .name { font-size: 0.95rem; font-weight: 700; color: #1e293b; }
 
-    .garden-section-title { font-size: 0.9rem; font-weight: 700; color: #1e40af; margin-top: 15px; margin-bottom: 6px; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
-    .garden-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-top: 6px; }
+    .garden-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 10px; margin-top: 15px; }
     .garden-item {
-      border: 1.5px dashed var(--border); border-radius: 10px; padding: 8px 4px; text-align: center;
+      border: 1.5px dashed var(--border); border-radius: 10px; padding: 10px 6px; text-align: center;
       background: #f0fdf4; border-color: #86efac; cursor: pointer; transition: all 0.2s; position: relative;
     }
     .garden-item:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
@@ -158,10 +160,8 @@
       border: 2px solid #2563eb !important; background: #eff6ff !important;
       box-shadow: 0 0 12px rgba(37, 99, 235, 0.5) !important;
     }
-    .garden-item.eco-item { background: #fefce8; border-color: #fde047; }
-    .garden-item img { width: 36px; height: 36px; object-fit: contain; margin: 0 auto; display: block; }
-    .garden-item .name { font-size: 0.72rem; font-weight: 700; color: #15803d; margin-top: 3px; }
-    .garden-item.eco-item .name { color: #854d0e; }
+    .garden-item .emoji { font-size: 34px; }
+    .garden-item .name { font-size: 0.75rem; font-weight: 700; color: #15803d; margin-top: 4px; }
     
     .garden-item.is-redeemed {
       background: #fffbeb !important;
@@ -170,9 +170,9 @@
     }
     .garden-item.is-redeemed .name { color: #b45309 !important; }
     .redeemed-badge {
-      font-size: 0.6rem; background: #fef08a; color: #854d0e; padding: 1px 3px;
-      border-radius: 4px; margin-top: 3px; display: inline-block; font-weight: 700;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 85px;
+      font-size: 0.65rem; background: #fef08a; color: #854d0e; padding: 2px 4px;
+      border-radius: 4px; margin-top: 4px; display: inline-block; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;
     }
 
     .ticket-summary-box {
@@ -284,4 +284,1228 @@
             </div>
             <div class="clean-col"><h4>🪑 沒靠椅子</h4><div class="clean-list" id="zone-clean-chair"></div></div>
             <div class="clean-col"><h4>📦 座位凌亂</h4><div class="clean-list" id="zone-clean-messy"></div></div>
-            <div class="clean-col"><h4>🎒 棉被書包未歸位</h4>
+            <div class="clean-col"><h4>🎒 棉被書包未歸位</h4><div class="clean-list" id="zone-clean-bag"></div></div>
+            <div class="clean-col"><h4>📐 桌椅沒有對齊</h4><div class="clean-list" id="zone-clean-align"></div></div>
+          </div>
+        </div>
+
+        <!-- 4. 打掃工作看板 -->
+        <div id="cleanKanban" style="display:none;">
+          <div style="font-size:0.8rem; color:#059669; font-weight:700; margin-bottom:10px; background:#dcfce7; padding:6px 10px; border-radius:6px;">
+            <i class="fa-solid fa-hand-pointer"></i> 提示：<strong>直接點擊座號即可「亮綠燈 / 關閉綠燈」</strong>，完成打掃的孩子寵物自動 +1 分！
+          </div>
+          <div class="clean-board full">
+            <div class="clean-col" style="background:#f1f5f9; border-color:#cbd5e1;">
+              <h4>🧹 尚未分配打掃區 (拖曳分派)</h4>
+              <div class="clean-list" id="zone-unassigned"></div>
+            </div>
+          </div>
+          <div class="clean-board">
+            <div class="clean-col"><h4>教室內</h4><div class="clean-list" id="zone-classroom"></div></div>
+            <div class="clean-col"><h4>走廊</h4><div class="clean-list" id="zone-corridor"></div></div>
+            <div class="clean-col"><h4>拖地</h4><div class="clean-list" id="zone-mop"></div></div>
+            <div class="clean-col"><h4>窗戶</h4><div class="clean-list" id="zone-window"></div></div>
+            <div class="clean-col"><h4>黑板</h4><div class="clean-list" id="zone-blackboard"></div></div>
+            <div class="clean-col"><h4>倒垃圾/資源回收</h4><div class="clean-list" id="zone-trash"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 第六部分：寵物養成系統 -->
+    <section id="tab-pets" class="page-section">
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-paw text-secondary"></i> 班級神秘寵物樂園</div>
+        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px; line-height:1.5;">
+          一開始會隨機獲得神秘的蛋，升級後才會破殼揭曉真正品種！滿等後可送入個人專屬「寵物園」。<br>
+          <strong style="color:#2563eb;">成長階段：🥚 蛋(0-20分) ➔ 🐤 幼體(20-40分) ➔ 🦅 成體(40-55分)</strong>
+        </p>
+        <div style="margin-bottom: 14px;">
+          <a href="game.html" class="bg-emerald-500 text-white px-4 py-2 rounded-xl" style="display: inline-block; background-color: #10b981; color: white; padding: 8px 16px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.9rem;">🎮 點我去玩扭蛋與兌換獎品</a>
+        </div>
+        <div class="student-grid" id="petsGrid"></div>
+      </div>
+    </section>
+
+    <!-- 第三部分：傷病與親師溝通 -->
+    <section id="tab-records" class="page-section">
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-file-waveform"></i> 新增傷病 / 親師溝通紀錄</div>
+        <form onsubmit="handleRecordSubmit(event)">
+          <div class="form-group">
+            <select id="recordType" class="form-control">
+              <option value="傷病通知">🏥 健康/傷病通知單</option>
+              <option value="親師溝通">📞 親師聯絡/溝通紀錄</option>
+            </select>
+          </div>
+          <div class="form-group"><select id="recordStudentSelect" class="form-control"></select></div>
+          <div class="form-group"><textarea id="recordDetail" class="form-control" rows="3" placeholder="事由或情況說明..." required></textarea></div>
+          <div class="form-group"><input type="text" id="recordFollowup" class="form-control" placeholder="處理方式 / 聯絡反饋"></div>
+          <button type="submit" class="btn-submit"><i class="fa-solid fa-cloud-arrow-up"></i> 儲存並上傳至 Google 試算表</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 設定頁面 (已補回 Google 試算表連結設定區塊) -->
+    <section id="tab-settings" class="page-section">
+      <div class="card" style="border: 2px solid #2563eb;">
+        <div class="card-title"><i class="fa-solid fa-database text-primary"></i> 1. 全班即時資料庫 (Firebase 雙向同步)</div>
+        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">
+          請確保手機與電腦填寫相同的 Firebase Realtime Database 網址：
+        </p>
+        <div class="form-group">
+          <input type="url" id="firebaseDbUrlInput" class="form-control" placeholder="例如: https://cm309-default-rtdb.firebaseio.com">
+        </div>
+        <button class="btn-submit" style="background:#2563eb;" onclick="saveFirebaseDbUrl()">
+          <i class="fa-solid fa-link"></i> 儲存並立即全域同步
+        </button>
+      </div>
+
+      <!-- 💡 已補回：Google 試算表連結設定 -->
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-table text-primary"></i> 2. Google 試算表 (記錄點名/作業/傷病日誌)</div>
+        <input type="url" id="sheetsApiUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
+        <button class="btn-submit" style="margin-top:8px; background:#059669;" onclick="saveSheetsUrl()">儲存試算表連結</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-users-gear"></i> 3. 學生座號設定 (每行一個座號)</div>
+        <textarea id="studentRosterInput" class="form-control" rows="8" placeholder="每行一個座號..."></textarea>
+        <button class="btn-submit" style="margin-top:8px;" onclick="saveStudentRoster()">儲存座號設定</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-triangle-exclamation text-danger"></i> 進階資料清除</div>
+        <button class="btn-submit" style="background:#ef4444;" onclick="resetAllPets()">
+          <i class="fa-solid fa-trash-can"></i> 一鍵刪除全班寵物與寵物園
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 作業狀態 Modal -->
+  <div id="hwStatusModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3 id="hwModalTitle">挑選作業狀態</h3>
+      <div class="modal-options">
+        <button class="opt-btn" onclick="applyHwStatus('已繳交', 'hw-green')"><span style="color:#16a34a;">🟢 1. 已繳交 (+1分)</span></button>
+        <button class="opt-btn" onclick="applyHwStatus('忘記帶回家', 'hw-blue')"><span style="color:#2563eb;">🔵 2. 忘記帶回家</span></button>
+        <button class="opt-btn" onclick="applyHwStatus('未完成', 'hw-red')"><span style="color:#dc2626;">🔴 3. 未完成</span></button>
+        <button class="opt-btn" onclick="applyHwStatus('忘記帶來學校', 'hw-orange')"><span style="color:#ea580c;">🟠 4. 忘記帶來學校</span></button>
+        <button class="opt-btn" onclick="showMissingInput()"><span style="color:#0d9488;">✍ 5. 缺項 (自訂輸入)</span></button>
+        
+        <div id="missingInputArea" style="display:none; padding:10px; background:#f0fdfa; border:1px dashed #0d9488; border-radius:8px;">
+          <input type="text" id="hwMissingText" class="form-control" placeholder="輸入缺漏項目(如:數習)">
+          <button class="btn-submit" style="margin-top:8px; background:#0d9488;" onclick="submitMissingHw()">確認儲存</button>
+        </div>
+
+        <button class="opt-btn" onclick="resetSingleStudentHw()" style="border-style:dashed; background:#f8fafc; justify-content:center;">
+          <span style="color:#64748b;">↺ 重設為「未登記」</span>
+        </button>
+      </div>
+      <button class="btn-submit" style="margin-top:14px; background:#94a3b8;" onclick="closeHwModal()">關閉</button>
+    </div>
+  </div>
+
+  <!-- 寵物操作 Modal -->
+  <div id="petManageModal" class="modal-overlay">
+    <div class="modal-box" style="text-align:center;">
+      <h3 id="petModalTitle">寵物狀態</h3>
+      <div id="petManageView">
+        <div id="petModalEmoji" style="margin:10px 0;">🥚</div>
+        <h4 id="petModalName" style="color:#1e40af; margin-bottom:8px;">神秘的蛋 (第一階段：蛋)</h4>
+        
+        <div id="petModalProgressArea">
+          <div style="text-align:left; font-size:0.8rem; color:#64748b; margin-top:10px;">升級進度：<span id="petModalXpText" style="float:right;">15 / 20</span></div>
+          <div class="pet-progress-bg" style="height:12px; margin-bottom:20px;">
+            <div id="petModalProgressBar" class="pet-progress-fill"></div>
+          </div>
+        </div>
+
+        <div id="petModalCompleteArea" style="display:none; margin:20px 0;">
+          <p style="font-size:0.9rem; color:#15803d; margin-bottom:12px; font-weight:700;">🎉 恭喜！寵物已經圓滿長大了！</p>
+          <button class="btn-submit" style="background:#eab308; color:#fff;" onclick="moveToGarden()">
+            🏕️ 送進專屬寵物園並領養新蛋
+          </button>
+        </div>
+
+        <div id="petModalActionArea" style="display:flex; gap:10px; margin-bottom:15px;">
+          <button class="btn-submit" style="background:#10b981;" onclick="manualAddPetXp(1)">+1 獎勵分</button>
+          <button class="btn-submit" style="background:#059669;" onclick="manualAddPetXp(5)">+5 獎勵分</button>
+          <button class="btn-submit" style="background:#f8fafc; color:#ef4444; border:1px solid #fca5a5;" onclick="manualAddPetXp(-1)">-1 扣分</button>
+        </div>
+      </div>
+
+      <div id="petSelectView" style="display:none; text-align:left;">
+        <p style="font-size:0.9rem; margin-bottom:10px; color:#1e40af; font-weight:700;">請挑選一顆神秘的蛋來孵化：</p>
+        <div class="pet-select-grid" id="petSelectGrid">
+          <div class="pet-card" onclick="selectMysteryPet()"><div class="emoji" style="font-size:40px;">🥚</div><div class="name">純白之蛋</div></div>
+          <div class="pet-card" onclick="selectMysteryPet()"><div class="emoji" style="font-size:40px;">🎁</div><div class="name">驚喜禮盒</div></div>
+          <div class="pet-card" onclick="selectMysteryPet()"><div class="emoji" style="font-size:40px;">🔮</div><div class="name">神秘水晶</div></div>
+        </div>
+      </div>
+
+      <!-- 動物園與雙寵物配對兌換區 -->
+      <div id="petGardenView" style="display:none; text-align:left;">
+        <div id="gardenTicketSummary" class="ticket-summary-box"></div>
+        <p style="font-size:0.8rem; color:#64748b; margin-top:10px;"><i class="fa-solid fa-circle-info"></i> <strong>2隻成體配對兌換（扭蛋卷或10代幣）</strong>：點擊第1隻成體後，再點擊第2隻成體即可選擇獎勵（兩隻同時亮黃燈）。點擊已兌換的其中一隻可取消。</p>
+        <div class="garden-grid" id="gardenGrid"></div>
+      </div>
+
+      <div style="margin-top:20px; display:flex; flex-direction:column; gap:8px;">
+        <button class="btn-submit" style="background:#0ea5e9;" id="btnViewGarden" onclick="showPetGarden()">🌳 查看專屬動物園與獎勵兌換</button>
+        <div id="gardenTicketBadgeBelow" style="font-size:0.82rem; color:#b45309; font-weight:700; text-align:center;"></div>
+        
+        <div style="border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 4px;">
+          <button class="btn-submit" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; font-size:0.8rem; padding:8px;" onclick="resetSingleStudentPet()">
+            🗑️ 刪除/重設該生目前寵物 (重新抽蛋)
+          </button>
+        </div>
+
+        <button class="btn-submit" style="background:#94a3b8;" id="btnModalClose" onclick="closePetModal()">關閉視窗</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 💡 雙寵物配對兌換選擇 Modal -->
+  <div id="rewardRedeemModal" class="modal-overlay" style="z-index:110;">
+    <div class="modal-box" style="max-width:380px; text-align:center;">
+      <h3 style="color:#b45309; margin-bottom:8px;"><i class="fa-solid fa-gift"></i> 2隻寵物配對兌換獎勵</h3>
+      <p style="font-size:0.85rem; color:#64748b; margin-bottom:14px;">請選擇您想兌換的項目：</p>
+      
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px;">
+        <button class="btn-submit" style="background:#10b981;" onclick="choosePairReward('ticket')">🎁 換扭蛋卷一張</button>
+        <button class="btn-submit" style="background:#d97706;" onclick="choosePairReward('coin')">🪙 換 10 個代幣</button>
+      </div>
+
+      <button class="btn-submit" style="background:#94a3b8;" onclick="closeRewardModal()">取消返回</button>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_STUDENTS = [
+      "1號", "2號", "3號", "4號", "5號", "6號", "7號", "8號", "9號", "10號",
+      "11號", "12號", "13號", "14號", "15號", "16號", "17號", "18號", "19號", "20號",
+      "21號", "22號", "23號", "24號", "25號"
+    ];
+
+    const INITIAL_PETS = {
+      1: { petId: 'cat_black', stage: 1, xp: 12 },
+      2: { petId: 'dog_shiba', stage: 1, xp: 11 },
+      3: { petId: 'turtle', stage: 1, xp: 11 },
+      4: { petId: 'dragon', stage: 1, xp: 10 },
+      5: { petId: 'parrot', stage: 1, xp: 10 },
+      6: { petId: 'penguin', stage: 1, xp: 11 },
+      7: { petId: 'fish', stage: 1, xp: 8 },
+      8: { petId: 'rabbit', stage: 1, xp: 9 },
+      9: { petId: 'panda', stage: 1, xp: 9 },
+      10: { petId: 'turtle', stage: 1, xp: 10 },
+      11: { petId: 'dragon', stage: 1, xp: 10 },
+      12: { petId: 'owl', stage: 1, xp: 10 },
+      13: { petId: 'dog_corgi', stage: 1, xp: 8 },
+      14: { petId: 'fish', stage: 1, xp: 10 },
+      15: { petId: 'cat_orange', stage: 1, xp: 11 },
+      16: { petId: 'dog_husky', stage: 1, xp: 10 },
+      17: { petId: 'fox', stage: 1, xp: 9 },
+      18: { petId: 'trex', stage: 1, xp: 11 },
+      19: { petId: 'cat_calico', stage: 1, xp: 10 },
+      20: { petId: 'dolphin', stage: 1, xp: 12 },
+      21: { petId: 'unicorn', stage: 1, xp: 11 },
+      22: { petId: 'lion', stage: 1, xp: 12 },
+      23: { petId: 'dog_poodle', stage: 1, xp: 6 },
+      24: { petId: 'cat_white', stage: 1, xp: 10 },
+      25: { petId: 'whale', stage: 1, xp: 10 }
+    };
+
+    const PET_CATALOG = [
+      { id: 'cat_black', name: '黑貓', stages: ['🥚', '🐱', '🐈‍⬛'], desc: '幸運黑貓' },
+      { id: 'cat_orange', name: '橘貓', stages: ['🥚', '🐱', '🐈'], desc: '圓滾大橘' },
+      { id: 'cat_calico', name: '三花貓', stages: ['🥚', '🐱', '🐾'], desc: '花紋三花' },
+      { id: 'cat_white', name: '純白貓', stages: ['🥚', '🐱', '🤍'], desc: '雪白波斯' },
+      { id: 'dog_shiba', name: '柴犬', stages: ['🥚', '🐶', '🐕'], desc: '赤毛柴犬' },
+      { id: 'dog_husky', name: '哈士奇', stages: ['🥚', '🐶', '🐺'], desc: '二哈雪橇' },
+      { id: 'dog_poodle', name: '貴賓狗', stages: ['🥚', '🐶', '🐩'], desc: '捲毛貴賓' },
+      { id: 'dog_corgi', name: '柯基犬', stages: ['🥚', '🐶', '🦊'], desc: '短腿柯基' },
+      { id: 'dog_golden', name: '黃金獵犬', stages: ['🥚', '🐶', '🦮'], desc: '溫柔金毛' },
+      { id: 'rabbit', name: '小白兔', stages: ['🥚', '🐰', '🐇'], desc: '可愛寵物' },
+      { id: 'hamster', name: '倉鼠', stages: ['🥚', '🐹', '🐹'], desc: '可愛寵物' },
+      { id: 'turtle', name: '烏龜', stages: ['🥚', '🐢', '🐢'], desc: '爬蟲類' },
+      { id: 'dragon', name: '飛龍', stages: ['🥚', '🦎', '🐉'], desc: '神話傳說' },
+      { id: 'unicorn', name: '獨角獸', stages: ['🥚', '🐴', '🦄'], desc: '神話傳說' },
+      { id: 'eagle', name: '金翅雀鷹', stages: ['🥚', '🐣', '🦅'], desc: '天空飛禽' },
+      { id: 'parrot', name: '金剛鸚鵡', stages: ['🥚', '🐤', '🦜'], desc: '天空飛禽' },
+      { id: 'owl', name: '貓頭鷹', stages: ['🥚', '🐥', '🦉'], desc: '天空飛禽' },
+      { id: 'penguin', name: '國王企鵝', stages: ['🥚', '🐧', '🐧'], desc: '極地冰原' },
+      { id: 'fish', name: '大白鯊', stages: ['🫧', '🐠', '🦈'], desc: '海洋世界' },
+      { id: 'dolphin', name: '海豚', stages: ['🫧', '🐟', '🐬'], desc: '海洋世界' },
+      { id: 'whale', name: '藍鯨', stages: ['🫧', '🐋', '🐳'], desc: '海洋世界' },
+      { id: 'trex', name: '霸王龍', stages: ['🥚', '🦎', '🦖'], desc: '史前恐龍' },
+      { id: 'bronto', name: '腕龍', stages: ['🥚', '🦎', '🦕'], desc: '史前恐龍' },
+      { id: 'panda', name: '大熊貓', stages: ['🥚', '🐼', '🐼'], desc: '野生動物' },
+      { id: 'lion', name: '萬獸獅王', stages: ['🥚', '🦁', '🦁'], desc: '野生動物' },
+      { id: 'koala', name: '無尾熊', stages: ['🥚', '🐨', '🐨'], desc: '野生動物' },
+      { id: 'fox', name: '赤狐', stages: ['🥚', '🦊', '🦊'], desc: '野生動物' }
+    ];
+
+    const PET_REQ = [20, 20, 15]; 
+
+    let storedStudents = JSON.parse(localStorage.getItem('cm309_students'));
+    if (!storedStudents || storedStudents.length !== 25 || storedStudents[0].includes("黃")) {
+      storedStudents = DEFAULT_STUDENTS;
+      localStorage.setItem('cm309_students', JSON.stringify(storedStudents));
+    }
+    let students = storedStudents;
+
+    let sheetsWebhookUrl = localStorage.getItem('cm309_sheets_url') || "";
+    let firebaseDbUrl = localStorage.getItem('cm309_firebase_url') || "";
+    let announcements = JSON.parse(localStorage.getItem('cm309_announcements')) || [];
+    
+    let petState = JSON.parse(localStorage.getItem('cm309_pets')) || INITIAL_PETS;
+    let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
+    let cleanAssignment = JSON.parse(localStorage.getItem('cm309_cleanAssign')) || {};
+    let correctionBoxes = JSON.parse(localStorage.getItem('cm309_corrBoxes')) || [
+      { id: 'box_1', title: '國語甲本', students: [] },
+      { id: 'box_2', title: '數學習作', students: [] }
+    ];
+    let cleanlinessAssignment = JSON.parse(localStorage.getItem('cm309_cleanlinessAssign')) || {};
+    let cleanlinessAwarded = JSON.parse(localStorage.getItem('cm309_cleanlinessAwarded')) || {};
+    let attendanceState = JSON.parse(localStorage.getItem('cm309_attState')) || {}; 
+    let interactiveHwState = JSON.parse(localStorage.getItem('cm309_hwState')) || {}; 
+    let teethLampState = JSON.parse(localStorage.getItem('cm309_teethState')) || {};  
+    let mouthwashLampState = JSON.parse(localStorage.getItem('cm309_mwState')) || {}; 
+    let cleanLampState = JSON.parse(localStorage.getItem('cm309_cleanState')) || {}; 
+
+    let currentSelectedStudent = null;
+    let currentInteractiveMode = 'hw';
+    let clickTimeout = null;
+    let lastClickedSeat = null;
+    let syncDebounceTimer = null;
+    let firstSelectedPetIndex = null;
+    let selectedRedeemPair = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('zh-TW');
+      document.getElementById('studentRosterInput').value = students.join('\n');
+      document.getElementById('sheetsApiUrlInput').value = sheetsWebhookUrl;
+      document.getElementById('firebaseDbUrlInput').value = firebaseDbUrl;
+
+      initSortables();
+      initCleanlinessSortables();
+      renderAllGrids();
+      updateCloudBadge();
+
+      if (firebaseDbUrl) {
+        fetchFromFirebase(true);
+      }
+    });
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+      window.scrollTo(0,0);
+      if(tabId === 'tab-pets') renderPetsGrid();
+    }
+
+    function renderAllGrids() {
+      renderAttendanceGrid();
+      renderInteractiveGrid();
+      const select = document.getElementById('recordStudentSelect');
+      select.innerHTML = '';
+      students.forEach((name, i) => { select.add(new Option(`${name}`, `${name}`)); });
+    }
+
+    function updateCloudBadge(status) {
+      const badge = document.getElementById('cloudStatus');
+      const text = document.getElementById('cloudStatusText');
+      badge.className = 'cloud-status';
+      
+      if (status === 'syncing') {
+        badge.classList.add('syncing');
+        text.textContent = '同步中...';
+      } else if (firebaseDbUrl) {
+        badge.classList.add('active');
+        text.textContent = 'Firebase 連線就緒';
+      } else {
+        text.textContent = '未連線 (點我設定)';
+      }
+    }
+
+    function manualTriggerSync() {
+      if (!firebaseDbUrl) switchTab('tab-settings');
+      else fetchFromFirebase(false);
+    }
+
+    function cleanFirebaseUrl(url) {
+      let u = url.trim();
+      if (u.endsWith('/')) u = u.slice(0, -1);
+      return u;
+    }
+
+    function saveFirebaseDbUrl() {
+      let url = document.getElementById('firebaseDbUrlInput').value.trim();
+      if (!url) return alert("請輸入 Firebase Realtime Database 網址！");
+      url = cleanFirebaseUrl(url);
+      firebaseDbUrl = url;
+      localStorage.setItem('cm309_firebase_url', url);
+      updateCloudBadge();
+      alert("✅ Firebase 網址已儲存！正在同步...");
+      fetchFromFirebase(false);
+    }
+
+    function syncToFirebase() {
+      localStorage.setItem('cm309_attState', JSON.stringify(attendanceState));
+      localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
+      localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState));
+      localStorage.setItem('cm309_mwState', JSON.stringify(mouthwashLampState));
+      localStorage.setItem('cm309_cleanState', JSON.stringify(cleanLampState));
+      localStorage.setItem('cm309_pets', JSON.stringify(petState));
+      localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
+      localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
+      localStorage.setItem('cm309_cleanAssign', JSON.stringify(cleanAssignment));
+      localStorage.setItem('cm309_corrBoxes', JSON.stringify(correctionBoxes));
+      localStorage.setItem('cm309_cleanlinessAssign', JSON.stringify(cleanlinessAssignment));
+      localStorage.setItem('cm309_cleanlinessAwarded', JSON.stringify(cleanlinessAwarded));
+
+      if (!firebaseDbUrl) return;
+
+      clearTimeout(syncDebounceTimer);
+      updateCloudBadge('syncing');
+
+      syncDebounceTimer = setTimeout(() => {
+        const payload = {
+          attendanceState,
+          interactiveHwState,
+          teethLampState,
+          mouthwashLampState,
+          cleanLampState,
+          petState,
+          petCollection,
+          announcements,
+          cleanAssignment,
+          correctionBoxes,
+          cleanlinessAssignment,
+          cleanlinessAwarded,
+          students
+        };
+
+        fetch(`${cleanFirebaseUrl(firebaseDbUrl)}/classroomData.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(() => { updateCloudBadge(); })
+        .catch(err => {
+          console.error("Firebase 上傳失敗:", err);
+          updateCloudBadge();
+        });
+      }, 600);
+    }
+
+    function fetchFromFirebase(silent = false) {
+      if (!firebaseDbUrl) return;
+      updateCloudBadge('syncing');
+
+      fetch(`${cleanFirebaseUrl(firebaseDbUrl)}/classroomData.json`)
+        .then(res => res.json())
+        .then(data => {
+          if (data) {
+            if (data.students && data.students.length > 0 && !data.students[0].includes("黃")) {
+              students = data.students;
+            } else {
+              students = DEFAULT_STUDENTS;
+            }
+            attendanceState = data.attendanceState || {};
+            interactiveHwState = data.interactiveHwState || {};
+            teethLampState = data.teethLampState || {};
+            mouthwashLampState = data.mouthwashLampState || {};
+            cleanLampState = data.cleanLampState || {};
+            
+            if (data.petState && Object.keys(data.petState).length > 0) {
+              petState = data.petState;
+            }
+            petCollection = data.petCollection || {};
+            announcements = data.announcements || [];
+            cleanAssignment = data.cleanAssignment || {};
+            if (data.correctionBoxes) correctionBoxes = data.correctionBoxes;
+            cleanlinessAssignment = data.cleanlinessAssignment || {};
+            cleanlinessAwarded = data.cleanlinessAwarded || {};
+
+            localStorage.setItem('cm309_students', JSON.stringify(students));
+            localStorage.setItem('cm309_attState', JSON.stringify(attendanceState));
+            localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
+            localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState));
+            localStorage.setItem('cm309_mwState', JSON.stringify(mouthwashLampState));
+            localStorage.setItem('cm309_cleanState', JSON.stringify(cleanLampState));
+            localStorage.setItem('cm309_pets', JSON.stringify(petState));
+            localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
+            localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
+            localStorage.setItem('cm309_cleanAssign', JSON.stringify(cleanAssignment));
+            localStorage.setItem('cm309_corrBoxes', JSON.stringify(correctionBoxes));
+            localStorage.setItem('cm309_cleanlinessAssign', JSON.stringify(cleanlinessAssignment));
+            localStorage.setItem('cm309_cleanlinessAwarded', JSON.stringify(cleanlinessAwarded));
+
+            renderAllGrids();
+            renderPetsGrid();
+            document.getElementById('studentRosterInput').value = students.join('\n');
+            updateCloudBadge();
+            if (!silent) alert("✅ 已成功從 Firebase 同步最新狀態！");
+          } else {
+            updateCloudBadge();
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          updateCloudBadge();
+        });
+    }
+
+    // === 師生互動區切換 ===
+    function switchInteractiveMode(mode) {
+      currentInteractiveMode = mode;
+      document.querySelectorAll('#tab-interactive .form-chip').forEach(b => b.classList.remove('active'));
+      document.getElementById('btn-sub-' + mode).classList.add('active');
+
+      const title = document.getElementById('currentInteractiveTitleDisplay');
+      const grid = document.getElementById('interactiveGrid');
+      const corrSec = document.getElementById('correctionBoardSection');
+      const cleanSec = document.getElementById('cleanlinessBoardSection');
+      const kanban = document.getElementById('cleanKanban');
+
+      grid.style.display = 'none';
+      corrSec.style.display = 'none';
+      cleanSec.style.display = 'none';
+      kanban.style.display = 'none';
+
+      if (mode === 'hw') {
+        title.textContent = '目前項目：作業繳交';
+        grid.style.display = 'grid';
+      } else if (mode === 'correction') {
+        title.textContent = '目前項目：作業訂正追蹤 (10格換行，完成亮綠燈沉底)';
+        corrSec.style.display = 'block';
+        renderCorrectionBoard();
+      } else if (mode === 'cleanliness') {
+        title.textContent = '目前項目：整潔大師 (座位整潔評比)';
+        cleanSec.style.display = 'block';
+        renderCleanlinessBoard();
+      } else if (mode === 'clean') {
+        title.textContent = '目前項目：打掃工作';
+        kanban.style.display = 'block';
+        renderCleanKanban();
+      } else {
+        title.textContent = (mode === 'teeth' ? '目前項目：潔牙高手' : '目前項目：漱口水');
+        grid.style.display = 'grid';
+      }
+      renderInteractiveGrid();
+    }
+
+    function renderCorrectionBoard() {
+      const pool = document.getElementById('correctionPool');
+      pool.innerHTML = '';
+      students.forEach((name, i) => {
+        const id = i + 1;
+        const tag = document.createElement('div');
+        tag.className = 'drag-tag';
+        tag.setAttribute('data-seat', id);
+        tag.setAttribute('data-name', name);
+        tag.textContent = `${name}`;
+        pool.appendChild(tag);
+      });
+
+      new Sortable(pool, {
+        group: { name: 'corrGroup', pull: 'clone', put: false },
+        sort: false,
+        animation: 150
+      });
+
+      const boxesContainer = document.getElementById('correctionBoxesContainer');
+      boxesContainer.innerHTML = '';
+      correctionBoxes.forEach((box, bIdx) => {
+        box.students.sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1));
+
+        const col = document.createElement('div');
+        col.className = 'clean-col';
+        col.innerHTML = `
+          <div style="display:flex; gap:6px; margin-bottom:8px; align-items:center;">
+            <input type="text" class="form-control" style="font-weight:700; padding:4px 8px; font-size:0.9rem;" value="${box.title}" onchange="updateCorrectionBoxTitle(${bIdx}, this.value)">
+            <button onclick="removeCorrectionBox(${bIdx})" style="background:transparent; border:none; color:#ef4444; cursor:pointer; padding:4px;"><i class="fa-solid fa-trash-can"></i></button>
+          </div>
+          <div class="clean-list" id="corr-box-${box.id}"></div>
+        `;
+        boxesContainer.appendChild(col);
+
+        const listEl = col.querySelector(`#corr-box-${box.id}`);
+        box.students.forEach((st, sIdx) => {
+          const tag = document.createElement('div');
+          const isDone = !!st.done;
+          tag.className = `drag-tag ${isDone ? 'is-corrected' : ''}`;
+          tag.innerHTML = `
+            <span onclick="toggleStudentCorrDone(${bIdx}, ${sIdx})" style="cursor:pointer; display:inline-block; padding:0 2px;">
+              ${st.name}
+            </span>
+            <i class="fa-solid fa-xmark btn-remove-tag" onclick="removeStudentFromCorr(${bIdx}, ${sIdx})"></i>
+          `;
+          listEl.appendChild(tag);
+        });
+
+        new Sortable(listEl, {
+          group: { name: 'corrGroup', pull: true, put: true },
+          animation: 150,
+          onAdd: function (evt) {
+            const seat = evt.item.getAttribute('data-seat');
+            const name = evt.item.getAttribute('data-name');
+            evt.item.remove();
+            if (!box.students.some(s => s.seat == seat)) {
+              box.students.push({ seat, name, done: false });
+              renderCorrectionBoard();
+              syncToFirebase();
+            }
+          }
+        });
+      });
+    }
+
+    function toggleStudentCorrDone(boxIdx, stIdx) {
+      correctionBoxes[boxIdx].students[stIdx].done = !correctionBoxes[boxIdx].students[stIdx].done;
+      renderCorrectionBoard();
+      syncToFirebase();
+    }
+
+    function addCorrectionBox() {
+      const newId = 'box_' + Date.now();
+      correctionBoxes.push({ id: newId, title: '新作業項目', students: [] });
+      renderCorrectionBoard();
+      syncToFirebase();
+    }
+
+    function removeCorrectionBox(idx) {
+      if (confirm(`確定刪除「${correctionBoxes[idx].title}」分類框嗎？`)) {
+        correctionBoxes.splice(idx, 1);
+        renderCorrectionBoard();
+        syncToFirebase();
+      }
+    }
+
+    function updateCorrectionBoxTitle(idx, val) {
+      correctionBoxes[idx].title = val.trim() || '未命名作業';
+      syncToFirebase();
+    }
+
+    function removeStudentFromCorr(boxIdx, stIdx) {
+      correctionBoxes[boxIdx].students.splice(stIdx, 1);
+      renderCorrectionBoard();
+      syncToFirebase();
+    }
+
+    function initCleanlinessSortables() {
+      const zones = ['cleanlinessPool', 'zone-clean-tidy', 'zone-clean-chair', 'zone-clean-messy', 'zone-clean-bag', 'zone-clean-align'];
+      zones.forEach(zId => {
+        const el = document.getElementById(zId);
+        if (!el) return;
+        new Sortable(el, {
+          group: 'cleanlinessGroup',
+          animation: 150,
+          onEnd: function (evt) {
+            const seat = evt.item.getAttribute('data-seat');
+            const targetZone = evt.to.id;
+            cleanlinessAssignment[seat] = targetZone;
+
+            if (targetZone === 'zone-clean-tidy') {
+              if (!cleanlinessAwarded[seat]) {
+                addPetXp(seat, 1);
+                cleanlinessAwarded[seat] = true;
+              }
+            } else {
+              if (cleanlinessAwarded[seat]) {
+                addPetXp(seat, -1);
+                delete cleanlinessAwarded[seat];
+              }
+            }
+            syncToFirebase();
+          }
+        });
+      });
+    }
+
+    function renderCleanlinessBoard() {
+      const zones = ['cleanlinessPool', 'zone-clean-tidy', 'zone-clean-chair', 'zone-clean-messy', 'zone-clean-bag', 'zone-clean-align'];
+      zones.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
+      });
+
+      students.forEach((name, i) => {
+        const id = i + 1;
+        const targetZone = cleanlinessAssignment[id] || 'cleanlinessPool';
+        const tag = document.createElement('div');
+        tag.className = 'drag-tag';
+        tag.setAttribute('data-seat', id);
+        tag.textContent = `${name}`;
+        
+        const zoneEl = document.getElementById(targetZone);
+        if (zoneEl) zoneEl.appendChild(tag);
+      });
+    }
+
+    function initSortables() {
+      const zones = ['zone-unassigned', 'zone-classroom', 'zone-corridor', 'zone-mop', 'zone-window', 'zone-blackboard', 'zone-trash'];
+      zones.forEach(z => {
+        const el = document.getElementById(z);
+        if (!el) return;
+        new Sortable(el, {
+          group: 'clean',
+          animation: 150,
+          delay: 150,
+          delayOnTouchOnly: true,
+          onEnd: function(evt) {
+            const seat = evt.item.getAttribute('data-seat');
+            cleanAssignment[seat] = evt.to.id;
+            syncToFirebase();
+          }
+        });
+      });
+    }
+
+    function renderCleanKanban() {
+      const zones = ['zone-unassigned', 'zone-classroom', 'zone-corridor', 'zone-mop', 'zone-window', 'zone-blackboard', 'zone-trash'];
+      zones.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
+      });
+
+      students.forEach((name, i) => {
+        const id = i+1;
+        const targetZone = cleanAssignment[id] || 'zone-unassigned';
+        const isLit = !!cleanLampState[id];
+
+        const div = document.createElement('div');
+        div.className = `student-btn ${isLit ? 'is-lit' : ''}`;
+        div.style.padding = '8px 6px';
+        div.style.width = '78px';
+        div.setAttribute('data-seat', id);
+        
+        div.innerHTML = `
+          <div class="indicator-lamp"></div>
+          <div class="seat" style="pointer-events:none;">${name}</div>
+          <div style="font-size:0.65rem; color:${isLit?'#15803d':'#94a3b8'}; pointer-events:none;">${isLit?'已完成':'未完成'}</div>
+        `;
+        
+        div.onmouseup = function(e) {
+          toggleCleanLamp(id);
+        };
+
+        const zoneEl = document.getElementById(targetZone);
+        if (zoneEl) zoneEl.appendChild(div);
+      });
+    }
+
+    function toggleCleanLamp(seat) {
+      cleanLampState[seat] = !cleanLampState[seat];
+      const isOn = cleanLampState[seat];
+      if (isOn) addPetXp(seat, 1);
+      else addPetXp(seat, -1);
+      renderCleanKanban();
+      syncToFirebase();
+    }
+
+    function renderInteractiveGrid() {
+      if (currentInteractiveMode === 'clean' || currentInteractiveMode === 'correction' || currentInteractiveMode === 'cleanliness') return;
+      const container = document.getElementById('interactiveGrid'); container.innerHTML = '';
+      students.forEach((name, i) => {
+        const id = i+1; const div = document.createElement('div'); div.className = 'student-btn';
+        if(currentInteractiveMode === 'hw') {
+          const hw = interactiveHwState[id];
+          if(hw) div.classList.add(hw.lightClass);
+          div.innerHTML = `<div class="indicator-lamp"></div><span class="seat">${name}</span><span class="status">${hw ? hw.status : '未登記'}</span>`;
+          div.onclick = () => handleHwClick(id, name);
+        } else {
+          const isLit = (currentInteractiveMode === 'teeth' ? teethLampState[id] : mouthwashLampState[id]);
+          if(isLit) div.classList.add('is-lit');
+          div.innerHTML = `<div class="indicator-lamp"></div><span class="seat">${name}</span><span class="status">${isLit?'已完成':'未完成'}</span>`;
+          div.onclick = () => toggleLamp(id);
+        }
+        container.appendChild(div);
+      });
+    }
+
+    function handleHwClick(seat, name) {
+      if (clickTimeout && lastClickedSeat === seat) {
+        clearTimeout(clickTimeout); clickTimeout = null; lastClickedSeat = null;
+        if(interactiveHwState[seat] && interactiveHwState[seat].lightClass === 'hw-green') addPetXp(seat, -1);
+        delete interactiveHwState[seat]; 
+        renderInteractiveGrid(); 
+        syncToFirebase();
+        return;
+      }
+      lastClickedSeat = seat;
+      clickTimeout = setTimeout(() => {
+        clickTimeout = null; lastClickedSeat = null; currentSelectedStudent = { seat, name };
+        document.getElementById('missingInputArea').style.display = 'none'; document.getElementById('hwMissingText').value = '';
+        document.getElementById('hwStatusModal').classList.add('active');
+      }, 250);
+    }
+    
+    function applyHwStatus(status, lightCls) {
+      const seat = currentSelectedStudent.seat; const oldState = interactiveHwState[seat];
+      const wasGreen = oldState && oldState.lightClass === 'hw-green'; const isGreen = lightCls === 'hw-green';
+      if (!wasGreen && isGreen) addPetXp(seat, 1);
+      if (wasGreen && !isGreen) addPetXp(seat, -1);
+      interactiveHwState[seat] = { status, lightClass: lightCls };
+      closeHwModal(); 
+      renderInteractiveGrid();
+      syncToFirebase();
+    }
+    
+    function resetSingleStudentHw() {
+      const seat = currentSelectedStudent.seat;
+      if(interactiveHwState[seat] && interactiveHwState[seat].lightClass === 'hw-green') addPetXp(seat, -1);
+      delete interactiveHwState[seat]; 
+      closeHwModal(); 
+      renderInteractiveGrid(); 
+      syncToFirebase();
+    }
+    function showMissingInput() { document.getElementById('missingInputArea').style.display = 'block'; }
+    function submitMissingHw() {
+      const txt = document.getElementById('hwMissingText').value.trim();
+      if(!txt) return alert("請輸入缺交項目！");
+      applyHwStatus(`缺項(${txt})`, 'hw-teal');
+    }
+    function closeHwModal() { document.getElementById('hwStatusModal').classList.remove('active'); }
+
+    function toggleLamp(seat) {
+      let isOn = false;
+      if (currentInteractiveMode === 'teeth') { teethLampState[seat] = !teethLampState[seat]; isOn = teethLampState[seat]; }
+      else if (currentInteractiveMode === 'mouthwash') { mouthwashLampState[seat] = !mouthwashLampState[seat]; isOn = mouthwashLampState[seat]; }
+      if (isOn) addPetXp(seat, 1); else addPetXp(seat, -1);
+      renderInteractiveGrid();
+      syncToFirebase();
+    }
+
+    function resetCurrentInteractive() {
+      if(confirm("確定重整當前項目的紀錄？")) {
+        if(currentInteractiveMode === 'hw') interactiveHwState = {};
+        else if(currentInteractiveMode === 'clean') cleanLampState = {};
+        else if(currentInteractiveMode === 'teeth') teethLampState = {};
+        else if(currentInteractiveMode === 'mouthwash') mouthwashLampState = {};
+        else if(currentInteractiveMode === 'correction') {
+          correctionBoxes.forEach(b => b.students = []);
+          renderCorrectionBoard();
+        } else if(currentInteractiveMode === 'cleanliness') {
+          cleanlinessAssignment = {};
+          cleanlinessAwarded = {};
+          renderCleanlinessBoard();
+        }
+        renderInteractiveGrid();
+        if(currentInteractiveMode === 'clean') renderCleanKanban();
+        syncToFirebase();
+      }
+    }
+
+    function uploadInteractiveBatch() {
+      let detailText = "";
+      if(currentInteractiveMode === 'hw') {
+        let stats = {"已繳交":0, "忘記帶回家":0, "未完成":0, "忘記帶來學校":0};
+        let missingList = [];
+        students.forEach((n,i) => {
+          const st = interactiveHwState[i+1] ? interactiveHwState[i+1].status : "未登記";
+          if(st.includes("缺項")) missingList.push(`${n}(${st})`);
+          else if(stats[st] !== undefined) stats[st]++;
+          else if(st !== "未登記") missingList.push(`${n}(${st})`);
+          if(["忘記帶回家", "未完成", "忘記帶來學校"].includes(st)) missingList.push(`${n}(${st})`);
+        });
+        detailText = `已繳交:${stats["已繳交"]}、缺/未帶:${missingList.length}。 ${missingList.length>0 ? '需追蹤:'+missingList.join('、') : ''}`;
+        sendToSheets({ category: "作業繳交(總表)", student: "全班", detail: detailText });
+      } else if(currentInteractiveMode === 'correction') {
+        let boxSummaries = correctionBoxes.map(b => {
+          let doneList = b.students.filter(s => s.done).map(s => s.name);
+          let undoneList = b.students.filter(s => !s.done).map(s => s.name);
+          return `${b.title} [已訂正:${doneList.join('、')||'無'}, 未訂正:${undoneList.join('、')||'無'}]`;
+        });
+        detailText = boxSummaries.join(' | ');
+        sendToSheets({ category: "作業訂正追蹤", student: "全班", detail: detailText });
+      } else if(currentInteractiveMode === 'cleanliness') {
+        let tidyStudents = students.filter((_, i) => cleanlinessAssignment[i+1] === 'zone-clean-tidy');
+        detailText = `整潔達標: ${tidyStudents.join('、') || '無'}`;
+        sendToSheets({ category: "整潔大師評比", student: "全班", detail: detailText });
+      } else {
+        const actionMap = { clean: "打掃工作", teeth: "潔牙高手", mouthwash: "漱口水" };
+        let lamp = (currentInteractiveMode === 'clean') ? cleanLampState : ((currentInteractiveMode === 'teeth') ? teethLampState : mouthwashLampState);
+        let notDone = students.map((n,i)=>({id:i+1})).filter(s => !lamp[s.id]).map(s=>`${students[s.id-1]}`);
+        detailText = notDone.length > 0 ? `未完成: ${notDone.join('、')}` : '全員完成！';
+        sendToSheets({ category: actionMap[currentInteractiveMode], student: "全班", detail: detailText });
+      }
+      alert(`已彙整上傳至 Google 試算表！\n\n${detailText}`);
+    }
+
+    // === 點名功能 ===
+    function renderAttendanceGrid() {
+      const container = document.getElementById('attendanceGrid'); container.innerHTML = '';
+      students.forEach((name, i) => {
+        const id = i+1; const st = attendanceState[id] || '出席'; let cls = '';
+        if(st==='出席') cls='att-present'; else if(st==='病假') cls='att-sick'; else if(st==='事假') cls='att-absent'; else cls='att-late';
+        container.innerHTML += `<div class="student-btn ${cls}" onclick="attendanceState[${id}] = ['出席','事假','病假','遲到'][ (['出席','事假','病假','遲到'].indexOf(attendanceState[${id}]||'出席')+1)%4 ]; renderAttendanceGrid(); syncToFirebase();">
+          <span class="seat">${name}</span><span class="status">${st}</span></div>`;
+      });
+    }
+    function resetAttendance() { if(confirm("確定重整為全數出席？")) { attendanceState = {}; renderAttendanceGrid(); syncToFirebase(); } }
+    function uploadAttendanceBatch() {
+      let abnormal = [], present = 0;
+      students.forEach((n, i) => { let st = attendanceState[i+1] || '出席'; if(st === '出席') present++; else abnormal.push(`${n}(${st})`); });
+      let txt = `應到${students.length}人，實到${present}人。${abnormal.length>0 ? '請假:'+abnormal.join('、') : '全班到齊！'}`;
+      sendToSheets({ category: "每日點名", student: "全班", detail: txt }); alert(`已上傳至 Google 試算表！\n${txt}`);
+    }
+
+    // === 🐾 寵物養成系統 ===
+    function addPetXp(seat, amount) {
+      let seatNum = parseInt(seat);
+      if (!petState[seatNum]) {
+        petState[seatNum] = { petId: 'cat_orange', stage: 1, xp: 0 };
+      }
+      let p = petState[seatNum];
+      if (p.stage > 3) return; 
+      p.xp += amount;
+      while (p.stage <= 3 && p.xp >= PET_REQ[p.stage - 1]) { 
+        p.xp -= PET_REQ[p.stage - 1]; 
+        p.stage++; 
+      }
+      if (p.xp < 0) { 
+        if (p.stage > 1) { 
+          p.stage--; 
+          p.xp = PET_REQ[p.stage - 1] + p.xp; 
+        } else { 
+          p.xp = 0; 
+        } 
+      }
+      if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
+      syncToFirebase();
+    }
+
+    function renderPetsGrid() {
+      const container = document.getElementById('petsGrid');
+      container.innerHTML = '';
+      students.forEach((name, i) => {
+        const id = i+1; 
+        if (!petState[id]) {
+          petState[id] = { petId: 'cat_orange', stage: 1, xp: 0 };
+        }
+        const p = petState[id];
+        const div = document.createElement('div');
+        div.className = 'student-btn pet-btn'; div.style.padding = '12px 8px';
+        
+        const cat = PET_CATALOG.find(c => c.id === p.petId) || PET_CATALOG[0];
+        const isMystery = p.stage === 1;
+        const isCompleted = p.stage > 3;
+        const emoji = isMystery ? '🥚' : (cat ? cat.stages[Math.min(p.stage - 1, 2)] : '🐱');
+        let stageName = isCompleted ? '圓滿成長' : (p.stage===1?'蛋':(p.stage===2?'幼體':'成體'));
+        let progressPercent = isCompleted ? 100 : Math.floor((p.xp / PET_REQ[p.stage - 1]) * 100);
+        
+        div.innerHTML = `<span class="seat">${name}</span><div class="pet-emoji s${p.stage}">${emoji}</div><div class="pet-progress-bg"><div class="pet-progress-fill" style="width:${progressPercent}%;"></div></div><div class="pet-info"><span>${stageName}</span><span>${isCompleted ? 'MAX' : p.xp}</span></div>`;
+        if (isCompleted) div.style.borderColor = '#eab308';
+
+        div.onclick = () => openPetModal(id, name);
+        container.appendChild(div);
+      });
+    }
+
+    function openPetModal(seat, name) {
+      currentSelectedStudent = { seat, name };
+      if (!petState[seat]) {
+        petState[seat] = { stage: 1, xp: 0, petId: 'cat_orange' };
+      }
+      const p = petState[seat];
+      document.getElementById('petModalTitle').textContent = `${name} 的寵物`;
+      const manageView = document.getElementById('petManageView');
+      const selectView = document.getElementById('petSelectView');
+      const gardenView = document.getElementById('petGardenView');
+      
+      if (!p.petId && p.stage === 1 && p.xp === 0) {
+        manageView.style.display = 'none';
+        selectView.style.display = 'block';
+        gardenView.style.display = 'none';
+        document.getElementById('btnViewGarden').style.display = 'none';
+        document.getElementById('btnModalClose').textContent = '關閉視窗';
+        document.getElementById('btnModalClose').onclick = closePetModal;
+      } else {
+        manageView.style.display = 'block';
+        selectView.style.display = 'none';
+        gardenView.style.display = 'none';
+        document.getElementById('btnViewGarden').style.display = 'block';
+        document.getElementById('btnModalClose').textContent = '關閉視窗';
+        document.getElementById('btnModalClose').onclick = closePetModal;
+
+        updateTicketBadgeBelow(seat);
+
+        const cat = PET_CATALOG.find(c => c.id === p.petId) || PET_CATALOG[0];
+        const isMystery = p.stage === 1;
+        const isCompleted = p.stage > 3;
+        document.getElementById('petModalEmoji').textContent = isMystery ? '🥚' : (cat ? cat.stages[Math.min(p.stage - 1, 2)] : '🐱');
+        document.getElementById('petModalEmoji').className = `pet-emoji s${Math.min(p.stage, 4)}`;
+        
+        let stageName = isCompleted ? '圓滿成長' : (p.stage===1?'第一階段：蛋':(p.stage===2?'第二階段：幼體':'第三階段：成體'));
+        let displayName = isMystery ? '神秘的蛋' : (cat ? cat.name : '未知寵物');
+        document.getElementById('petModalName').textContent = `${displayName} (${stageName})`;
+        
+        const progressArea = document.getElementById('petModalProgressArea');
+        const actionArea = document.getElementById('petModalActionArea');
+        const completeArea = document.getElementById('petModalCompleteArea');
+
+        if(isCompleted) {
+           progressArea.style.display = 'none'; actionArea.style.display = 'none'; completeArea.style.display = 'block';
+        } else {
+           progressArea.style.display = 'block'; actionArea.style.display = 'flex'; completeArea.style.display = 'none';
+           let req = PET_REQ[p.stage - 1];
+           document.getElementById('petModalXpText').textContent = `${p.xp} / ${req}`;
+           document.getElementById('petModalProgressBar').style.width = `${(p.xp/req)*100}%`;
+        }
+      }
+      document.getElementById('petManageModal').classList.add('active');
+    }
+
+    function resetSingleStudentPet() {
+      const seat = currentSelectedStudent.seat;
+      if (confirm(`確定要重設 ${currentSelectedStudent.name} 的目前寵物嗎？分數會歸零並重新抽蛋。`)) {
+        const randomPet = PET_CATALOG[Math.floor(Math.random() * PET_CATALOG.length)];
+        petState[seat] = { petId: randomPet.id, stage: 1, xp: 0 };
+        openPetModal(seat, currentSelectedStudent.name);
+        renderPetsGrid();
+        syncToFirebase();
+        alert("✅ 已成功將該生寵物與分數重設歸零！");
+      }
+    }
+
+    function updateTicketBadgeBelow(seat) {
+      const myPets = petCollection[seat] || [];
+      const adultCount = myPets.length;
+      const pairedCount = myPets.filter(item => item.redeemed).length / 2;
+      const badge = document.getElementById('gardenTicketBadgeBelow');
+      if (adultCount > 0) {
+        badge.innerHTML = `🌟 目前動物園成體：${adultCount} 隻 ｜ 已換獎勵：<strong style="color:#d97706; font-size:0.95rem;">${pairedCount} 組</strong>`;
+      } else {
+        badge.innerHTML = `🎟️ 培育 2 隻動物成體即可配對兌換獎勵！`;
+      }
+    }
+
+    function selectMysteryPet() {
+      const seat = currentSelectedStudent.seat;
+      const randomPet = PET_CATALOG[Math.floor(Math.random() * PET_CATALOG.length)];
+      petState[seat] = { petId: randomPet.id, stage: 1, xp: 0 };
+      openPetModal(seat, currentSelectedStudent.name); 
+      renderPetsGrid();
+      syncToFirebase();
+    }
+
+    function manualAddPetXp(points) { addPetXp(currentSelectedStudent.seat, points); openPetModal(currentSelectedStudent.seat, currentSelectedStudent.name); }
+    
+    function moveToGarden() {
+      const seat = currentSelectedStudent.seat; const p = petState[seat];
+      if(!petCollection[seat]) petCollection[seat] = [];
+      petCollection[seat].push({ petId: p.petId, prize: null, redeemed: false, pairId: null }); 
+      
+      petState[seat] = { petId: null, stage: 1, xp: 0 };
+      
+      openPetModal(seat, currentSelectedStudent.name); 
+      renderPetsGrid();
+      syncToFirebase();
+    }
+
+    function showPetGarden() {
+      document.getElementById('petManageView').style.display = 'none';
+      document.getElementById('petSelectView').style.display = 'none';
+      document.getElementById('petGardenView').style.display = 'block';
+      document.getElementById('btnViewGarden').style.display = 'none';
+      document.getElementById('gardenTicketBadgeBelow').style.display = 'none';
+      document.getElementById('petModalTitle').textContent = `${currentSelectedStudent.name} 的專屬動物園`;
+      document.getElementById('btnModalClose').textContent = '🔙 返回上一頁';
+      document.getElementById('btnModalClose').onclick = () => {
+        document.getElementById('gardenTicketBadgeBelow').style.display = 'block';
+        openPetModal(currentSelectedStudent.seat, currentSelectedStudent.name);
+      };
+
+      firstSelectedPetIndex = null;
+      renderPetGardenContent();
+    }
+
+    function renderPetGardenContent() {
+      const seat = currentSelectedStudent.seat;
+      const grid = document.getElementById('gardenGrid');
+      grid.innerHTML = '';
+      
+      let rawPets = petCollection[seat] || [];
+      const myPets = rawPets.map(p => typeof p === 'string' ? { petId: p, prize: null, redeemed: false, pairId: null } : p);
+      petCollection[seat] = myPets;
+
+      const adultCount = myPets.length;
+      const pairedCount = myPets.filter(item => item.redeemed).length / 2;
+
+      const summaryBox = document.getElementById('gardenTicketSummary');
+      summaryBox.innerHTML = `
+        <div>🦁 成體總數：<strong>${adultCount} 隻</strong></div>
+        <div style="font-size:1rem; color:#b45309;">🎁 已換獎勵：<strong>${pairedCount} 組</strong> (每2隻換1次)</div>
+      `;
+
+      if (myPets.length === 0) {
+        grid.innerHTML = '<p style="color:#64748b; text-align:center; grid-column:1/-1; padding:20px;">目前動物園空空如也，趕快培育第一隻成體動物吧！</p>';
+      } else {
+        myPets.forEach((item, idx) => {
+          const cat = PET_CATALOG.find(c => c.id === item.petId) || PET_CATALOG[0];
+          const isRedeemed = !!item.redeemed;
+          const isSelectedFirst = (firstSelectedPetIndex === idx);
+          
+          const div = document.createElement('div');
+          let itemClass = 'garden-item';
+          if (isRedeemed) itemClass += ' is-redeemed';
+          if (isSelectedFirst) itemClass += ' is-selected-first';
+          div.className = itemClass;
+
+          let statusHtml = '';
+          if (isSelectedFirst) {
+            statusHtml = `<div style="font-size:0.65rem; background:#2563eb; color:#fff; padding:2px 4px; border-radius:4px; margin-top:4px; font-weight:700;">點第2隻配對</div>`;
+          } else if (isRedeemed) {
+            statusHtml = `<div class="redeemed-badge" title="${item.prize || '已兌換'}">🎁 ${item.prize || '已換獎'}</div><button onclick="event.stopPropagation(); cancelPairRedeem(${idx})" style="background:#fee2e2; border:1px solid #fca5a5; color:#dc2626; border-radius:4px; font-size:0.6rem; padding:1px 4px; margin-top:2px; cursor:pointer; font-weight:700;">✕ 取消</button>`;
+          } else {
+            statusHtml = `<div style="font-size:0.65rem; color:#64748b; margin-top:4px;">(點擊配對)</div>`;
+          }
+
+          div.innerHTML = `
+            <div class="emoji">${cat ? cat.stages[2] : '🐾'}</div>
+            <div class="name">${cat ? cat.name : '神秘動物'}</div>
+            ${statusHtml}
+          `;
+
+          div.onclick = () => {
+            if (isRedeemed) {
+              if (confirm("要取消此組雙寵物兌換，讓這兩隻寵物恢復未兌換狀態嗎？")) {
+                cancelPairRedeem(idx);
+              }
+              return;
+            }
+
+            if (firstSelectedPetIndex === null) {
+              firstSelectedPetIndex = idx;
+              renderPetGardenContent();
+            } else if (firstSelectedPetIndex === idx) {
+              firstSelectedPetIndex = null;
+              renderPetGardenContent();
+            } else {
+              openRewardModal(firstSelectedPetIndex, idx);
+            }
+          };
+
+          grid.appendChild(div);
+        });
+      }
+    }
+
+    function openRewardModal(idx1, idx2) {
+      selectedRedeemPair = { idx1, idx2 };
+      document.getElementById('rewardRedeemModal').classList.add('active');
+    }
+
+    function closeRewardModal() {
+      document.getElementById('rewardRedeemModal').classList.remove('active');
+      firstSelectedPetIndex = null;
+      selectedRedeemPair = null;
+    }
+
+    function choosePairReward(type) {
+      const seat = currentSelectedStudent.seat;
+      const pets = petCollection[seat];
+      const { idx1, idx2 } = selectedRedeemPair;
+      const pairToken = 'pair_' + Date.now();
+
+      let prizeDesc = "";
+      let gameData = JSON.parse(localStorage.getItem('cm309_game_data')) || {};
+      let gData = gameData[seat] || { extraCoins: 0, tickets: [], specials: [], coinLogs: [] };
+      if (!gameData[seat]) gameData[seat] = gData;
+      if (!gData.tickets) gData.tickets = [];
+      if (!gData.coinLogs) gData.coinLogs = [];
+
+      if (type === 'ticket') {
+        prizeDesc = "扭蛋卷";
+        gData.tickets.push({ name: "扭蛋卷 (點擊設定名稱)", date: new Date().toLocaleDateString(), isUsed: false });
+      } else {
+        prizeDesc = "10個代幣";
+        gData.extraCoins += 10;
+        gData.coinLogs.unshift({ text: `動物園雙寵物兌換獲得代幣 +10`, date: new Date().toLocaleDateString() });
+      }
+
+      pets[idx1].redeemed = true;
+      pets[idx1].prize = prizeDesc;
+      pets[idx1].pairId = pairToken;
+
+      pets[idx2].redeemed = true;
+      pets[idx2].prize = prizeDesc;
+      pets[idx2].pairId = pairToken;
+
+      localStorage.setItem('cm309_game_data', JSON.stringify(gameData));
+      closeRewardModal();
+      renderPetGardenContent();
+      syncToFirebase();
+      alert(`✅ 雙寵物配對成功！已成功換取【${prizeDesc}】，兩隻寵物已同步亮黃燈！`);
+    }
+
+    function cancelPairRedeem(index) {
+      const seat = currentSelectedStudent.seat;
+      const pets = petCollection[seat];
+      const targetPairId = pets[index].pairId;
+
+      if (!targetPairId) {
+        pets[index].redeemed = false;
+        pets[index].prize = null;
+      } else {
+        pets.forEach(p => {
+          if (p.pairId === targetPairId) {
+            p.redeemed = false;
+            p.prize = null;
+            p.pairId = null;
+          }
+        });
+      }
+
+      firstSelectedPetIndex = null;
+      renderPetGardenContent();
+      syncToFirebase();
+      alert("✅ 已成功取消兌換，恢復未亮燈狀態！");
+    }
+
+    function resetAllPets() {
+      if(confirm("⚠️ 警告：確定要刪除全班寵物與寵物園嗎？")) {
+        petState = {}; petCollection = {};
+        alert("✅ 全班寵物紀錄已清除！");
+        if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
+        syncToFirebase();
+      }
+    }
+
+    function closePetModal() { document.getElementById('petManageModal').classList.remove('active'); }
+
+    // === Google 試算表日誌寫入 ===
+    function handleRecordSubmit(e) {
+      e.preventDefault();
+      sendToSheets({ category: document.getElementById('recordType').value, student: document.getElementById('recordStudentSelect').value, detail: document.getElementById('recordDetail').value, followup: document.getElementById('recordFollowup').value });
+      alert('已上傳至試算表！'); e.target.reset();
+    }
+    function sendToSheets(payload) {
+      if(!sheetsWebhookUrl) return;
+      const data = { timestamp: new Date().toISOString(), timeDisplay: new Date().toLocaleString('zh-TW'), className: "三年九班", ...payload };
+      fetch(sheetsWebhookUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    }
+    function saveStudentRoster() {
+      const txt = document.getElementById('studentRosterInput').value.trim(); if(!txt) return;
+      students = txt.split('\n').map(s=>s.trim()).filter(s=>s.length>0); 
+      renderAllGrids(); 
+      alert("座號設定已更新！");
+      syncToFirebase();
+    }
+    function saveSheetsUrl() { 
+      sheetsWebhookUrl = document.getElementById('sheetsApiUrlInput').value.trim(); 
+      localStorage.setItem('cm309_sheets_url', sheetsWebhookUrl); 
+      alert("試算表 Webhook 已儲存！"); 
+    }
+  </script>
+</body>
+</html>
