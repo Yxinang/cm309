@@ -94,9 +94,9 @@
 
     .clean-board { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 14px; }
     .clean-board.full { grid-template-columns: 1fr; } 
-    .clean-col { background: #f8fafc; border: 1.5px dashed var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; min-height: 140px; }
+    .clean-col { background: #f8fafc; border: 1.5px dashed var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; min-height: 130px; }
     .clean-col h4 { font-size: 0.9rem; color: #334155; margin-bottom: 8px; text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
-    .clean-list { flex-grow: 1; min-height: 80px; display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
+    .clean-list { flex-grow: 1; min-height: 70px; display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
     .sortable-ghost { opacity: 0.4; background: #e2e8f0; }
 
     .ten-col-pool {
@@ -289,22 +289,47 @@
           </div>
         </div>
 
-        <!-- 4. 打掃工作看板 (動態新增區域與點擊亮燈加分) -->
+        <!-- 4. 打掃工作看板（上下完整區塊：早自修 vs 環保時間） -->
         <div id="cleanKanban" style="display:none;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
-            <p style="font-size:0.85rem; color:#059669; font-weight:700; background:#dcfce7; padding:6px 10px; border-radius:6px; margin:0;">
-              <i class="fa-solid fa-hand-pointer"></i> 提示：<strong>點擊座號即可亮綠燈，寵物自動 +1 分</strong>（再次點擊取消並扣 1 分）。
-            </p>
-            <button class="btn-upload" style="background:#2563eb; font-size:0.8rem; padding:5px 12px;" onclick="addCleanBox()"><i class="fa-solid fa-plus"></i> 新增打掃區域</button>
-          </div>
-          <div class="clean-board full" style="margin-bottom:12px;">
-            <div class="clean-col" style="background:#f1f5f9; border-color:#cbd5e1; min-height:80px;">
-              <h4 style="color:#334155; border-bottom-color:#cbd5e1;">🧹 尚未分配打掃區座號池 (可重複拖出)</h4>
-              <div class="clean-list ten-col-pool" id="cleanPool"></div>
+          <p style="font-size:0.85rem; color:#059669; font-weight:700; background:#dcfce7; padding:8px 12px; border-radius:6px; margin-bottom:14px;">
+            <i class="fa-solid fa-hand-pointer"></i> 提示：<strong>點擊座號即可亮綠燈，寵物自動 +1 分</strong>（再次點擊取消並扣 1 分）。
+          </p>
+
+          <!-- ☀️ 上半部：早自修時間 (7:40～7:55) -->
+          <div style="background:#f8fafc; border:2px solid #bae6fd; border-radius:12px; padding:14px; margin-bottom:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+              <h3 style="color:#0284c7; font-size:1rem; display:flex; align-items:center; gap:6px;">
+                <i class="fa-solid fa-sun"></i> 上半部：早自修時間（7：40 ～ 7：55）
+              </h3>
+              <button class="btn-upload" style="background:#0284c7; font-size:0.8rem; padding:5px 12px;" onclick="addCleanBox('am')"><i class="fa-solid fa-plus"></i> 新增早自修打掃區</button>
             </div>
+            <div class="clean-board full" style="margin-bottom:10px;">
+              <div class="clean-col" style="background:#e0f2fe; border-color:#7dd3fc; min-height:70px;">
+                <h4 style="color:#0369a1; border-bottom-color:#7dd3fc;">👥 早自修待分配座號池 (可重複拖出)</h4>
+                <div class="clean-list ten-col-pool" id="cleanPoolAM"></div>
+              </div>
+            </div>
+            <div class="clean-board" id="cleanBoxesContainerAM"></div>
           </div>
-          <div class="clean-board" id="cleanBoxesContainer"></div>
+
+          <!-- 🌙 下半部：環保時間 (3:00～3:20) -->
+          <div style="background:#f8fafc; border:2px solid #fed7aa; border-radius:12px; padding:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+              <h3 style="color:#c2410c; font-size:1rem; display:flex; align-items:center; gap:6px;">
+                <i class="fa-solid fa-leaf"></i> 下半部：環保時間（3：00 ～ 3：20）
+              </h3>
+              <button class="btn-upload" style="background:#d97706; font-size:0.8rem; padding:5px 12px;" onclick="addCleanBox('pm')"><i class="fa-solid fa-plus"></i> 新增環保時間打掃區</button>
+            </div>
+            <div class="clean-board full" style="margin-bottom:10px;">
+              <div class="clean-col" style="background:#ffedd5; border-color:#fdba74; min-height:70px;">
+                <h4 style="color:#9a3412; border-bottom-color:#fdba74;">👥 環保時間待分配座號池 (可重複拖出)</h4>
+                <div class="clean-list ten-col-pool" id="cleanPoolPM"></div>
+              </div>
+            </div>
+            <div class="clean-board" id="cleanBoxesContainerPM"></div>
+          </div>
         </div>
+
       </div>
     </section>
 
@@ -559,14 +584,18 @@
     let petState = JSON.parse(localStorage.getItem('cm309_pets')) || INITIAL_PETS;
     let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
     
-    // 動態打掃工作區塊資料
-    let cleanBoxes = JSON.parse(localStorage.getItem('cm309_cleanBoxes')) || [
-      { id: 'cbox_1', title: '教室內', students: [] },
-      { id: 'cbox_2', title: '走廊', students: [] },
-      { id: 'cbox_3', title: '拖地', students: [] },
-      { id: 'cbox_4', title: '窗戶', students: [] },
-      { id: 'cbox_5', title: '黑板', students: [] },
-      { id: 'cbox_6', title: '倒垃圾/資源回收', students: [] }
+    // 上半部：早自修打掃工作區塊資料
+    let cleanBoxesAM = JSON.parse(localStorage.getItem('cm309_cleanBoxesAM')) || [
+      { id: 'am_1', title: '教室內', students: [] },
+      { id: 'am_2', title: '走廊', students: [] },
+      { id: 'am_3', title: '黑板', students: [] }
+    ];
+
+    // 下半部：環保時間打掃工作區塊資料
+    let cleanBoxesPM = JSON.parse(localStorage.getItem('cm309_cleanBoxesPM')) || [
+      { id: 'pm_1', title: '拖地', students: [] },
+      { id: 'pm_2', title: '窗戶', students: [] },
+      { id: 'pm_3', title: '倒垃圾/資源回收', students: [] }
     ];
 
     let correctionBoxes = JSON.parse(localStorage.getItem('cm309_corrBoxes')) || [
@@ -664,7 +693,8 @@
       localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
       localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState));
       localStorage.setItem('cm309_mwState', JSON.stringify(mouthwashLampState));
-      localStorage.setItem('cm309_cleanBoxes', JSON.stringify(cleanBoxes));
+      localStorage.setItem('cm309_cleanBoxesAM', JSON.stringify(cleanBoxesAM));
+      localStorage.setItem('cm309_cleanBoxesPM', JSON.stringify(cleanBoxesPM));
       localStorage.setItem('cm309_pets', JSON.stringify(petState));
       localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
       localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
@@ -683,7 +713,8 @@
           interactiveHwState,
           teethLampState,
           mouthwashLampState,
-          cleanBoxes,
+          cleanBoxesAM,
+          cleanBoxesPM,
           petState,
           petCollection,
           announcements,
@@ -724,7 +755,8 @@
             interactiveHwState = data.interactiveHwState || {};
             teethLampState = data.teethLampState || {};
             mouthwashLampState = data.mouthwashLampState || {};
-            if (data.cleanBoxes) cleanBoxes = data.cleanBoxes;
+            if (data.cleanBoxesAM) cleanBoxesAM = data.cleanBoxesAM;
+            if (data.cleanBoxesPM) cleanBoxesPM = data.cleanBoxesPM;
             
             if (data.petState && Object.keys(data.petState).length > 0) {
               petState = data.petState;
@@ -740,7 +772,8 @@
             localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
             localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState));
             localStorage.setItem('cm309_mwState', JSON.stringify(mouthwashLampState));
-            localStorage.setItem('cm309_cleanBoxes', JSON.stringify(cleanBoxes));
+            localStorage.setItem('cm309_cleanBoxesAM', JSON.stringify(cleanBoxesAM));
+            localStorage.setItem('cm309_cleanBoxesPM', JSON.stringify(cleanBoxesPM));
             localStorage.setItem('cm309_pets', JSON.stringify(petState));
             localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
             localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
@@ -792,9 +825,9 @@
         cleanSec.style.display = 'block';
         renderCleanlinessBoard();
       } else if (mode === 'clean') {
-        title.textContent = '目前項目：打掃工作 (動態崗位分配)';
+        title.textContent = '目前項目：打掃工作 (早自修與環保時間上下區塊)';
         kanban.style.display = 'block';
-        renderCleanBoard();
+        renderCleanBoards();
       } else {
         title.textContent = (mode === 'teeth' ? '目前項目：潔牙高手' : '目前項目：漱口水');
         grid.style.display = 'grid';
@@ -802,58 +835,59 @@
       renderInteractiveGrid();
     }
 
-    // === 動態打掃工作看板邏輯 ===
-    function renderCleanBoard() {
-      const pool = document.getElementById('cleanPool');
-      pool.innerHTML = '';
+    // === 上下雙區塊打掃工作看板邏輯 ===
+    function renderCleanBoards() {
+      // 1. 渲染早自修 (AM)
+      const poolAM = document.getElementById('cleanPoolAM');
+      poolAM.innerHTML = '';
       students.forEach((name, i) => {
         const id = i + 1;
         const tag = document.createElement('div');
         tag.className = 'drag-tag';
         tag.setAttribute('data-seat', id);
         tag.setAttribute('data-name', name);
+        tag.setAttribute('data-session', 'am');
         tag.textContent = `${name}`;
-        pool.appendChild(tag);
+        poolAM.appendChild(tag);
       });
 
-      new Sortable(pool, {
-        group: { name: 'cleanGroup', pull: 'clone', put: false },
+      new Sortable(poolAM, {
+        group: { name: 'cleanGroupAM', pull: 'clone', put: false },
         sort: false,
         animation: 150
       });
 
-      const boxesContainer = document.getElementById('cleanBoxesContainer');
-      boxesContainer.innerHTML = '';
-      cleanBoxes.forEach((box, bIdx) => {
+      const containerAM = document.getElementById('cleanBoxesContainerAM');
+      containerAM.innerHTML = '';
+      cleanBoxesAM.forEach((box, bIdx) => {
         box.students.sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1));
-
         const col = document.createElement('div');
         col.className = 'clean-col';
         col.innerHTML = `
           <div style="display:flex; gap:6px; margin-bottom:8px; align-items:center;">
-            <input type="text" class="form-control" style="font-weight:700; padding:4px 8px; font-size:0.9rem;" value="${box.title}" onchange="updateCleanBoxTitle(${bIdx}, this.value)">
-            <button onclick="removeCleanBox(${bIdx})" style="background:transparent; border:none; color:#ef4444; cursor:pointer; padding:4px;"><i class="fa-solid fa-trash-can"></i></button>
+            <input type="text" class="form-control" style="font-weight:700; padding:4px 8px; font-size:0.9rem;" value="${box.title}" onchange="updateCleanBoxTitle('am', ${bIdx}, this.value)">
+            <button onclick="removeCleanBox('am', ${bIdx})" style="background:transparent; border:none; color:#ef4444; cursor:pointer; padding:4px;"><i class="fa-solid fa-trash-can"></i></button>
           </div>
-          <div class="clean-list" id="clean-box-${box.id}"></div>
+          <div class="clean-list" id="clean-box-am-${box.id}"></div>
         `;
-        boxesContainer.appendChild(col);
+        containerAM.appendChild(col);
 
-        const listEl = col.querySelector(`#clean-box-${box.id}`);
+        const listEl = col.querySelector(`#clean-box-am-${box.id}`);
         box.students.forEach((st, sIdx) => {
           const tag = document.createElement('div');
           const isDone = !!st.done;
           tag.className = `drag-tag ${isDone ? 'is-clean-done' : ''}`;
           tag.innerHTML = `
-            <span onclick="toggleStudentCleanDone(${bIdx}, ${sIdx})" style="cursor:pointer; display:inline-block; padding:0 2px;">
+            <span onclick="toggleStudentCleanDone('am', ${bIdx}, ${sIdx})" style="cursor:pointer; display:inline-block; padding:0 2px;">
               ${st.name} ${isDone ? '✨' : ''}
             </span>
-            <i class="fa-solid fa-xmark btn-remove-tag" onclick="removeStudentFromClean(${bIdx}, ${sIdx})"></i>
+            <i class="fa-solid fa-xmark btn-remove-tag" onclick="removeStudentFromClean('am', ${bIdx}, ${sIdx})"></i>
           `;
           listEl.appendChild(tag);
         });
 
         new Sortable(listEl, {
-          group: { name: 'cleanGroup', pull: true, put: true },
+          group: { name: 'cleanGroupAM', pull: true, put: true },
           animation: 150,
           onAdd: function (evt) {
             const seat = evt.item.getAttribute('data-seat');
@@ -861,7 +895,72 @@
             evt.item.remove();
             if (!box.students.some(s => s.seat == seat)) {
               box.students.push({ seat, name, done: false });
-              renderCleanBoard();
+              renderCleanBoards();
+              syncToFirebase();
+            }
+          }
+        });
+      });
+
+      // 2. 渲染環保時間 (PM)
+      const poolPM = document.getElementById('cleanPoolPM');
+      poolPM.innerHTML = '';
+      students.forEach((name, i) => {
+        const id = i + 1;
+        const tag = document.createElement('div');
+        tag.className = 'drag-tag';
+        tag.setAttribute('data-seat', id);
+        tag.setAttribute('data-name', name);
+        tag.setAttribute('data-session', 'pm');
+        tag.textContent = `${name}`;
+        poolPM.appendChild(tag);
+      });
+
+      new Sortable(poolPM, {
+        group: { name: 'cleanGroupPM', pull: 'clone', put: false },
+        sort: false,
+        animation: 150
+      });
+
+      const containerPM = document.getElementById('cleanBoxesContainerPM');
+      containerPM.innerHTML = '';
+      cleanBoxesPM.forEach((box, bIdx) => {
+        box.students.sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1));
+        const col = document.createElement('div');
+        col.className = 'clean-col';
+        col.innerHTML = `
+          <div style="display:flex; gap:6px; margin-bottom:8px; align-items:center;">
+            <input type="text" class="form-control" style="font-weight:700; padding:4px 8px; font-size:0.9rem;" value="${box.title}" onchange="updateCleanBoxTitle('pm', ${bIdx}, this.value)">
+            <button onclick="removeCleanBox('pm', ${bIdx})" style="background:transparent; border:none; color:#ef4444; cursor:pointer; padding:4px;"><i class="fa-solid fa-trash-can"></i></button>
+          </div>
+          <div class="clean-list" id="clean-box-pm-${box.id}"></div>
+        `;
+        containerPM.appendChild(col);
+
+        const listEl = col.querySelector(`#clean-box-pm-${box.id}`);
+        box.students.forEach((st, sIdx) => {
+          const tag = document.createElement('div');
+          const isDone = !!st.done;
+          tag.className = `drag-tag ${isDone ? 'is-clean-done' : ''}`;
+          tag.innerHTML = `
+            <span onclick="toggleStudentCleanDone('pm', ${bIdx}, ${sIdx})" style="cursor:pointer; display:inline-block; padding:0 2px;">
+              ${st.name} ${isDone ? '✨' : ''}
+            </span>
+            <i class="fa-solid fa-xmark btn-remove-tag" onclick="removeStudentFromClean('pm', ${bIdx}, ${sIdx})"></i>
+          `;
+          listEl.appendChild(tag);
+        });
+
+        new Sortable(listEl, {
+          group: { name: 'cleanGroupPM', pull: true, put: true },
+          animation: 150,
+          onAdd: function (evt) {
+            const seat = evt.item.getAttribute('data-seat');
+            const name = evt.item.getAttribute('data-name');
+            evt.item.remove();
+            if (!box.students.some(s => s.seat == seat)) {
+              box.students.push({ seat, name, done: false });
+              renderCleanBoards();
               syncToFirebase();
             }
           }
@@ -869,50 +968,56 @@
       });
     }
 
-    function toggleStudentCleanDone(boxIdx, stIdx) {
-      const studentObj = cleanBoxes[boxIdx].students[stIdx];
+    function toggleStudentCleanDone(session, boxIdx, stIdx) {
+      const boxes = (session === 'am') ? cleanBoxesAM : cleanBoxesPM;
+      const studentObj = boxes[boxIdx].students[stIdx];
       const wasDone = studentObj.done;
       studentObj.done = !wasDone;
 
-      // 完成亮燈加 1 分，取消則扣 1 分
       if (!wasDone) {
         addPetXp(studentObj.seat, 1);
       } else {
         addPetXp(studentObj.seat, -1);
       }
 
-      renderCleanBoard();
+      renderCleanBoards();
       syncToFirebase();
     }
 
-    function addCleanBox() {
-      const newId = 'cbox_' + Date.now();
-      cleanBoxes.push({ id: newId, title: '新打掃區域', students: [] });
-      renderCleanBoard();
+    function addCleanBox(session) {
+      const newId = session + '_' + Date.now();
+      if (session === 'am') {
+        cleanBoxesAM.push({ id: newId, title: '新早自修區域', students: [] });
+      } else {
+        cleanBoxesPM.push({ id: newId, title: '新環保時間區域', students: [] });
+      }
+      renderCleanBoards();
       syncToFirebase();
     }
 
-    function removeCleanBox(idx) {
-      if (confirm(`確定刪除「${cleanBoxes[idx].title}」打掃區域嗎？`)) {
-        // 如果該區域有學生完成過打掃亮燈的，可以選擇是否扣回分數，這裡直接移除區域
-        cleanBoxes.splice(idx, 1);
-        renderCleanBoard();
+    function removeCleanBox(session, idx) {
+      const boxes = (session === 'am') ? cleanBoxesAM : cleanBoxesPM;
+      if (confirm(`確定刪除「${boxes[idx].title}」打掃區域嗎？`)) {
+        boxes.splice(idx, 1);
+        renderCleanBoards();
         syncToFirebase();
       }
     }
 
-    function updateCleanBoxTitle(idx, val) {
-      cleanBoxes[idx].title = val.trim() || '未命名區域';
+    function updateCleanBoxTitle(session, idx, val) {
+      const boxes = (session === 'am') ? cleanBoxesAM : cleanBoxesPM;
+      boxes[idx].title = val.trim() || '未命名區域';
       syncToFirebase();
     }
 
-    function removeStudentFromClean(boxIdx, stIdx) {
-      const studentObj = cleanBoxes[boxIdx].students[stIdx];
+    function removeStudentFromClean(session, boxIdx, stIdx) {
+      const boxes = (session === 'am') ? cleanBoxesAM : cleanBoxesPM;
+      const studentObj = boxes[boxIdx].students[stIdx];
       if (studentObj.done) {
-        addPetXp(studentObj.seat, -1); // 若原本已完成亮燈，移除時扣回加分
+        addPetXp(studentObj.seat, -1);
       }
-      cleanBoxes[boxIdx].students.splice(stIdx, 1);
-      renderCleanBoard();
+      boxes[boxIdx].students.splice(stIdx, 1);
+      renderCleanBoards();
       syncToFirebase();
     }
 
@@ -1141,8 +1246,9 @@
       if(confirm("確定重整當前項目的紀錄？")) {
         if(currentInteractiveMode === 'hw') interactiveHwState = {};
         else if(currentInteractiveMode === 'clean') {
-          cleanBoxes.forEach(b => b.students = []);
-          renderCleanBoard();
+          cleanBoxesAM.forEach(b => b.students = []);
+          cleanBoxesPM.forEach(b => b.students = []);
+          renderCleanBoards();
         }
         else if(currentInteractiveMode === 'teeth') teethLampState = {};
         else if(currentInteractiveMode === 'mouthwash') mouthwashLampState = {};
@@ -1186,13 +1292,16 @@
         detailText = `整潔達標: ${tidyStudents.join('、') || '無'}`;
         sendToSheets({ category: "整潔大師評比", student: "全班", detail: detailText });
       } else if(currentInteractiveMode === 'clean') {
-        let boxSummaries = cleanBoxes.map(b => {
-          let doneList = b.students.filter(s => s.done).map(s => s.name);
-          let undoneList = b.students.filter(s => !s.done).map(s => s.name);
-          return `${b.title} [已完成:${doneList.join('、')||'無'}, 未完成:${undoneList.join('、')||'無'}]`;
+        let amSummaries = cleanBoxesAM.map(b => {
+          let done = b.students.filter(s => s.done).map(s => s.name);
+          return `[早]${b.title}(${done.join('、')||'無'})`;
         });
-        detailText = boxSummaries.join(' | ');
-        sendToSheets({ category: "打掃工作", student: "全班", detail: detailText });
+        let pmSummaries = cleanBoxesPM.map(b => {
+          let done = b.students.filter(s => s.done).map(s => s.name);
+          return `[環]${b.title}(${done.join('、')||'無'})`;
+        });
+        detailText = [...amSummaries, ...pmSummaries].join(' | ');
+        sendToSheets({ category: "打掃工作(早自修與環保)", student: "全班", detail: detailText });
       } else {
         const actionMap = { teeth: "潔牙高手", mouthwash: "漱口水" };
         let lamp = (currentInteractiveMode === 'teeth') ? teethLampState : mouthwashLampState;
