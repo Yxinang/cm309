@@ -569,7 +569,7 @@
             }
         }
 
-        // 2. 爬梯子畫面（已調整為最佳化機率）
+        // 2. 爬梯子畫面
         function playLadder(pathNum) {
             let seatNum = getCurrentSeatNum();
             if (getTotalCoins(seatNum) < 10) {
@@ -618,7 +618,7 @@
                     updateView();
                 } else if (chosen.type === "prize") {
                     pendingDynamicReward = { type: 'tickets', prefix: '' };
-                    document.getElementById('dynamicModalTitle').textContent = "🎁 獲得金幣大冒險抽中獎品金蛋";
+                    document.getElementById('dynamicModalTitle').textContent = "👑 獲得金幣大冒險抽中獎品金蛋";
                     document.getElementById('dynamicModalDesc').textContent = "請輸入獲得的小獎品名稱：";
                     document.getElementById('dynamicPrizeInput').value = "";
                     document.getElementById('dynamicPrizeModal').classList.remove('hidden');
@@ -689,7 +689,7 @@
                     updateView();
                 } else if (wonPrize.type === "prize") {
                     pendingDynamicReward = { type: 'tickets', prefix: '' };
-                    document.getElementById('dynamicModalTitle').textContent = "🎁 比大小獲得獎品金蛋";
+                    document.getElementById('dynamicModalTitle').textContent = "👑 比大小獲得獎品金蛋";
                     document.getElementById('dynamicModalDesc').textContent = "請輸入獲得的小獎品名稱：";
                     document.getElementById('dynamicPrizeInput').value = "";
                     document.getElementById('dynamicPrizeModal').classList.remove('hidden');
@@ -738,7 +738,7 @@
             }
         }
 
-        // 4. 獎品兌換與背包管理
+        // 4. 獎品兌換與背包管理 (已更新金、銀、銅蛋的獨立圖案)
         function renderShop() {
             let container = document.getElementById('shopList');
             container.innerHTML = '';
@@ -747,9 +747,9 @@
                 { id: 'seat', name: "指定座位", cost: 50, icon: "🪑" },
                 { id: 'book', name: "免抄聯絡簿 3 天", cost: 40, icon: "📝" },
                 { id: 'hw', name: "作業減免", cost: 30, icon: "✂️" },
-                { id: 'gold_egg', name: "獎品金蛋", cost: 30, icon: "🥚" },
-                { id: 'silver_egg', name: "獎品銀蛋", cost: 20, icon: "🥚" },
-                { id: 'bronze_egg', name: "獎品銅蛋", cost: 10, icon: "🥚" }
+                { id: 'gold_egg', name: "獎品金蛋", cost: 30, icon: "👑" },
+                { id: 'silver_egg', name: "獎品銀蛋", cost: 20, icon: "💎" },
+                { id: 'bronze_egg', name: "獎品銅蛋", cost: 10, icon: "🎁" }
             ];
 
             shopItems.forEach(item => {
