@@ -289,25 +289,27 @@
           </div>
         </div>
 
-        <!-- 4. 打掃工作看板（上下完整區塊：早自修 vs 環保時間） -->
+        <!-- 4. 打掃工作看板（共用最上方一個座號池，下方分早自修與環保時間） -->
         <div id="cleanKanban" style="display:none;">
           <p style="font-size:0.85rem; color:#059669; font-weight:700; background:#dcfce7; padding:8px 12px; border-radius:6px; margin-bottom:14px;">
             <i class="fa-solid fa-hand-pointer"></i> 提示：<strong>點擊座號即可亮綠燈，寵物自動 +1 分</strong>（再次點擊取消並扣 1 分）。
           </p>
 
+          <!-- 📌 最上方共用座號池 -->
+          <div class="clean-board full" style="margin-bottom:20px;">
+            <div class="clean-col" style="background:#f1f5f9; border-color:#94a3b8; min-height:80px;">
+              <h4 style="color:#334155; border-bottom-color:#cbd5e1;">👥 全班待分配座號池 (每行 10 格，可重複拖出)</h4>
+              <div class="clean-list ten-col-pool" id="cleanPoolShared"></div>
+            </div>
+          </div>
+
           <!-- ☀️ 上半部：早自修時間 (7:40～7:55) -->
           <div style="background:#f8fafc; border:2px solid #bae6fd; border-radius:12px; padding:14px; margin-bottom:20px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
               <h3 style="color:#0284c7; font-size:1rem; display:flex; align-items:center; gap:6px;">
-                <i class="fa-solid fa-sun"></i> 上半部：早自修時間（7：40 ～ 7：55）
+                <i class="fa-solid fa-sun"></i> 早自修時間（7：40 ～ 7：55）
               </h3>
               <button class="btn-upload" style="background:#0284c7; font-size:0.8rem; padding:5px 12px;" onclick="addCleanBox('am')"><i class="fa-solid fa-plus"></i> 新增早自修打掃區</button>
-            </div>
-            <div class="clean-board full" style="margin-bottom:10px;">
-              <div class="clean-col" style="background:#e0f2fe; border-color:#7dd3fc; min-height:70px;">
-                <h4 style="color:#0369a1; border-bottom-color:#7dd3fc;">👥 早自修待分配座號池 (可重複拖出)</h4>
-                <div class="clean-list ten-col-pool" id="cleanPoolAM"></div>
-              </div>
             </div>
             <div class="clean-board" id="cleanBoxesContainerAM"></div>
           </div>
@@ -316,15 +318,9 @@
           <div style="background:#f8fafc; border:2px solid #fed7aa; border-radius:12px; padding:14px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
               <h3 style="color:#c2410c; font-size:1rem; display:flex; align-items:center; gap:6px;">
-                <i class="fa-solid fa-leaf"></i> 下半部：環保時間（3：00 ～ 3：20）
+                <i class="fa-solid fa-leaf"></i> 環保時間（3：00 ～ 3：20）
               </h3>
               <button class="btn-upload" style="background:#d97706; font-size:0.8rem; padding:5px 12px;" onclick="addCleanBox('pm')"><i class="fa-solid fa-plus"></i> 新增環保時間打掃區</button>
-            </div>
-            <div class="clean-board full" style="margin-bottom:10px;">
-              <div class="clean-col" style="background:#ffedd5; border-color:#fdba74; min-height:70px;">
-                <h4 style="color:#9a3412; border-bottom-color:#fdba74;">👥 環保時間待分配座號池 (可重複拖出)</h4>
-                <div class="clean-list ten-col-pool" id="cleanPoolPM"></div>
-              </div>
             </div>
             <div class="clean-board" id="cleanBoxesContainerPM"></div>
           </div>
@@ -584,14 +580,14 @@
     let petState = JSON.parse(localStorage.getItem('cm309_pets')) || INITIAL_PETS;
     let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
     
-    // 上半部：早自修打掃工作區塊資料
+    // 早自修打掃工作區塊資料
     let cleanBoxesAM = JSON.parse(localStorage.getItem('cm309_cleanBoxesAM')) || [
       { id: 'am_1', title: '教室內', students: [] },
       { id: 'am_2', title: '走廊', students: [] },
       { id: 'am_3', title: '黑板', students: [] }
     ];
 
-    // 下半部：環保時間打掃工作區塊資料
+    // 環保時間打掃工作區塊資料
     let cleanBoxesPM = JSON.parse(localStorage.getItem('cm309_cleanBoxesPM')) || [
       { id: 'pm_1', title: '拖地', students: [] },
       { id: 'pm_2', title: '窗戶', students: [] },
@@ -835,28 +831,29 @@
       renderInteractiveGrid();
     }
 
-    // === 上下雙區塊打掃工作看板邏輯 ===
+    // === 上下雙區塊打掃工作看板邏輯（共用上方一個座號池） ===
     function renderCleanBoards() {
-      // 1. 渲染早自修 (AM)
-      const poolAM = document.getElementById('cleanPoolAM');
-      poolAM.innerHTML = '';
+      // 1. 渲染最上方共用座號池
+      const poolShared = document.getElementById('cleanPoolShared');
+      poolShared.innerHTML = '';
       students.forEach((name, i) => {
         const id = i + 1;
         const tag = document.createElement('div');
         tag.className = 'drag-tag';
         tag.setAttribute('data-seat', id);
         tag.setAttribute('data-name', name);
-        tag.setAttribute('data-session', 'am');
         tag.textContent = `${name}`;
-        poolAM.appendChild(tag);
+        poolShared.appendChild(tag);
       });
 
-      new Sortable(poolAM, {
-        group: { name: 'cleanGroupAM', pull: 'clone', put: false },
+      // 同時支援拖曳到 AM 與 PM 的群組
+      new Sortable(poolShared, {
+        group: { name: 'cleanGroupShared', pull: 'clone', put: false },
         sort: false,
         animation: 150
       });
 
+      // 2. 渲染早自修 (AM) 區塊
       const containerAM = document.getElementById('cleanBoxesContainerAM');
       containerAM.innerHTML = '';
       cleanBoxesAM.forEach((box, bIdx) => {
@@ -887,7 +884,7 @@
         });
 
         new Sortable(listEl, {
-          group: { name: 'cleanGroupAM', pull: true, put: true },
+          group: { name: 'cleanGroupShared', pull: true, put: true },
           animation: 150,
           onAdd: function (evt) {
             const seat = evt.item.getAttribute('data-seat');
@@ -902,26 +899,7 @@
         });
       });
 
-      // 2. 渲染環保時間 (PM)
-      const poolPM = document.getElementById('cleanPoolPM');
-      poolPM.innerHTML = '';
-      students.forEach((name, i) => {
-        const id = i + 1;
-        const tag = document.createElement('div');
-        tag.className = 'drag-tag';
-        tag.setAttribute('data-seat', id);
-        tag.setAttribute('data-name', name);
-        tag.setAttribute('data-session', 'pm');
-        tag.textContent = `${name}`;
-        poolPM.appendChild(tag);
-      });
-
-      new Sortable(poolPM, {
-        group: { name: 'cleanGroupPM', pull: 'clone', put: false },
-        sort: false,
-        animation: 150
-      });
-
+      // 3. 渲染環保時間 (PM) 區塊
       const containerPM = document.getElementById('cleanBoxesContainerPM');
       containerPM.innerHTML = '';
       cleanBoxesPM.forEach((box, bIdx) => {
@@ -952,7 +930,7 @@
         });
 
         new Sortable(listEl, {
-          group: { name: 'cleanGroupPM', pull: true, put: true },
+          group: { name: 'cleanGroupShared', pull: true, put: true },
           animation: 150,
           onAdd: function (evt) {
             const seat = evt.item.getAttribute('data-seat');
