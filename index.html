@@ -289,16 +289,16 @@
           </div>
         </div>
 
-        <!-- 4. 打掃工作看板（共用最上方一個座號池，下方分早自修與環保時間） -->
+        <!-- 4. 打掃工作看板（共用最上方一個座號池，拖出後即從池中移除） -->
         <div id="cleanKanban" style="display:none;">
           <p style="font-size:0.85rem; color:#059669; font-weight:700; background:#dcfce7; padding:8px 12px; border-radius:6px; margin-bottom:14px;">
             <i class="fa-solid fa-hand-pointer"></i> 提示：<strong>點擊座號即可亮綠燈，寵物自動 +1 分</strong>（再次點擊取消並扣 1 分）。
           </p>
 
-          <!-- 📌 最上方共用座號池 -->
+          <!-- 📌 最上方共用座號池 (不能重複拖出) -->
           <div class="clean-board full" style="margin-bottom:20px;">
             <div class="clean-col" style="background:#f1f5f9; border-color:#94a3b8; min-height:80px;">
-              <h4 style="color:#334155; border-bottom-color:#cbd5e1;">👥 全班待分配座號池 (每行 10 格，可重複拖出)</h4>
+              <h4 style="color:#334155; border-bottom-color:#cbd5e1;">👥 全班待分配座號池 (每行 10 格，拖入打掃區後即移出)</h4>
               <div class="clean-list ten-col-pool" id="cleanPoolShared"></div>
             </div>
           </div>
@@ -831,26 +831,57 @@
       renderInteractiveGrid();
     }
 
-    // === 上下雙區塊打掃工作看板邏輯（共用上方一個座號池） ===
+    // === 上下雙區塊打掃工作看板邏輯（不能重複拖出，跨區塊共用座號池） ===
     function renderCleanBoards() {
-      // 1. 渲染最上方共用座號池
+      // 收集所有已經被分配到早自修或環保時間的座號
+      const assignedSeats = new Set();
+      cleanBoxesAM.forEach(b => b.students.forEach(s => assignedSeats.add(String(s.seat))));
+      cleanBoxesPM.forEach(b => b.students.forEach(s => assignedSeats.add(String(s.seat))));
+
+      // 1. 渲染最上方共用座號池（濾掉已被分配的座號）
       const poolShared = document.getElementById('cleanPoolShared');
       poolShared.innerHTML = '';
       students.forEach((name, i) => {
-        const id = i + 1;
-        const tag = document.createElement('div');
-        tag.className = 'drag-tag';
-        tag.setAttribute('data-seat', id);
-        tag.setAttribute('data-name', name);
-        tag.textContent = `${name}`;
-        poolShared.appendChild(tag);
+        const id = String(i + 1);
+        if (!assignedSeats.has(id)) {
+          const tag = document.createElement('div');
+          tag.className = 'drag-tag';
+          tag.setAttribute('data-seat', id);
+          tag.setAttribute('data-name', name);
+          tag.textContent = `${name}`;
+          poolShared.appendChild(tag);
+        }
       });
 
-      // 同時支援拖曳到 AM 與 PM 的群組
       new Sortable(poolShared, {
-        group: { name: 'cleanGroupShared', pull: 'clone', put: false },
-        sort: false,
-        animation: 150
+        group: { name: 'cleanGroupShared', pull: true, put: true },
+        animation: 150,
+        onAdd: function (evt) {
+          // 當學生從打掃區被拖回共用座號池時，從打掃區資料中移除
+          const seat = evt.item.getAttribute('data-seat');
+          evt.item.remove();
+          
+          let removed = false;
+          cleanBoxesAM.forEach(b => {
+            const idx = b.students.findIndex(s => String(s.seat) === String(seat));
+            if (idx !== -1) {
+              if (b.students[idx].done) addPetXp(seat, -1); // 若原本已完成亮燈，移回池中時扣回加分
+              b.students.splice(idx, 1);
+              removed = true;
+            }
+          });
+          if (!removed) {
+            cleanBoxesPM.forEach(b => {
+              const idx = b.students.findIndex(s => String(s.seat) === String(seat));
+              if (idx !== -1) {
+                if (b.students[idx].done) addPetXp(seat, -1);
+                b.students.splice(idx, 1);
+              }
+            });
+          }
+          renderCleanBoards();
+          syncToFirebase();
+        }
       });
 
       // 2. 渲染早自修 (AM) 區塊
@@ -874,6 +905,8 @@
           const tag = document.createElement('div');
           const isDone = !!st.done;
           tag.className = `drag-tag ${isDone ? 'is-clean-done' : ''}`;
+          tag.setAttribute('data-seat', st.seat);
+          tag.setAttribute('data-name', st.name);
           tag.innerHTML = `
             <span onclick="toggleStudentCleanDone('am', ${bIdx}, ${sIdx})" style="cursor:pointer; display:inline-block; padding:0 2px;">
               ${st.name} ${isDone ? '✨' : ''}
@@ -890,11 +923,28 @@
             const seat = evt.item.getAttribute('data-seat');
             const name = evt.item.getAttribute('data-name');
             evt.item.remove();
-            if (!box.students.some(s => s.seat == seat)) {
+
+            // 從其他 AM 或 PM 區塊中移除該學生（確保同一時間只能在一個地方）
+            cleanBoxesAM.forEach(b => {
+              const idx = b.students.findIndex(s => String(s.seat) === String(seat));
+              if (idx !== -1 && b !== box) {
+                if (b.students[idx].done) addPetXp(seat, -1);
+                b.students.splice(idx, 1);
+              }
+            });
+            cleanBoxesPM.forEach(b => {
+              const idx = b.students.findIndex(s => String(s.seat) === String(seat));
+              if (idx !== -1) {
+                if (b.students[idx].done) addPetXp(seat, -1);
+                b.students.splice(idx, 1);
+              }
+            });
+
+            if (!box.students.some(s => String(s.seat) === String(seat))) {
               box.students.push({ seat, name, done: false });
-              renderCleanBoards();
-              syncToFirebase();
             }
+            renderCleanBoards();
+            syncToFirebase();
           }
         });
       });
@@ -920,6 +970,8 @@
           const tag = document.createElement('div');
           const isDone = !!st.done;
           tag.className = `drag-tag ${isDone ? 'is-clean-done' : ''}`;
+          tag.setAttribute('data-seat', st.seat);
+          tag.setAttribute('data-name', st.name);
           tag.innerHTML = `
             <span onclick="toggleStudentCleanDone('pm', ${bIdx}, ${sIdx})" style="cursor:pointer; display:inline-block; padding:0 2px;">
               ${st.name} ${isDone ? '✨' : ''}
@@ -936,11 +988,27 @@
             const seat = evt.item.getAttribute('data-seat');
             const name = evt.item.getAttribute('data-name');
             evt.item.remove();
-            if (!box.students.some(s => s.seat == seat)) {
+
+            cleanBoxesPM.forEach(b => {
+              const idx = b.students.findIndex(s => String(s.seat) === String(seat));
+              if (idx !== -1 && b !== box) {
+                if (b.students[idx].done) addPetXp(seat, -1);
+                b.students.splice(idx, 1);
+              }
+            });
+            cleanBoxesAM.forEach(b => {
+              const idx = b.students.findIndex(s => String(s.seat) === String(seat));
+              if (idx !== -1) {
+                if (b.students[idx].done) addPetXp(seat, -1);
+                b.students.splice(idx, 1);
+              }
+            });
+
+            if (!box.students.some(s => String(s.seat) === String(seat))) {
               box.students.push({ seat, name, done: false });
-              renderCleanBoards();
-              syncToFirebase();
             }
+            renderCleanBoards();
+            syncToFirebase();
           }
         });
       });
