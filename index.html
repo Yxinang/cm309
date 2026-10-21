@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -111,13 +111,13 @@
 
     .drag-tag {
       background: #fff; border: 1px solid var(--border); border-radius: 6px;
-      padding: 6px 4px; font-size: 0.88rem; font-weight: 700; display: inline-flex;
+      padding: 6px 8px; font-size: 0.88rem; font-weight: 700; display: inline-flex;
       justify-content: center; align-items: center; gap: 4px; cursor: grab; user-select: none; transition: all 0.15s;
       text-align: center;
     }
     .drag-tag .btn-remove-tag { color: #ef4444; cursor: pointer; font-size: 0.75rem; margin-left: 2px; }
     
-    .drag-tag.is-corrected {
+    .drag-tag.is-corrected, .drag-tag.is-clean-done {
       background: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important;
       box-shadow: 0 0 10px rgba(34, 197, 94, 0.45) !important; font-weight: 800;
     }
@@ -289,25 +289,21 @@
           </div>
         </div>
 
-        <!-- 4. 打掃工作看板 -->
+        <!-- 4. 打掃工作看板 (動態新增區域與點擊亮燈加分) -->
         <div id="cleanKanban" style="display:none;">
-          <div style="font-size:0.8rem; color:#059669; font-weight:700; margin-bottom:10px; background:#dcfce7; padding:6px 10px; border-radius:6px;">
-            <i class="fa-solid fa-hand-pointer"></i> 提示：<strong>直接點擊座號即可「亮綠燈 / 關閉綠燈」</strong>，完成打掃的孩子寵物自動 +1 分！
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+            <p style="font-size:0.85rem; color:#059669; font-weight:700; background:#dcfce7; padding:6px 10px; border-radius:6px; margin:0;">
+              <i class="fa-solid fa-hand-pointer"></i> 提示：<strong>點擊座號即可亮綠燈，寵物自動 +1 分</strong>（再次點擊取消並扣 1 分）。
+            </p>
+            <button class="btn-upload" style="background:#2563eb; font-size:0.8rem; padding:5px 12px;" onclick="addCleanBox()"><i class="fa-solid fa-plus"></i> 新增打掃區域</button>
           </div>
-          <div class="clean-board full">
-            <div class="clean-col" style="background:#f1f5f9; border-color:#cbd5e1;">
-              <h4>🧹 尚未分配打掃區 (拖曳分派)</h4>
-              <div class="clean-list" id="zone-unassigned"></div>
+          <div class="clean-board full" style="margin-bottom:12px;">
+            <div class="clean-col" style="background:#f1f5f9; border-color:#cbd5e1; min-height:80px;">
+              <h4 style="color:#334155; border-bottom-color:#cbd5e1;">🧹 尚未分配打掃區座號池 (可重複拖出)</h4>
+              <div class="clean-list ten-col-pool" id="cleanPool"></div>
             </div>
           </div>
-          <div class="clean-board">
-            <div class="clean-col"><h4>教室內</h4><div class="clean-list" id="zone-classroom"></div></div>
-            <div class="clean-col"><h4>走廊</h4><div class="clean-list" id="zone-corridor"></div></div>
-            <div class="clean-col"><h4>拖地</h4><div class="clean-list" id="zone-mop"></div></div>
-            <div class="clean-col"><h4>窗戶</h4><div class="clean-list" id="zone-window"></div></div>
-            <div class="clean-col"><h4>黑板</h4><div class="clean-list" id="zone-blackboard"></div></div>
-            <div class="clean-col"><h4>倒垃圾/資源回收</h4><div class="clean-list" id="zone-trash"></div></div>
-          </div>
+          <div class="clean-board" id="cleanBoxesContainer"></div>
         </div>
       </div>
     </section>
@@ -346,7 +342,7 @@
       </div>
     </section>
 
-    <!-- 設定頁面 (已補回 Google 試算表連結設定區塊) -->
+    <!-- 設定頁面 -->
     <section id="tab-settings" class="page-section">
       <div class="card" style="border: 2px solid #2563eb;">
         <div class="card-title"><i class="fa-solid fa-database text-primary"></i> 1. 全班即時資料庫 (Firebase 雙向同步)</div>
@@ -361,7 +357,6 @@
         </button>
       </div>
 
-      <!-- 💡 已補回：Google 試算表連結設定 -->
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-table text-primary"></i> 2. Google 試算表 (記錄點名/作業/傷病日誌)</div>
         <input type="url" id="sheetsApiUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
@@ -563,7 +558,17 @@
     
     let petState = JSON.parse(localStorage.getItem('cm309_pets')) || INITIAL_PETS;
     let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
-    let cleanAssignment = JSON.parse(localStorage.getItem('cm309_cleanAssign')) || {};
+    
+    // 動態打掃工作區塊資料
+    let cleanBoxes = JSON.parse(localStorage.getItem('cm309_cleanBoxes')) || [
+      { id: 'cbox_1', title: '教室內', students: [] },
+      { id: 'cbox_2', title: '走廊', students: [] },
+      { id: 'cbox_3', title: '拖地', students: [] },
+      { id: 'cbox_4', title: '窗戶', students: [] },
+      { id: 'cbox_5', title: '黑板', students: [] },
+      { id: 'cbox_6', title: '倒垃圾/資源回收', students: [] }
+    ];
+
     let correctionBoxes = JSON.parse(localStorage.getItem('cm309_corrBoxes')) || [
       { id: 'box_1', title: '國語甲本', students: [] },
       { id: 'box_2', title: '數學習作', students: [] }
@@ -574,7 +579,6 @@
     let interactiveHwState = JSON.parse(localStorage.getItem('cm309_hwState')) || {}; 
     let teethLampState = JSON.parse(localStorage.getItem('cm309_teethState')) || {};  
     let mouthwashLampState = JSON.parse(localStorage.getItem('cm309_mwState')) || {}; 
-    let cleanLampState = JSON.parse(localStorage.getItem('cm309_cleanState')) || {}; 
 
     let currentSelectedStudent = null;
     let currentInteractiveMode = 'hw';
@@ -590,7 +594,6 @@
       document.getElementById('sheetsApiUrlInput').value = sheetsWebhookUrl;
       document.getElementById('firebaseDbUrlInput').value = firebaseDbUrl;
 
-      initSortables();
       initCleanlinessSortables();
       renderAllGrids();
       updateCloudBadge();
@@ -661,11 +664,10 @@
       localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
       localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState));
       localStorage.setItem('cm309_mwState', JSON.stringify(mouthwashLampState));
-      localStorage.setItem('cm309_cleanState', JSON.stringify(cleanLampState));
+      localStorage.setItem('cm309_cleanBoxes', JSON.stringify(cleanBoxes));
       localStorage.setItem('cm309_pets', JSON.stringify(petState));
       localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
       localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
-      localStorage.setItem('cm309_cleanAssign', JSON.stringify(cleanAssignment));
       localStorage.setItem('cm309_corrBoxes', JSON.stringify(correctionBoxes));
       localStorage.setItem('cm309_cleanlinessAssign', JSON.stringify(cleanlinessAssignment));
       localStorage.setItem('cm309_cleanlinessAwarded', JSON.stringify(cleanlinessAwarded));
@@ -681,11 +683,10 @@
           interactiveHwState,
           teethLampState,
           mouthwashLampState,
-          cleanLampState,
+          cleanBoxes,
           petState,
           petCollection,
           announcements,
-          cleanAssignment,
           correctionBoxes,
           cleanlinessAssignment,
           cleanlinessAwarded,
@@ -723,14 +724,13 @@
             interactiveHwState = data.interactiveHwState || {};
             teethLampState = data.teethLampState || {};
             mouthwashLampState = data.mouthwashLampState || {};
-            cleanLampState = data.cleanLampState || {};
+            if (data.cleanBoxes) cleanBoxes = data.cleanBoxes;
             
             if (data.petState && Object.keys(data.petState).length > 0) {
               petState = data.petState;
             }
             petCollection = data.petCollection || {};
             announcements = data.announcements || [];
-            cleanAssignment = data.cleanAssignment || {};
             if (data.correctionBoxes) correctionBoxes = data.correctionBoxes;
             cleanlinessAssignment = data.cleanlinessAssignment || {};
             cleanlinessAwarded = data.cleanlinessAwarded || {};
@@ -740,11 +740,10 @@
             localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
             localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState));
             localStorage.setItem('cm309_mwState', JSON.stringify(mouthwashLampState));
-            localStorage.setItem('cm309_cleanState', JSON.stringify(cleanLampState));
+            localStorage.setItem('cm309_cleanBoxes', JSON.stringify(cleanBoxes));
             localStorage.setItem('cm309_pets', JSON.stringify(petState));
             localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
             localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
-            localStorage.setItem('cm309_cleanAssign', JSON.stringify(cleanAssignment));
             localStorage.setItem('cm309_corrBoxes', JSON.stringify(correctionBoxes));
             localStorage.setItem('cm309_cleanlinessAssign', JSON.stringify(cleanlinessAssignment));
             localStorage.setItem('cm309_cleanlinessAwarded', JSON.stringify(cleanlinessAwarded));
@@ -793,14 +792,128 @@
         cleanSec.style.display = 'block';
         renderCleanlinessBoard();
       } else if (mode === 'clean') {
-        title.textContent = '目前項目：打掃工作';
+        title.textContent = '目前項目：打掃工作 (動態崗位分配)';
         kanban.style.display = 'block';
-        renderCleanKanban();
+        renderCleanBoard();
       } else {
         title.textContent = (mode === 'teeth' ? '目前項目：潔牙高手' : '目前項目：漱口水');
         grid.style.display = 'grid';
       }
       renderInteractiveGrid();
+    }
+
+    // === 動態打掃工作看板邏輯 ===
+    function renderCleanBoard() {
+      const pool = document.getElementById('cleanPool');
+      pool.innerHTML = '';
+      students.forEach((name, i) => {
+        const id = i + 1;
+        const tag = document.createElement('div');
+        tag.className = 'drag-tag';
+        tag.setAttribute('data-seat', id);
+        tag.setAttribute('data-name', name);
+        tag.textContent = `${name}`;
+        pool.appendChild(tag);
+      });
+
+      new Sortable(pool, {
+        group: { name: 'cleanGroup', pull: 'clone', put: false },
+        sort: false,
+        animation: 150
+      });
+
+      const boxesContainer = document.getElementById('cleanBoxesContainer');
+      boxesContainer.innerHTML = '';
+      cleanBoxes.forEach((box, bIdx) => {
+        box.students.sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1));
+
+        const col = document.createElement('div');
+        col.className = 'clean-col';
+        col.innerHTML = `
+          <div style="display:flex; gap:6px; margin-bottom:8px; align-items:center;">
+            <input type="text" class="form-control" style="font-weight:700; padding:4px 8px; font-size:0.9rem;" value="${box.title}" onchange="updateCleanBoxTitle(${bIdx}, this.value)">
+            <button onclick="removeCleanBox(${bIdx})" style="background:transparent; border:none; color:#ef4444; cursor:pointer; padding:4px;"><i class="fa-solid fa-trash-can"></i></button>
+          </div>
+          <div class="clean-list" id="clean-box-${box.id}"></div>
+        `;
+        boxesContainer.appendChild(col);
+
+        const listEl = col.querySelector(`#clean-box-${box.id}`);
+        box.students.forEach((st, sIdx) => {
+          const tag = document.createElement('div');
+          const isDone = !!st.done;
+          tag.className = `drag-tag ${isDone ? 'is-clean-done' : ''}`;
+          tag.innerHTML = `
+            <span onclick="toggleStudentCleanDone(${bIdx}, ${sIdx})" style="cursor:pointer; display:inline-block; padding:0 2px;">
+              ${st.name} ${isDone ? '✨' : ''}
+            </span>
+            <i class="fa-solid fa-xmark btn-remove-tag" onclick="removeStudentFromClean(${bIdx}, ${sIdx})"></i>
+          `;
+          listEl.appendChild(tag);
+        });
+
+        new Sortable(listEl, {
+          group: { name: 'cleanGroup', pull: true, put: true },
+          animation: 150,
+          onAdd: function (evt) {
+            const seat = evt.item.getAttribute('data-seat');
+            const name = evt.item.getAttribute('data-name');
+            evt.item.remove();
+            if (!box.students.some(s => s.seat == seat)) {
+              box.students.push({ seat, name, done: false });
+              renderCleanBoard();
+              syncToFirebase();
+            }
+          }
+        });
+      });
+    }
+
+    function toggleStudentCleanDone(boxIdx, stIdx) {
+      const studentObj = cleanBoxes[boxIdx].students[stIdx];
+      const wasDone = studentObj.done;
+      studentObj.done = !wasDone;
+
+      // 完成亮燈加 1 分，取消則扣 1 分
+      if (!wasDone) {
+        addPetXp(studentObj.seat, 1);
+      } else {
+        addPetXp(studentObj.seat, -1);
+      }
+
+      renderCleanBoard();
+      syncToFirebase();
+    }
+
+    function addCleanBox() {
+      const newId = 'cbox_' + Date.now();
+      cleanBoxes.push({ id: newId, title: '新打掃區域', students: [] });
+      renderCleanBoard();
+      syncToFirebase();
+    }
+
+    function removeCleanBox(idx) {
+      if (confirm(`確定刪除「${cleanBoxes[idx].title}」打掃區域嗎？`)) {
+        // 如果該區域有學生完成過打掃亮燈的，可以選擇是否扣回分數，這裡直接移除區域
+        cleanBoxes.splice(idx, 1);
+        renderCleanBoard();
+        syncToFirebase();
+      }
+    }
+
+    function updateCleanBoxTitle(idx, val) {
+      cleanBoxes[idx].title = val.trim() || '未命名區域';
+      syncToFirebase();
+    }
+
+    function removeStudentFromClean(boxIdx, stIdx) {
+      const studentObj = cleanBoxes[boxIdx].students[stIdx];
+      if (studentObj.done) {
+        addPetXp(studentObj.seat, -1); // 若原本已完成亮燈，移除時扣回加分
+      }
+      cleanBoxes[boxIdx].students.splice(stIdx, 1);
+      renderCleanBoard();
+      syncToFirebase();
     }
 
     function renderCorrectionBoard() {
@@ -951,67 +1064,6 @@
       });
     }
 
-    function initSortables() {
-      const zones = ['zone-unassigned', 'zone-classroom', 'zone-corridor', 'zone-mop', 'zone-window', 'zone-blackboard', 'zone-trash'];
-      zones.forEach(z => {
-        const el = document.getElementById(z);
-        if (!el) return;
-        new Sortable(el, {
-          group: 'clean',
-          animation: 150,
-          delay: 150,
-          delayOnTouchOnly: true,
-          onEnd: function(evt) {
-            const seat = evt.item.getAttribute('data-seat');
-            cleanAssignment[seat] = evt.to.id;
-            syncToFirebase();
-          }
-        });
-      });
-    }
-
-    function renderCleanKanban() {
-      const zones = ['zone-unassigned', 'zone-classroom', 'zone-corridor', 'zone-mop', 'zone-window', 'zone-blackboard', 'zone-trash'];
-      zones.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = '';
-      });
-
-      students.forEach((name, i) => {
-        const id = i+1;
-        const targetZone = cleanAssignment[id] || 'zone-unassigned';
-        const isLit = !!cleanLampState[id];
-
-        const div = document.createElement('div');
-        div.className = `student-btn ${isLit ? 'is-lit' : ''}`;
-        div.style.padding = '8px 6px';
-        div.style.width = '78px';
-        div.setAttribute('data-seat', id);
-        
-        div.innerHTML = `
-          <div class="indicator-lamp"></div>
-          <div class="seat" style="pointer-events:none;">${name}</div>
-          <div style="font-size:0.65rem; color:${isLit?'#15803d':'#94a3b8'}; pointer-events:none;">${isLit?'已完成':'未完成'}</div>
-        `;
-        
-        div.onmouseup = function(e) {
-          toggleCleanLamp(id);
-        };
-
-        const zoneEl = document.getElementById(targetZone);
-        if (zoneEl) zoneEl.appendChild(div);
-      });
-    }
-
-    function toggleCleanLamp(seat) {
-      cleanLampState[seat] = !cleanLampState[seat];
-      const isOn = cleanLampState[seat];
-      if (isOn) addPetXp(seat, 1);
-      else addPetXp(seat, -1);
-      renderCleanKanban();
-      syncToFirebase();
-    }
-
     function renderInteractiveGrid() {
       if (currentInteractiveMode === 'clean' || currentInteractiveMode === 'correction' || currentInteractiveMode === 'cleanliness') return;
       const container = document.getElementById('interactiveGrid'); container.innerHTML = '';
@@ -1088,7 +1140,10 @@
     function resetCurrentInteractive() {
       if(confirm("確定重整當前項目的紀錄？")) {
         if(currentInteractiveMode === 'hw') interactiveHwState = {};
-        else if(currentInteractiveMode === 'clean') cleanLampState = {};
+        else if(currentInteractiveMode === 'clean') {
+          cleanBoxes.forEach(b => b.students = []);
+          renderCleanBoard();
+        }
         else if(currentInteractiveMode === 'teeth') teethLampState = {};
         else if(currentInteractiveMode === 'mouthwash') mouthwashLampState = {};
         else if(currentInteractiveMode === 'correction') {
@@ -1100,7 +1155,6 @@
           renderCleanlinessBoard();
         }
         renderInteractiveGrid();
-        if(currentInteractiveMode === 'clean') renderCleanKanban();
         syncToFirebase();
       }
     }
@@ -1131,9 +1185,17 @@
         let tidyStudents = students.filter((_, i) => cleanlinessAssignment[i+1] === 'zone-clean-tidy');
         detailText = `整潔達標: ${tidyStudents.join('、') || '無'}`;
         sendToSheets({ category: "整潔大師評比", student: "全班", detail: detailText });
+      } else if(currentInteractiveMode === 'clean') {
+        let boxSummaries = cleanBoxes.map(b => {
+          let doneList = b.students.filter(s => s.done).map(s => s.name);
+          let undoneList = b.students.filter(s => !s.done).map(s => s.name);
+          return `${b.title} [已完成:${doneList.join('、')||'無'}, 未完成:${undoneList.join('、')||'無'}]`;
+        });
+        detailText = boxSummaries.join(' | ');
+        sendToSheets({ category: "打掃工作", student: "全班", detail: detailText });
       } else {
-        const actionMap = { clean: "打掃工作", teeth: "潔牙高手", mouthwash: "漱口水" };
-        let lamp = (currentInteractiveMode === 'clean') ? cleanLampState : ((currentInteractiveMode === 'teeth') ? teethLampState : mouthwashLampState);
+        const actionMap = { teeth: "潔牙高手", mouthwash: "漱口水" };
+        let lamp = (currentInteractiveMode === 'teeth') ? teethLampState : mouthwashLampState;
         let notDone = students.map((n,i)=>({id:i+1})).filter(s => !lamp[s.id]).map(s=>`${students[s.id-1]}`);
         detailText = notDone.length > 0 ? `未完成: ${notDone.join('、')}` : '全員完成！';
         sendToSheets({ category: actionMap[currentInteractiveMode], student: "全班", detail: detailText });
@@ -1344,7 +1406,7 @@
       const summaryBox = document.getElementById('gardenTicketSummary');
       summaryBox.innerHTML = `
         <div>🦁 成體總數：<strong>${adultCount} 隻</strong></div>
-        <div style="font-size:1rem; color:#b45309;">🎁 已換獎勵：<strong>${pairedCount} 組</strong> (每2隻換1次)</div>
+        <div style="font-size:1.0rem; color:#b45309;">🎁 已換獎勵：<strong>${pairedCount} 組</strong> (每2隻換1次)</div>
       `;
 
       if (myPets.length === 0) {
