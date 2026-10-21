@@ -111,10 +111,10 @@
             <div class="max-w-md mx-auto bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 text-left shadow-sm">
                 <div class="text-sm font-bold text-amber-800 mb-2">🧗 獲得金幣大冒險可能獲得的獎品項目：</div>
                 <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside font-medium">
-                    <li>代幣 30 個（機率 15%）</li>
-                    <li>獎品金蛋（機率 45%）</li>
-                    <li>哇ㄛ，下次再來８～（機率 55%）</li>
-                    <li>代幣 20 個（機率 15%）</li>
+                    <li>代幣 30 個（機率 10%）</li>
+                    <li>代幣 20 個（機率 20%）</li>
+                    <li>獎品金蛋（機率 35%）</li>
+                    <li>哇ㄛ，下次再來８～（機率 35%）</li>
                 </ul>
             </div>
         </div>
@@ -569,7 +569,7 @@
             }
         }
 
-        // 2. 爬梯子畫面
+        // 2. 爬梯子畫面（已調整為最佳化機率）
         function playLadder(pathNum) {
             let seatNum = getCurrentSeatNum();
             if (getTotalCoins(seatNum) < 10) {
@@ -591,10 +591,10 @@
                 document.querySelectorAll('.ladder-btn').forEach(btn => btn.disabled = false);
 
                 let outcomes = [
-                    { text: "代幣 30 個", type: "coin", val: 30, prob: 15 },
-                    { text: "獎品金蛋", type: "prize", prob: 45 },
-                    { text: "哇ㄛ，下次再來８～", type: "none", prob: 55 },
-                    { text: "代幣 20 個", type: "coin", val: 20, prob: 15 }
+                    { text: "代幣 30 個", type: "coin", val: 30, prob: 10 },
+                    { text: "代幣 20 個", type: "coin", val: 20, prob: 20 },
+                    { text: "獎品金蛋", type: "prize", prob: 35 },
+                    { text: "哇ㄛ，下次再來８～", type: "none", prob: 35 }
                 ];
 
                 let totalProb = outcomes.reduce((sum, o) => sum + o.prob, 0);
