@@ -110,16 +110,16 @@
     }
 
     .drag-tag {
-      background: #fff; border: 1px solid var(--border); border-radius: 6px;
-      padding: 6px 8px; font-size: 0.88rem; font-weight: 700; display: inline-flex;
-      justify-content: center; align-items: center; gap: 4px; cursor: grab; user-select: none; transition: all 0.15s;
+      background: #fff; border: 1.5px solid var(--border); border-radius: 6px;
+      padding: 6px 10px; font-size: 0.88rem; font-weight: 700; display: inline-flex;
+      justify-content: center; align-items: center; gap: 6px; cursor: grab; user-select: none; transition: all 0.15s;
       text-align: center;
     }
     .drag-tag .btn-remove-tag { color: #ef4444; cursor: pointer; font-size: 0.75rem; margin-left: 2px; }
     
     .drag-tag.is-corrected, .drag-tag.is-clean-done {
       background: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important;
-      box-shadow: 0 0 10px rgba(34, 197, 94, 0.45) !important; font-weight: 800;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.3) !important; font-weight: 800;
     }
 
     .form-group { margin-bottom: 12px; }
@@ -289,13 +289,13 @@
           </div>
         </div>
 
-        <!-- 4. 打掃工作看板（共用最上方一個座號池，拖出後即從池中移除） -->
+        <!-- 4. 打掃工作看板（位置固定不移動，點擊原地亮燈） -->
         <div id="cleanKanban" style="display:none;">
           <p style="font-size:0.85rem; color:#059669; font-weight:700; background:#dcfce7; padding:8px 12px; border-radius:6px; margin-bottom:14px;">
-            <i class="fa-solid fa-hand-pointer"></i> 提示：<strong>點擊座號即可亮綠燈，寵物自動 +1 分</strong>（再次點擊取消並扣 1 分）。
+            <i class="fa-solid fa-hand-pointer"></i> 提示：<strong>點擊座號即可原地亮綠燈，寵物自動 +1 分</strong>（再次點擊取消並扣 1 分）。
           </p>
 
-          <!-- 📌 最上方共用座號池 (不能重複拖出) -->
+          <!-- 📌 最上方共用座號池 -->
           <div class="clean-board full" style="margin-bottom:20px;">
             <div class="clean-col" style="background:#f1f5f9; border-color:#94a3b8; min-height:80px;">
               <h4 style="color:#334155; border-bottom-color:#cbd5e1;">👥 全班待分配座號池 (每行 10 格，拖入打掃區後即移出)</h4>
@@ -831,7 +831,7 @@
       renderInteractiveGrid();
     }
 
-    // === 上下雙區塊打掃工作看板邏輯（不能重複拖出，跨區塊共用座號池） ===
+    // === 上下雙區塊打掃工作看板邏輯（座號位置固定，不重新排序，原地亮燈） ===
     function renderCleanBoards() {
       // 收集所有已經被分配到早自修或環保時間的座號
       const assignedSeats = new Set();
@@ -857,7 +857,6 @@
         group: { name: 'cleanGroupShared', pull: true, put: true },
         animation: 150,
         onAdd: function (evt) {
-          // 當學生從打掃區被拖回共用座號池時，從打掃區資料中移除
           const seat = evt.item.getAttribute('data-seat');
           evt.item.remove();
           
@@ -865,7 +864,7 @@
           cleanBoxesAM.forEach(b => {
             const idx = b.students.findIndex(s => String(s.seat) === String(seat));
             if (idx !== -1) {
-              if (b.students[idx].done) addPetXp(seat, -1); // 若原本已完成亮燈，移回池中時扣回加分
+              if (b.students[idx].done) addPetXp(seat, -1);
               b.students.splice(idx, 1);
               removed = true;
             }
@@ -888,7 +887,7 @@
       const containerAM = document.getElementById('cleanBoxesContainerAM');
       containerAM.innerHTML = '';
       cleanBoxesAM.forEach((box, bIdx) => {
-        box.students.sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1));
+        // 移除自動排序，保持原本被拖入時的先後順序固定不動
         const col = document.createElement('div');
         col.className = 'clean-col';
         col.innerHTML = `
@@ -924,7 +923,6 @@
             const name = evt.item.getAttribute('data-name');
             evt.item.remove();
 
-            // 從其他 AM 或 PM 區塊中移除該學生（確保同一時間只能在一個地方）
             cleanBoxesAM.forEach(b => {
               const idx = b.students.findIndex(s => String(s.seat) === String(seat));
               if (idx !== -1 && b !== box) {
@@ -953,7 +951,7 @@
       const containerPM = document.getElementById('cleanBoxesContainerPM');
       containerPM.innerHTML = '';
       cleanBoxesPM.forEach((box, bIdx) => {
-        box.students.sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1));
+        // 移除自動排序，保持原地不動
         const col = document.createElement('div');
         col.className = 'clean-col';
         col.innerHTML = `
