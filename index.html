@@ -269,7 +269,7 @@
         <!-- 3. 整潔大師看板 -->
         <div id="cleanlinessBoardSection" style="display:none;">
           <p style="font-size:0.85rem; color:#15803d; font-weight:700; margin-bottom:10px; background:#dcfce7; padding:6px 10px; border-radius:6px;">
-            <i class="fa-solid fa-sparkles"></i> 規則：拖入【整潔】的孩子立即獲得寵物加分（+1），其餘未達標項目不扣分！
+            <i class="fa-solid fa-sparkles"></i> 規則 : 拖入【整潔】的孩子立即獲得寵物加分（+1），其餘未達標項目不扣分！
           </p>
           <div class="clean-board full" style="margin-bottom:12px;">
             <div class="clean-col" style="background:#f1f5f9; border-color:#cbd5e1; min-height:80px;">
@@ -289,7 +289,7 @@
           </div>
         </div>
 
-        <!-- 4. 打掃工作看板（位置固定，只清除亮燈不重整位置） -->
+        <!-- 4. 打掃工作看板（位置絕對固定，點擊原地亮燈不加圖案） -->
         <div id="cleanKanban" style="display:none;">
           <p style="font-size:0.85rem; color:#059669; font-weight:700; background:#dcfce7; padding:8px 12px; border-radius:6px; margin-bottom:14px;">
             <i class="fa-solid fa-hand-pointer"></i> 提示：<strong>點擊座號即可原地亮綠燈，寵物自動 +1 分</strong>（再次點擊取消並扣 1 分）。
@@ -905,9 +905,10 @@
           tag.className = `drag-tag ${isDone ? 'is-clean-done' : ''}`;
           tag.setAttribute('data-seat', st.seat);
           tag.setAttribute('data-name', st.name);
+          // 拿掉 ✨ 符號，點擊時純粹原地亮燈
           tag.innerHTML = `
             <span onclick="toggleStudentCleanDone('am', ${bIdx}, ${sIdx})" style="cursor:pointer; display:inline-block; padding:0 2px;">
-              ${st.name} ${isDone ? '✨' : ''}
+              ${st.name}
             </span>
             <i class="fa-solid fa-xmark btn-remove-tag" onclick="removeStudentFromClean('am', ${bIdx}, ${sIdx})"></i>
           `;
@@ -968,9 +969,10 @@
           tag.className = `drag-tag ${isDone ? 'is-clean-done' : ''}`;
           tag.setAttribute('data-seat', st.seat);
           tag.setAttribute('data-name', st.name);
+          // 拿掉 ✨ 符號，點擊時純粹原地亮燈
           tag.innerHTML = `
             <span onclick="toggleStudentCleanDone('pm', ${bIdx}, ${sIdx})" style="cursor:pointer; display:inline-block; padding:0 2px;">
-              ${st.name} ${isDone ? '✨' : ''}
+              ${st.name}
             </span>
             <i class="fa-solid fa-xmark btn-remove-tag" onclick="removeStudentFromClean('pm', ${bIdx}, ${sIdx})"></i>
           `;
@@ -1288,9 +1290,8 @@
       if(confirm("確定重整當前項目的紀錄？（打掃工作只會清除亮燈，位置保留）")) {
         if(currentInteractiveMode === 'hw') interactiveHwState = {};
         else if(currentInteractiveMode === 'clean') {
-          // 修改處：只清除亮燈狀態 (done = false)，位置不動
           cleanBoxesAM.forEach(b => b.students.forEach(s => {
-            if (s.done) addPetXp(s.seat, -1); // 扣回亮燈加分
+            if (s.done) addPetXp(s.seat, -1);
             s.done = false;
           }));
           cleanBoxesPM.forEach(b => b.students.forEach(s => {
