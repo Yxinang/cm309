@@ -289,7 +289,7 @@
           </div>
         </div>
 
-        <!-- 4. 打掃工作看板（位置固定不移動，點擊原地亮燈） -->
+        <!-- 4. 打掃工作看板（位置固定，只清除亮燈不重整位置） -->
         <div id="cleanKanban" style="display:none;">
           <p style="font-size:0.85rem; color:#059669; font-weight:700; background:#dcfce7; padding:8px 12px; border-radius:6px; margin-bottom:14px;">
             <i class="fa-solid fa-hand-pointer"></i> 提示：<strong>點擊座號即可原地亮綠燈，寵物自動 +1 分</strong>（再次點擊取消並扣 1 分）。
@@ -887,7 +887,6 @@
       const containerAM = document.getElementById('cleanBoxesContainerAM');
       containerAM.innerHTML = '';
       cleanBoxesAM.forEach((box, bIdx) => {
-        // 移除自動排序，保持原本被拖入時的先後順序固定不動
         const col = document.createElement('div');
         col.className = 'clean-col';
         col.innerHTML = `
@@ -951,7 +950,6 @@
       const containerPM = document.getElementById('cleanBoxesContainerPM');
       containerPM.innerHTML = '';
       cleanBoxesPM.forEach((box, bIdx) => {
-        // 移除自動排序，保持原地不動
         const col = document.createElement('div');
         col.className = 'clean-col';
         col.innerHTML = `
@@ -1287,11 +1285,18 @@
     }
 
     function resetCurrentInteractive() {
-      if(confirm("確定重整當前項目的紀錄？")) {
+      if(confirm("確定重整當前項目的紀錄？（打掃工作只會清除亮燈，位置保留）")) {
         if(currentInteractiveMode === 'hw') interactiveHwState = {};
         else if(currentInteractiveMode === 'clean') {
-          cleanBoxesAM.forEach(b => b.students = []);
-          cleanBoxesPM.forEach(b => b.students = []);
+          // 修改處：只清除亮燈狀態 (done = false)，位置不動
+          cleanBoxesAM.forEach(b => b.students.forEach(s => {
+            if (s.done) addPetXp(s.seat, -1); // 扣回亮燈加分
+            s.done = false;
+          }));
+          cleanBoxesPM.forEach(b => b.students.forEach(s => {
+            if (s.done) addPetXp(s.seat, -1);
+            s.done = false;
+          }));
           renderCleanBoards();
         }
         else if(currentInteractiveMode === 'teeth') teethLampState = {};
