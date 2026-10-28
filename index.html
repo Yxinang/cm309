@@ -269,7 +269,7 @@
         <!-- 3. 整潔大師看板 -->
         <div id="cleanlinessBoardSection" style="display:none;">
           <p style="font-size:0.85rem; color:#15803d; font-weight:700; margin-bottom:10px; background:#dcfce7; padding:6px 10px; border-radius:6px;">
-            <i class="fa-solid fa-sparkles"></i> 規則 : 拖入【整潔】的孩子立即獲得寵物加分（+1），其餘未達標項目不扣分！
+            <i class="fa-solid fa-sparkles"></i> 規則：拖入【整潔】的孩子立即獲得寵物加分（+1），其餘未達標項目不扣分！
           </p>
           <div class="clean-board full" style="margin-bottom:12px;">
             <div class="clean-col" style="background:#f1f5f9; border-color:#cbd5e1; min-height:80px;">
@@ -289,13 +289,12 @@
           </div>
         </div>
 
-        <!-- 4. 打掃工作看板（位置絕對固定，點擊原地亮燈不加圖案） -->
+        <!-- 4. 打掃工作看板 -->
         <div id="cleanKanban" style="display:none;">
           <p style="font-size:0.85rem; color:#059669; font-weight:700; background:#dcfce7; padding:8px 12px; border-radius:6px; margin-bottom:14px;">
             <i class="fa-solid fa-hand-pointer"></i> 提示：<strong>點擊座號即可原地亮綠燈，寵物自動 +1 分</strong>（再次點擊取消並扣 1 分）。
           </p>
 
-          <!-- 📌 最上方共用座號池 -->
           <div class="clean-board full" style="margin-bottom:20px;">
             <div class="clean-col" style="background:#f1f5f9; border-color:#94a3b8; min-height:80px;">
               <h4 style="color:#334155; border-bottom-color:#cbd5e1;">👥 全班待分配座號池 (每行 10 格，拖入打掃區後即移出)</h4>
@@ -303,7 +302,6 @@
             </div>
           </div>
 
-          <!-- ☀️ 上半部：早自修時間 (7:40～7:55) -->
           <div style="background:#f8fafc; border:2px solid #bae6fd; border-radius:12px; padding:14px; margin-bottom:20px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
               <h3 style="color:#0284c7; font-size:1rem; display:flex; align-items:center; gap:6px;">
@@ -314,7 +312,6 @@
             <div class="clean-board" id="cleanBoxesContainerAM"></div>
           </div>
 
-          <!-- 🌙 下半部：環保時間 (3:00～3:20) -->
           <div style="background:#f8fafc; border:2px solid #fed7aa; border-radius:12px; padding:14px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
               <h3 style="color:#c2410c; font-size:1rem; display:flex; align-items:center; gap:6px;">
@@ -332,7 +329,13 @@
     <!-- 第六部分：寵物養成系統 -->
     <section id="tab-pets" class="page-section">
       <div class="card">
-        <div class="card-title"><i class="fa-solid fa-paw text-secondary"></i> 班級神秘寵物樂園</div>
+        <div class="card-title" style="justify-content: space-between;">
+          <span><i class="fa-solid fa-paw text-secondary"></i> 班級神秘寵物樂園</span>
+          <!-- 💡 快速補救按鈕：一鍵幫全班動物園補回 1 隻成體動物 -->
+          <button onclick="emergencyRestoreGarden()" style="background:#d97706; color:#fff; border:none; padding:6px 12px; border-radius:8px; font-size:0.8rem; font-weight:700; cursor:pointer;">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> 一鍵幫全班動物園補回 1 隻成體
+          </button>
+        </div>
         <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px; line-height:1.5;">
           一開始會隨機獲得神秘的蛋，升級後才會破殼揭曉真正品種！滿等後可送入個人專屬「寵物園」。<br>
           <strong style="color:#2563eb;">成長階段：🥚 蛋(0-20分) ➔ 🐤 幼體(20-40分) ➔ 🦅 成體(40-55分)</strong>
@@ -792,6 +795,22 @@
         });
     }
 
+    // === 💡 一鍵緊急幫全班動物園補回 1 隻成體動物 ===
+    function emergencyRestoreGarden() {
+      if (confirm("確定要一鍵幫全班每個小朋友的動物園補回 1 隻成體動物嗎？")) {
+        students.forEach((name, i) => {
+          const seat = i + 1;
+          if (!petCollection[seat]) petCollection[seat] = [];
+          // 隨機補一隻動物進去
+          const randomPet = PET_CATALOG[Math.floor(Math.random() * PET_CATALOG.length)];
+          petCollection[seat].push({ petId: randomPet.id, prize: null, redeemed: false, pairId: null });
+        });
+        syncToFirebase();
+        if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
+        alert("✅ 已成功為全班每個小朋友的動物園補回 1 隻成體動物！");
+      }
+    }
+
     // === 師生互動區切換 ===
     function switchInteractiveMode(mode) {
       currentInteractiveMode = mode;
@@ -905,7 +924,6 @@
           tag.className = `drag-tag ${isDone ? 'is-clean-done' : ''}`;
           tag.setAttribute('data-seat', st.seat);
           tag.setAttribute('data-name', st.name);
-          // 拿掉 ✨ 符號，點擊時純粹原地亮燈
           tag.innerHTML = `
             <span onclick="toggleStudentCleanDone('am', ${bIdx}, ${sIdx})" style="cursor:pointer; display:inline-block; padding:0 2px;">
               ${st.name}
@@ -969,7 +987,6 @@
           tag.className = `drag-tag ${isDone ? 'is-clean-done' : ''}`;
           tag.setAttribute('data-seat', st.seat);
           tag.setAttribute('data-name', st.name);
-          // 拿掉 ✨ 符號，點擊時純粹原地亮燈
           tag.innerHTML = `
             <span onclick="toggleStudentCleanDone('pm', ${bIdx}, ${sIdx})" style="cursor:pointer; display:inline-block; padding:0 2px;">
               ${st.name}
