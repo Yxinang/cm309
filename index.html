@@ -568,12 +568,9 @@
 
     const PET_REQ = [20, 20, 15]; 
 
+    // 💡 優先從 localStorage 讀取自訂座號
     let storedStudents = JSON.parse(localStorage.getItem('cm309_students'));
-    if (!storedStudents || storedStudents.length !== 25 || storedStudents[0].includes("黃")) {
-      storedStudents = DEFAULT_STUDENTS;
-      localStorage.setItem('cm309_students', JSON.stringify(storedStudents));
-    }
-    let students = storedStudents;
+    let students = (storedStudents && storedStudents.length > 0) ? storedStudents : DEFAULT_STUDENTS;
 
     let sheetsWebhookUrl = localStorage.getItem('cm309_sheets_url') || "";
     let firebaseDbUrl = localStorage.getItem('cm309_firebase_url') || "";
@@ -1634,7 +1631,6 @@
     }
 
     function closeRewardModal() {
-      document.getElementById('rewardRedeemModal').classList.add('active'); // Wait, modal close
       document.getElementById('rewardRedeemModal').classList.remove('active');
       firstSelectedPetIndex = null;
       selectedRedeemPair = null;
