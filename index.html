@@ -579,18 +579,15 @@
     let firebaseDbUrl = localStorage.getItem('cm309_firebase_url') || "";
     let announcements = JSON.parse(localStorage.getItem('cm309_announcements')) || [];
     
-    // 💡 修正：優先從 localStorage 讀取寵物與動物園，若沒有才使用初始值，確保重整不消失
     let petState = JSON.parse(localStorage.getItem('cm309_pets')) || INITIAL_PETS;
     let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
     
-    // 早自修打掃工作區塊資料
     let cleanBoxesAM = JSON.parse(localStorage.getItem('cm309_cleanBoxesAM')) || [
       { id: 'am_1', title: '教室內', students: [] },
       { id: 'am_2', title: '走廊', students: [] },
       { id: 'am_3', title: '黑板', students: [] }
     ];
 
-    // 環保時間打掃工作區塊資料
     let cleanBoxesPM = JSON.parse(localStorage.getItem('cm309_cleanBoxesPM')) || [
       { id: 'pm_1', title: '拖地', students: [] },
       { id: 'pm_2', title: '窗戶', students: [] },
@@ -688,7 +685,7 @@
     }
 
     function syncToFirebase() {
-      // 💡 確保每次變更時強制存入 localStorage
+      localStorage.setItem('cm309_students', JSON.stringify(students));
       localStorage.setItem('cm309_attState', JSON.stringify(attendanceState));
       localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
       localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState));
@@ -746,7 +743,7 @@
         .then(res => res.json())
         .then(data => {
           if (data) {
-            if (data.students && data.students.length > 0 && !data.students[0].includes("黃")) {
+            if (data.students && data.students.length > 0) {
               students = data.students;
             } else {
               students = DEFAULT_STUDENTS;
@@ -761,7 +758,6 @@
             if (data.petState && Object.keys(data.petState).length > 0) {
               petState = data.petState;
             }
-            // 💡 確保雲端有 petCollection 時同步覆蓋
             if (data.petCollection && Object.keys(data.petCollection).length > 0) {
               petCollection = data.petCollection;
             }
@@ -799,7 +795,6 @@
         });
     }
 
-    // === 💡 緊急救援按鈕：一鍵幫全班動物園補回 1 隻成體動物 ===
     function emergencyRestoreGarden() {
       if (confirm("確定要一鍵幫全班每個小朋友的動物園補回 1 隻成體動物嗎？")) {
         students.forEach((name, i) => {
@@ -814,7 +809,6 @@
       }
     }
 
-    // === 師生互動區切換 ===
     function switchInteractiveMode(mode) {
       currentInteractiveMode = mode;
       document.querySelectorAll('#tab-interactive .form-chip').forEach(b => b.classList.remove('active'));
@@ -853,7 +847,6 @@
       renderInteractiveGrid();
     }
 
-    // === 上下雙區塊打掃工作看板邏輯（座號位置固定，不重新排序，原地亮燈） ===
     function renderCleanBoards() {
       const assignedSeats = new Set();
       cleanBoxesAM.forEach(b => b.students.forEach(s => assignedSeats.add(String(s.seat))));
@@ -1378,7 +1371,6 @@
       alert(`已彙整上傳至 Google 試算表！\n\n${detailText}`);
     }
 
-    // === 點名功能 ===
     function renderAttendanceGrid() {
       const container = document.getElementById('attendanceGrid'); container.innerHTML = '';
       students.forEach((name, i) => {
@@ -1396,7 +1388,6 @@
       sendToSheets({ category: "每日點名", student: "全班", detail: txt }); alert(`已上傳至 Google 試算表！\n${txt}`);
     }
 
-    // === 🐾 寵物養成系統 ===
     function addPetXp(seat, amount) {
       let seatNum = parseInt(seat);
       if (!petState[seatNum]) {
@@ -1643,6 +1634,7 @@
     }
 
     function closeRewardModal() {
+      document.getElementById('rewardRedeemModal').classList.add('active'); // Wait, modal close
       document.getElementById('rewardRedeemModal').classList.remove('active');
       firstSelectedPetIndex = null;
       selectedRedeemPair = null;
@@ -1720,7 +1712,6 @@
 
     function closePetModal() { document.getElementById('petManageModal').classList.remove('active'); }
 
-    // === Google 試算表日誌寫入 ===
     function handleRecordSubmit(e) {
       e.preventDefault();
       sendToSheets({ category: document.getElementById('recordType').value, student: document.getElementById('recordStudentSelect').value, detail: document.getElementById('recordDetail').value, followup: document.getElementById('recordFollowup').value });
@@ -1731,13 +1722,18 @@
       const data = { timestamp: new Date().toISOString(), timeDisplay: new Date().toLocaleString('zh-TW'), className: "三年九班", ...payload };
       fetch(sheetsWebhookUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
     }
+
+    // 💡 修正：儲存座號時立即存入 localStorage 並同步到 Firebase
     function saveStudentRoster() {
-      const txt = document.getElementById('studentRosterInput').value.trim(); if(!txt) return;
-      students = txt.split('\n').map(s=>s.trim()).filter(s=>s.length>0); 
+      const txt = document.getElementById('studentRosterInput').value.trim(); 
+      if(!txt) return;
+      students = txt.split('\n').map(s => s.trim()).filter(s => s.length > 0); 
+      localStorage.setItem('cm309_students', JSON.stringify(students));
       renderAllGrids(); 
-      alert("座號設定已更新！");
+      alert("✅ 座號設定已更新並儲存！");
       syncToFirebase();
     }
+
     function saveSheetsUrl() { 
       sheetsWebhookUrl = document.getElementById('sheetsApiUrlInput').value.trim(); 
       localStorage.setItem('cm309_sheets_url', sheetsWebhookUrl); 
