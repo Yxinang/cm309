@@ -335,7 +335,7 @@
         };
 
         let selectedGachaType = 'homework';
-        let activeCouponModalData = null; // { category: 'direct'|'gacha'|'ladder'|'battle', index: 0 }
+        let activeCouponModalData = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             initApp();
@@ -366,7 +366,7 @@
             if (!gameData[seatNum]) {
                 gameData[seatNum] = { extraCoins: 0, directCoupons: [], gachaCoupons: [], ladderCoupons: [], battleCoupons: [], coinLogs: [] };
             }
-            // 兼容舊資料格式若有 tickets / specials 自動轉移到新 4 大卷類陣列
+            // 兼容舊資料轉換
             if (gameData[seatNum].tickets && gameData[seatNum].tickets.length > 0) {
                 gameData[seatNum].gachaCoupons = gameData[seatNum].gachaCoupons.concat(gameData[seatNum].tickets);
                 gameData[seatNum].tickets = [];
@@ -408,17 +408,15 @@
             let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
             let myAdultPets = petCollection[seatNum] || [];
 
-            // 1. 先檢查主頁面寵物園中的寵物是否有 redeemed 且 prize 包含 "扭蛋卷"
             let foundIndex = myAdultPets.findIndex(p => p.redeemed && p.prize && p.prize.includes("扭蛋卷") && !p.gachaUsed);
             if (foundIndex !== -1) {
-                myAdultPets[foundIndex].gachaUsed = true; // 標記這張卷已使用
+                myAdultPets[foundIndex].gachaUsed = true;
                 petCollection[seatNum] = myAdultPets;
                 localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
                 syncToFirebase();
                 return true;
             }
 
-            // 2. 檢查背包中第二區(扭蛋獎品區)是否有未使用的扭蛋卷
             let gData = getStudentGameData(seatNum);
             let gachaTicketIdx = gData.gachaCoupons.findIndex(t => (t.name.includes("扭蛋卷") || t.name.includes("扭蛋")) && !t.isUsed);
             if (gachaTicketIdx !== -1) {
@@ -472,7 +470,6 @@
             let pCount = getAdultPetCount(seatNum);
             let totalCoins = getTotalCoins(seatNum);
 
-            // 計算背包中可用的扭蛋卷總數（主頁面未使用的扭蛋卷 + 背包中的扭蛋卷）
             let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
             let myAdultPets = petCollection[seatNum] || [];
             let unspentHomeTickets = myAdultPets.filter(p => p.redeemed && p.prize && p.prize.includes("扭蛋卷") && !p.gachaUsed).length;
@@ -732,7 +729,7 @@
                     document.getElementById('dynamicPrizeModal').classList.remove('hidden');
                     setTimeout(() => document.getElementById('dynamicPrizeInput').focus(), 100);
                 } else if (wonPrize.type === "ticket") {
-                    gData.gachaCoupons.push({ name: "扭蛋卷", date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
+                    gData.battleCoupons.push({ name: "扭蛋卷", date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
                     saveGameData();
                     resText = `🎉 挑戰成功！贏了電腦，獲得：${wonPrize.text}！`;
                     showRewardPopup(wonPrize.text);
@@ -872,7 +869,7 @@
             updateView();
         }
 
-        // 通用卷類渲染函式 (區分 4 大卷類區塊)
+        // 通用卷類渲染函式
         function renderCoupons(containerId, couponsArray, categoryName) {
             let container = document.getElementById(containerId);
             container.innerHTML = '';
@@ -954,7 +951,7 @@
             }
         }
 
-        // 第三區 (第五區)：代幣獲得紀錄
+        // 第五區：代幣獲得紀錄
         function renderCoinLogs() {
             let container = document.getElementById('myCoinLogs');
             let seatNum = getCurrentSeatNum();
