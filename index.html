@@ -331,7 +331,6 @@
       <div class="card">
         <div class="card-title" style="justify-content: space-between;">
           <span><i class="fa-solid fa-paw text-secondary"></i> 班級神秘寵物樂園</span>
-          <!-- 💡 快速補救按鈕：一鍵幫全班動物園補回 1 隻成體動物 -->
           <button onclick="emergencyRestoreGarden()" style="background:#d97706; color:#fff; border:none; padding:6px 12px; border-radius:8px; font-size:0.8rem; font-weight:700; cursor:pointer;">
             <i class="fa-solid fa-wand-magic-sparkles"></i> 一鍵幫全班動物園補回 1 隻成體
           </button>
@@ -580,6 +579,7 @@
     let firebaseDbUrl = localStorage.getItem('cm309_firebase_url') || "";
     let announcements = JSON.parse(localStorage.getItem('cm309_announcements')) || [];
     
+    // 💡 修正：優先從 localStorage 讀取寵物與動物園，若沒有才使用初始值，確保重整不消失
     let petState = JSON.parse(localStorage.getItem('cm309_pets')) || INITIAL_PETS;
     let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
     
@@ -688,6 +688,7 @@
     }
 
     function syncToFirebase() {
+      // 💡 確保每次變更時強制存入 localStorage
       localStorage.setItem('cm309_attState', JSON.stringify(attendanceState));
       localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
       localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState));
@@ -760,7 +761,10 @@
             if (data.petState && Object.keys(data.petState).length > 0) {
               petState = data.petState;
             }
-            petCollection = data.petCollection || {};
+            // 💡 確保雲端有 petCollection 時同步覆蓋
+            if (data.petCollection && Object.keys(data.petCollection).length > 0) {
+              petCollection = data.petCollection;
+            }
             announcements = data.announcements || [];
             if (data.correctionBoxes) correctionBoxes = data.correctionBoxes;
             cleanlinessAssignment = data.cleanlinessAssignment || {};
@@ -795,13 +799,12 @@
         });
     }
 
-    // === 💡 一鍵緊急幫全班動物園補回 1 隻成體動物 ===
+    // === 💡 緊急救援按鈕：一鍵幫全班動物園補回 1 隻成體動物 ===
     function emergencyRestoreGarden() {
       if (confirm("確定要一鍵幫全班每個小朋友的動物園補回 1 隻成體動物嗎？")) {
         students.forEach((name, i) => {
           const seat = i + 1;
           if (!petCollection[seat]) petCollection[seat] = [];
-          // 隨機補一隻動物進去
           const randomPet = PET_CATALOG[Math.floor(Math.random() * PET_CATALOG.length)];
           petCollection[seat].push({ petId: randomPet.id, prize: null, redeemed: false, pairId: null });
         });
@@ -852,12 +855,10 @@
 
     // === 上下雙區塊打掃工作看板邏輯（座號位置固定，不重新排序，原地亮燈） ===
     function renderCleanBoards() {
-      // 收集所有已經被分配到早自修或環保時間的座號
       const assignedSeats = new Set();
       cleanBoxesAM.forEach(b => b.students.forEach(s => assignedSeats.add(String(s.seat))));
       cleanBoxesPM.forEach(b => b.students.forEach(s => assignedSeats.add(String(s.seat))));
 
-      // 1. 渲染最上方共用座號池（濾掉已被分配的座號）
       const poolShared = document.getElementById('cleanPoolShared');
       poolShared.innerHTML = '';
       students.forEach((name, i) => {
@@ -902,7 +903,6 @@
         }
       });
 
-      // 2. 渲染早自修 (AM) 區塊
       const containerAM = document.getElementById('cleanBoxesContainerAM');
       containerAM.innerHTML = '';
       cleanBoxesAM.forEach((box, bIdx) => {
@@ -965,7 +965,6 @@
         });
       });
 
-      // 3. 渲染環保時間 (PM) 區塊
       const containerPM = document.getElementById('cleanBoxesContainerPM');
       containerPM.innerHTML = '';
       cleanBoxesPM.forEach((box, bIdx) => {
