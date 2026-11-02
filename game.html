@@ -291,11 +291,14 @@
 
     <!-- JavaScript 邏輯 -->
     <script>
-        let students = JSON.parse(localStorage.getItem('cm309_students')) || [
+        const DEFAULT_STUDENTS = [
             "1號", "2號", "3號", "4號", "5號", "6號", "7號", "8號", "9號", "10號",
             "11號", "12號", "13號", "14號", "15號", "16號", "17號", "18號", "19號", "20號",
             "21號", "22號", "23號", "24號", "25號", "26號（測試用）"
         ];
+
+        let storedStudents = JSON.parse(localStorage.getItem('cm309_students'));
+        let students = (storedStudents && storedStudents.length > 0) ? storedStudents : DEFAULT_STUDENTS;
 
         let gameData = {};
         let currentSeatIndex = 0; 
