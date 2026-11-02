@@ -1,1740 +1,1026 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>崇明國小三年九班 - 班級管理與智慧互動系統</title>
-  
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-
-  <style>
-    :root {
-      --primary: #2563eb; --primary-light: #eff6ff; --secondary: #10b981;
-      --warning: #f59e0b; --danger: #ef4444; --gray-bg: #f8fafc;
-      --card-bg: #ffffff; --text-main: #1e293b; --text-sub: #64748b;
-      --border: #e2e8f0; --radius: 12px;
-      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; }
-    body { background-color: var(--gray-bg); color: var(--text-main); padding-bottom: 80px; }
-
-    header {
-      background-color: var(--card-bg); border-bottom: 1px solid var(--border);
-      position: sticky; top: 0; z-index: 50; padding: 12px 20px;
-      display: flex; justify-content: space-between; align-items: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-    }
-    .header-title h1 { font-size: 1.15rem; font-weight: 700; color: #1e40af; }
-    .header-title p { font-size: 0.8rem; color: var(--text-sub); }
-    .cloud-status {
-      font-size: 0.75rem; padding: 5px 12px; border-radius: 20px; cursor: pointer;
-      background: #e0f2fe; color: #0284c7; display: flex; align-items: center; gap: 6px;
-      font-weight: 600; transition: all 0.2s;
-    }
-    .cloud-status.active { background: #dcfce7; color: #15803d; }
-    .cloud-status.syncing { background: #fef3c7; color: #b45309; }
-
-    .tab-bar {
-      display: flex; gap: 8px; background: #fff; padding: 8px 16px;
-      border-bottom: 1px solid var(--border); overflow-x: auto;
-      white-space: nowrap; scrollbar-width: none;
-    }
-    .tab-bar::-webkit-scrollbar { display: none; }
-    .tab-btn {
-      padding: 8px 14px; border: none; border-radius: 8px; background: transparent;
-      color: var(--text-sub); font-size: 0.9rem; font-weight: 500; cursor: pointer;
-      display: flex; align-items: center; gap: 6px; transition: all 0.2s;
-    }
-    .tab-btn.active { background: var(--primary-light); color: var(--primary); font-weight: 700; }
-
-    .container { max-width: 960px; margin: 20px auto; padding: 0 16px; }
-    .page-section { display: none; }
-    .page-section.active { display: block; animation: fadeIn 0.25s; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-
-    .card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; margin-bottom: 20px; border: 1px solid var(--border); }
-    .card-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; color: #334155; }
-
-    .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding: 10px 14px; background: #f1f5f9; border-radius: 8px; flex-wrap: wrap; gap: 8px; }
-    .btn-upload { background: #059669; color: #fff; border: none; border-radius: 6px; padding: 7px 14px; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-    .btn-reset { background: #fff; color: #dc2626; border: 1.5px solid #fca5a5; border-radius: 6px; padding: 6px 12px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-
-    .student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 10px; }
-    .student-btn {
-      background: #fff; border: 1.5px solid var(--border); border-radius: 10px;
-      padding: 10px 8px; text-align: center; cursor: pointer; transition: all 0.2s;
-      display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; touch-action: manipulation; position: relative;
-    }
-    .student-btn:hover { border-color: var(--primary); transform: translateY(-1px); }
-    .student-btn .seat { font-size: 1rem; color: #1e293b; font-weight: 700; }
-    .student-btn .status { font-size: 0.72rem; margin-top: 4px; border-radius: 4px; padding: 2px 6px; }
-
-    .att-present { background-color: #ecfdf5; border-color: #34d399; color: #065f46; }
-    .att-absent { background-color: #fef2f2; border-color: #f87171; color: #991b1b; }
-    .att-sick { background-color: #fffbeb; border-color: #fbbf24; color: #92400e; }
-    .att-late { background-color: #f5f3ff; border-color: #a78bfa; color: #5b21b6; }
-
-    .indicator-lamp { width: 12px; height: 12px; border-radius: 50%; background: #cbd5e1; margin-bottom: 2px; }
-    .is-lit { background: #f0fdf4 !important; border-color: #22c55e !important; box-shadow: 0 0 10px rgba(34, 197, 94, 0.3); }
-    .is-lit .indicator-lamp { background: #22c55e !important; box-shadow: 0 0 8px #22c55e; }
-    
-    .hw-green { background: #f0fdf4 !important; border-color: #16a34a !important; }
-    .hw-green .status { background: #dcfce7; color: #15803d; }
-    .hw-blue { background: #eff6ff !important; border-color: #2563eb !important; }
-    .hw-blue .status { background: #dbeafe; color: #1d4ed8; }
-    .hw-red { background: #fef2f2 !important; border-color: #dc2626 !important; }
-    .hw-red .status { background: #fee2e2; color: #b91c1c; }
-    .hw-orange { background: #fff7ed !important; border-color: #ea580c !important; }
-    .hw-orange .status { background: #ffedd5; color: #c2410c; }
-    .hw-teal { background: #f0fdfa !important; border-color: #0d9488 !important; }
-    .hw-teal .status { background: #ccfbf1; color: #0f766e; }
-
-    .clean-board { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 14px; }
-    .clean-board.full { grid-template-columns: 1fr; } 
-    .clean-col { background: #f8fafc; border: 1.5px dashed var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; min-height: 130px; }
-    .clean-col h4 { font-size: 0.9rem; color: #334155; margin-bottom: 8px; text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
-    .clean-list { flex-grow: 1; min-height: 70px; display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
-    .sortable-ghost { opacity: 0.4; background: #e2e8f0; }
-
-    .ten-col-pool {
-      display: grid !important;
-      grid-template-columns: repeat(10, 1fr) !important;
-      gap: 6px !important;
-      width: 100% !important;
-    }
-    @media (max-width: 768px) {
-      .ten-col-pool { grid-template-columns: repeat(5, 1fr) !important; }
-    }
-
-    .drag-tag {
-      background: #fff; border: 1.5px solid var(--border); border-radius: 6px;
-      padding: 6px 10px; font-size: 0.88rem; font-weight: 700; display: inline-flex;
-      justify-content: center; align-items: center; gap: 6px; cursor: grab; user-select: none; transition: all 0.15s;
-      text-align: center;
-    }
-    .drag-tag .btn-remove-tag { color: #ef4444; cursor: pointer; font-size: 0.75rem; margin-left: 2px; }
-    
-    .drag-tag.is-corrected, .drag-tag.is-clean-done {
-      background: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important;
-      box-shadow: 0 0 8px rgba(34, 197, 94, 0.3) !important; font-weight: 800;
-    }
-
-    .form-group { margin-bottom: 12px; }
-    .form-control { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; outline: none; }
-    .btn-submit { width: 100%; padding: 12px; background: var(--primary); color: #fff; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; }
-    
-    .form-chip { padding: 6px 14px; background: #e2e8f0; border-radius: 20px; font-size: 0.85rem; cursor: pointer; border: none; white-space: nowrap; font-weight: 600; }
-    .form-chip.active { background: var(--primary); color: #fff; }
-
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; padding: 16px; }
-    .modal-overlay.active { display: flex; animation: fadeIn 0.15s; }
-    .modal-box { background: #fff; border-radius: var(--radius); width: 100%; max-width: 520px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto;}
-    .modal-options { display: flex; flex-direction: column; gap: 8px; }
-    .opt-btn { padding: 12px; border-radius: 8px; border: 1.5px solid var(--border); background: #fff; text-align: left; font-size: 0.95rem; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px; }
-
-    .pet-emoji { display: block; text-align: center; margin: 4px 0; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .pet-emoji.s1 { font-size: 24px; }
-    .pet-emoji.s2 { font-size: 32px; transform: scale(1.1); }
-    .pet-emoji.s3 { font-size: 46px; transform: scale(1.2); }
-    .pet-emoji.s4 { font-size: 46px; transform: scale(1.2); text-shadow: 0 0 15px #fde047; }
-    .pet-btn:hover .pet-emoji { transform: translateY(-3px) scale(1.1); }
-    .pet-progress-bg { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 6px; }
-    .pet-progress-fill { height: 100%; background: #10b981; transition: width 0.4s ease-out; }
-    .pet-info { font-size: 0.65rem; color: #64748b; margin-top: 4px; display: flex; justify-content: space-between; width: 100%; }
-    .pet-select-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-    .pet-card { border: 2px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; cursor: pointer; transition: all 0.2s; background:#f8fafc; }
-    .pet-card:hover { border-color: var(--primary); background: var(--primary-light); }
-    .pet-card .emoji { font-size: 36px; margin-bottom: 4px; }
-    .pet-card .name { font-size: 0.95rem; font-weight: 700; color: #1e293b; }
-
-    .garden-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 10px; margin-top: 15px; }
-    .garden-item {
-      border: 1.5px dashed var(--border); border-radius: 10px; padding: 10px 6px; text-align: center;
-      background: #f0fdf4; border-color: #86efac; cursor: pointer; transition: all 0.2s; position: relative;
-    }
-    .garden-item:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-    .garden-item.is-selected-first {
-      border: 2px solid #2563eb !important; background: #eff6ff !important;
-      box-shadow: 0 0 12px rgba(37, 99, 235, 0.5) !important;
-    }
-    .garden-item .emoji { font-size: 34px; }
-    .garden-item .name { font-size: 0.75rem; font-weight: 700; color: #15803d; margin-top: 4px; }
-    
-    .garden-item.is-redeemed {
-      background: #fffbeb !important;
-      border: 2px solid #eab308 !important;
-      box-shadow: 0 0 12px rgba(234, 179, 8, 0.45) !important;
-    }
-    .garden-item.is-redeemed .name { color: #b45309 !important; }
-    .redeemed-badge {
-      font-size: 0.65rem; background: #fef08a; color: #854d0e; padding: 2px 4px;
-      border-radius: 4px; margin-top: 4px; display: inline-block; font-weight: 700;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;
-    }
-
-    .ticket-summary-box {
-      background: #fffbeb; border: 1.5px solid #fde047; border-radius: 8px;
-      padding: 10px 14px; margin-top: 10px; text-align: center; font-size: 0.88rem;
-      color: #854d0e; font-weight: 700; display: flex; justify-content: space-around; align-items: center;
-    }
-
-    @media (max-width: 768px) {
-      .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; z-index: 50; border-top: 1px solid var(--border); justify-content: space-around; padding: 6px 0; }
-      .tab-btn { flex-direction: column; font-size: 0.68rem; gap: 3px; padding: 4px; }
-      body { padding-bottom: 70px; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>309 歡樂遊樂場與獎品兌換</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti CDN (慶祝特效) -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Noto+Sans+TC:wght@500;700&display=swap');
+        body { font-family: 'Fredoka', 'Noto Sans TC', sans-serif; background-color: #f0fdf4; }
+        .coupon-used {
+            background-color: #fef08a !important;
+            border-color: #eab308 !important;
+            box-shadow: 0 0 10px rgba(234, 179, 8, 0.4);
+        }
+    </style>
 </head>
-<body>
+<body class="min-h-screen text-gray-800 flex flex-col items-center p-4">
 
-  <header>
-    <div class="header-title">
-      <h1>崇明國小 三年九班</h1>
-      <p>班級管理與智慧互動系統</p>
-    </div>
-    <div id="cloudStatus" class="cloud-status" onclick="manualTriggerSync()">
-      <i class="fa-solid fa-cloud"></i>
-      <span id="cloudStatusText">未連線至雲端</span>
-    </div>
-  </header>
-
-  <nav class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('tab-attendance')"><i class="fa-solid fa-user-check"></i><span>點名</span></button>
-    <button class="tab-btn" onclick="switchTab('tab-interactive')"><i class="fa-solid fa-chalkboard-user"></i><span>師生互動</span></button>
-    <button class="tab-btn" onclick="switchTab('tab-pets')" style="color:#059669;"><i class="fa-solid fa-paw"></i><span>寵物養成</span></button>
-    <button class="tab-btn" onclick="switchTab('tab-records')"><i class="fa-solid fa-notes-medical"></i><span>傷病溝通</span></button>
-    <button class="tab-btn" onclick="switchTab('tab-settings')"><i class="fa-solid fa-gear"></i><span>設定</span></button>
-  </nav>
-
-  <main class="container">
-
-    <!-- 第一部分：到校點名 -->
-    <section id="tab-attendance" class="page-section active">
-      <div class="card">
-        <div class="card-title"><i class="fa-solid fa-clock text-primary"></i> 每日到校點名</div>
-        <div class="action-bar">
-          <div style="font-size:0.85rem; font-weight:600;" id="currentDateDisplay"></div>
-          <div class="action-group">
-            <button class="btn-reset" onclick="resetAttendance()"><i class="fa-solid fa-rotate-left"></i> 重整全到</button>
-            <button class="btn-upload" onclick="uploadAttendanceBatch()"><i class="fa-solid fa-cloud-arrow-up"></i> 彙整上傳試算表</button>
-          </div>
+    <!-- 頂部導覽列 -->
+    <header class="w-full max-w-4xl bg-white shadow-md rounded-2xl p-4 mb-6 flex flex-wrap justify-between items-center border-4 border-emerald-300">
+        <div class="flex items-center space-x-3 mb-2 sm:mb-0">
+            <span class="text-3xl">🐱</span>
+            <h1 class="text-2xl font-bold text-emerald-600">309 班級遊樂場與兌換</h1>
         </div>
-        <div class="student-grid" id="attendanceGrid"></div>
-      </div>
-    </section>
-
-    <!-- 第五部分：師生互動版 -->
-    <section id="tab-interactive" class="page-section">
-      <div style="display:flex; gap:8px; margin-bottom:12px; overflow-x:auto;">
-        <button class="form-chip active" id="btn-sub-hw" onclick="switchInteractiveMode('hw')">1.作業繳交</button>
-        <button class="form-chip" id="btn-sub-correction" onclick="switchInteractiveMode('correction')">2.作業訂正</button>
-        <button class="form-chip" id="btn-sub-cleanliness" onclick="switchInteractiveMode('cleanliness')">3.整潔大師</button>
-        <button class="form-chip" id="btn-sub-clean" onclick="switchInteractiveMode('clean')">4.打掃工作</button>
-        <button class="form-chip" id="btn-sub-teeth" onclick="switchInteractiveMode('teeth')">5.潔牙高手</button>
-        <button class="form-chip" id="btn-sub-mouthwash" onclick="switchInteractiveMode('mouthwash')">6.漱口水</button>
-      </div>
-
-      <div class="card">
-        <div class="card-title" id="interactiveTitle"><i class="fa-solid fa-hand-pointer"></i> 師生互動看板</div>
-        <div class="action-bar">
-          <span style="font-size:0.85rem; font-weight:600;" id="currentInteractiveTitleDisplay">目前項目：作業繳交</span>
-          <div class="action-group">
-            <button class="btn-reset" onclick="resetCurrentInteractive()"><i class="fa-solid fa-arrow-rotate-left"></i> 重整</button>
-            <button class="btn-upload" onclick="uploadInteractiveBatch()"><i class="fa-solid fa-cloud-arrow-up"></i> 上傳試算表</button>
-          </div>
-        </div>
-
-        <div class="student-grid" id="interactiveGrid"></div>
-
-        <!-- 2. 作業訂正看板 -->
-        <div id="correctionBoardSection" style="display:none;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
-            <p style="font-size:0.85rem; color:#64748b;">
-              <i class="fa-solid fa-circle-info"></i> 每 10 格換行。<strong>點擊座號亮綠燈表示完成，並自動沉底</strong>。
-            </p>
-            <button class="btn-upload" style="background:#2563eb; font-size:0.8rem; padding:5px 12px;" onclick="addCorrectionBox()"><i class="fa-solid fa-plus"></i> 新增訂正分類框</button>
-          </div>
-          <div class="clean-board full" style="margin-bottom:12px;">
-            <div class="clean-col" style="background:#eff6ff; border-color:#93c5fd; min-height:80px;">
-              <h4 style="color:#1e40af; border-bottom-color:#bfdbfe;">📋 全班座號池 (每行 10 格，可重複拖出)</h4>
-              <div class="clean-list ten-col-pool" id="correctionPool"></div>
+        <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center space-x-2 bg-emerald-50 px-3 py-1.5 rounded-xl border-2 border-emerald-200">
+                <label for="studentSelect" class="font-bold text-sm text-emerald-700">座號：</label>
+                <select id="studentSelect" onchange="switchStudent()" class="bg-white border border-emerald-300 rounded-lg px-2 py-1 font-bold text-emerald-800 focus:outline-none">
+                    <!-- 動態載入座號 -->
+                </select>
             </div>
-          </div>
-          <div class="clean-board" id="correctionBoxesContainer"></div>
-        </div>
-
-        <!-- 3. 整潔大師看板 -->
-        <div id="cleanlinessBoardSection" style="display:none;">
-          <p style="font-size:0.85rem; color:#15803d; font-weight:700; margin-bottom:10px; background:#dcfce7; padding:6px 10px; border-radius:6px;">
-            <i class="fa-solid fa-sparkles"></i> 規則：拖入【整潔】的孩子立即獲得寵物加分（+1），其餘未達標項目不扣分！
-          </p>
-          <div class="clean-board full" style="margin-bottom:12px;">
-            <div class="clean-col" style="background:#f1f5f9; border-color:#cbd5e1; min-height:80px;">
-              <h4>👥 待檢查座號池 (拖曳分派)</h4>
-              <div class="clean-list" id="cleanlinessPool"></div>
+            <div class="flex items-center space-x-2 bg-purple-50 px-3 py-1.5 rounded-xl border-2 border-purple-200">
+                <span class="text-lg">🎟️</span>
+                <span class="text-sm font-bold text-purple-700">扭蛋卷：</span>
+                <span id="studentTicketsCount" class="text-base font-black text-purple-600">0</span>張
             </div>
-          </div>
-          <div class="clean-board">
-            <div class="clean-col" style="background:#f0fdf4; border-color:#86efac;">
-              <h4 style="color:#15803d; font-weight:700;">✨ 整潔 (加 1 分)</h4>
-              <div class="clean-list" id="zone-clean-tidy"></div>
+            <div class="bg-amber-100 border-2 border-amber-300 px-3.5 py-1.5 rounded-xl flex items-center space-x-1 shadow-inner">
+                <span class="text-xl">🪙</span>
+                <span class="text-sm font-bold text-amber-800">代幣(分)：</span>
+                <span id="studentCoins" class="text-lg font-black text-amber-600">0</span>
             </div>
-            <div class="clean-col"><h4>🪑 沒靠椅子</h4><div class="clean-list" id="zone-clean-chair"></div></div>
-            <div class="clean-col"><h4>📦 座位凌亂</h4><div class="clean-list" id="zone-clean-messy"></div></div>
-            <div class="clean-col"><h4>🎒 棉被書包未歸位</h4><div class="clean-list" id="zone-clean-bag"></div></div>
-            <div class="clean-col"><h4>📐 桌椅沒有對齊</h4><div class="clean-list" id="zone-clean-align"></div></div>
-          </div>
         </div>
+    </header>
 
-        <!-- 4. 打掃工作看板 -->
-        <div id="cleanKanban" style="display:none;">
-          <p style="font-size:0.85rem; color:#059669; font-weight:700; background:#dcfce7; padding:8px 12px; border-radius:6px; margin-bottom:14px;">
-            <i class="fa-solid fa-hand-pointer"></i> 提示：<strong>點擊座號即可原地亮綠燈，寵物自動 +1 分</strong>（再次點擊取消並扣 1 分）。
-          </p>
-
-          <div class="clean-board full" style="margin-bottom:20px;">
-            <div class="clean-col" style="background:#f1f5f9; border-color:#94a3b8; min-height:80px;">
-              <h4 style="color:#334155; border-bottom-color:#cbd5e1;">👥 全班待分配座號池 (每行 10 格，拖入打掃區後即移出)</h4>
-              <div class="clean-list ten-col-pool" id="cleanPoolShared"></div>
-            </div>
-          </div>
-
-          <div style="background:#f8fafc; border:2px solid #bae6fd; border-radius:12px; padding:14px; margin-bottom:20px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
-              <h3 style="color:#0284c7; font-size:1rem; display:flex; align-items:center; gap:6px;">
-                <i class="fa-solid fa-sun"></i> 早自修時間（7：40 ～ 7：55）
-              </h3>
-              <button class="btn-upload" style="background:#0284c7; font-size:0.8rem; padding:5px 12px;" onclick="addCleanBox('am')"><i class="fa-solid fa-plus"></i> 新增早自修打掃區</button>
-            </div>
-            <div class="clean-board" id="cleanBoxesContainerAM"></div>
-          </div>
-
-          <div style="background:#f8fafc; border:2px solid #fed7aa; border-radius:12px; padding:14px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
-              <h3 style="color:#c2410c; font-size:1rem; display:flex; align-items:center; gap:6px;">
-                <i class="fa-solid fa-leaf"></i> 環保時間（3：00 ～ 3：20）
-              </h3>
-              <button class="btn-upload" style="background:#d97706; font-size:0.8rem; padding:5px 12px;" onclick="addCleanBox('pm')"><i class="fa-solid fa-plus"></i> 新增環保時間打掃區</button>
-            </div>
-            <div class="clean-board" id="cleanBoxesContainerPM"></div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- 第六部分：寵物養成系統 -->
-    <section id="tab-pets" class="page-section">
-      <div class="card">
-        <div class="card-title" style="justify-content: space-between;">
-          <span><i class="fa-solid fa-paw text-secondary"></i> 班級神秘寵物樂園</span>
-          <button onclick="emergencyRestoreGarden()" style="background:#d97706; color:#fff; border:none; padding:6px 12px; border-radius:8px; font-size:0.8rem; font-weight:700; cursor:pointer;">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> 一鍵幫全班動物園補回 1 隻成體
-          </button>
-        </div>
-        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px; line-height:1.5;">
-          一開始會隨機獲得神秘的蛋，升級後才會破殼揭曉真正品種！滿等後可送入個人專屬「寵物園」。<br>
-          <strong style="color:#2563eb;">成長階段：🥚 蛋(0-20分) ➔ 🐤 幼體(20-40分) ➔ 🦅 成體(40-55分)</strong>
-        </p>
-        <div style="margin-bottom: 14px;">
-          <a href="game.html" class="bg-emerald-500 text-white px-4 py-2 rounded-xl" style="display: inline-block; background-color: #10b981; color: white; padding: 8px 16px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.9rem;">🎮 點我去玩扭蛋與兌換獎品</a>
-        </div>
-        <div class="student-grid" id="petsGrid"></div>
-      </div>
-    </section>
-
-    <!-- 第三部分：傷病與親師溝通 -->
-    <section id="tab-records" class="page-section">
-      <div class="card">
-        <div class="card-title"><i class="fa-solid fa-file-waveform"></i> 新增傷病 / 親師溝通紀錄</div>
-        <form onsubmit="handleRecordSubmit(event)">
-          <div class="form-group">
-            <select id="recordType" class="form-control">
-              <option value="傷病通知">🏥 健康/傷病通知單</option>
-              <option value="親師溝通">📞 親師聯絡/溝通紀錄</option>
-            </select>
-          </div>
-          <div class="form-group"><select id="recordStudentSelect" class="form-control"></select></div>
-          <div class="form-group"><textarea id="recordDetail" class="form-control" rows="3" placeholder="事由或情況說明..." required></textarea></div>
-          <div class="form-group"><input type="text" id="recordFollowup" class="form-control" placeholder="處理方式 / 聯絡反饋"></div>
-          <button type="submit" class="btn-submit"><i class="fa-solid fa-cloud-arrow-up"></i> 儲存並上傳至 Google 試算表</button>
-        </form>
-      </div>
-    </section>
-
-    <!-- 設定頁面 -->
-    <section id="tab-settings" class="page-section">
-      <div class="card" style="border: 2px solid #2563eb;">
-        <div class="card-title"><i class="fa-solid fa-database text-primary"></i> 1. 全班即時資料庫 (Firebase 雙向同步)</div>
-        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px;">
-          請確保手機與電腦填寫相同的 Firebase Realtime Database 網址：
-        </p>
-        <div class="form-group">
-          <input type="url" id="firebaseDbUrlInput" class="form-control" placeholder="例如: https://cm309-default-rtdb.firebaseio.com">
-        </div>
-        <button class="btn-submit" style="background:#2563eb;" onclick="saveFirebaseDbUrl()">
-          <i class="fa-solid fa-link"></i> 儲存並立即全域同步
-        </button>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><i class="fa-solid fa-table text-primary"></i> 2. Google 試算表 (記錄點名/作業/傷病日誌)</div>
-        <input type="url" id="sheetsApiUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
-        <button class="btn-submit" style="margin-top:8px; background:#059669;" onclick="saveSheetsUrl()">儲存試算表連結</button>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><i class="fa-solid fa-users-gear"></i> 3. 學生座號設定 (每行一個座號)</div>
-        <textarea id="studentRosterInput" class="form-control" rows="8" placeholder="每行一個座號..."></textarea>
-        <button class="btn-submit" style="margin-top:8px;" onclick="saveStudentRoster()">儲存座號設定</button>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><i class="fa-solid fa-triangle-exclamation text-danger"></i> 進階資料清除</div>
-        <button class="btn-submit" style="background:#ef4444;" onclick="resetAllPets()">
-          <i class="fa-solid fa-trash-can"></i> 一鍵刪除全班寵物與寵物園
-        </button>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- 作業狀態 Modal -->
-  <div id="hwStatusModal" class="modal-overlay">
-    <div class="modal-box">
-      <h3 id="hwModalTitle">挑選作業狀態</h3>
-      <div class="modal-options">
-        <button class="opt-btn" onclick="applyHwStatus('已繳交', 'hw-green')"><span style="color:#16a34a;">🟢 1. 已繳交 (+1分)</span></button>
-        <button class="opt-btn" onclick="applyHwStatus('忘記帶回家', 'hw-blue')"><span style="color:#2563eb;">🔵 2. 忘記帶回家</span></button>
-        <button class="opt-btn" onclick="applyHwStatus('未完成', 'hw-red')"><span style="color:#dc2626;">🔴 3. 未完成</span></button>
-        <button class="opt-btn" onclick="applyHwStatus('忘記帶來學校', 'hw-orange')"><span style="color:#ea580c;">🟠 4. 忘記帶來學校</span></button>
-        <button class="opt-btn" onclick="showMissingInput()"><span style="color:#0d9488;">✍ 5. 缺項 (自訂輸入)</span></button>
+    <!-- 主要功能區塊 -->
+    <main class="w-full max-w-4xl bg-white shadow-xl rounded-3xl p-6 border-4 border-emerald-200 mb-8">
         
-        <div id="missingInputArea" style="display:none; padding:10px; background:#f0fdfa; border:1px dashed #0d9488; border-radius:8px;">
-          <input type="text" id="hwMissingText" class="form-control" placeholder="輸入缺漏項目(如:數習)">
-          <button class="btn-submit" style="margin-top:8px; background:#0d9488;" onclick="submitMissingHw()">確認儲存</button>
+        <!-- 導覽標籤 -->
+        <div class="flex justify-center flex-wrap gap-2 mb-6 border-b-2 border-gray-100 pb-4">
+            <button onclick="switchTab('gacha')" id="tab-gacha" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-base transition-all bg-emerald-500 text-white shadow-md">🎁 三大扭蛋機</button>
+            <button onclick="switchTab('ladder')" id="tab-ladder" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-base transition-all bg-gray-100 text-gray-600 hover:bg-emerald-100">🧗 獲得金幣大冒險</button>
+            <button onclick="switchTab('battle')" id="tab-battle" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-base transition-all bg-gray-100 text-gray-600 hover:bg-emerald-100">⚔️ 數字比大小</button>
+            <button onclick="switchTab('shop')" id="tab-shop" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-base transition-all bg-gray-100 text-gray-600 hover:bg-emerald-100">🛍️ 學生資訊與獎品兌換</button>
         </div>
 
-        <button class="opt-btn" onclick="resetSingleStudentHw()" style="border-style:dashed; background:#f8fafc; justify-content:center;">
-          <span style="color:#64748b;">↺ 重設為「未登記」</span>
-        </button>
-      </div>
-      <button class="btn-submit" style="margin-top:14px; background:#94a3b8;" onclick="closeHwModal()">關閉</button>
+        <!-- 1. 三種扭蛋機畫面 (僅限使用扭蛋卷) -->
+        <div id="section-gacha" class="tab-content text-center py-6">
+            <h2 class="text-2xl font-bold text-emerald-700 mb-2">✨ 三大專屬扭蛋機 ✨</h2>
+            <p class="text-gray-500 mb-2">每次遊玩需消耗 <span class="font-bold text-purple-600">1 張扭蛋卷</span>（僅限透過主頁面雙寵物兌換獲得），請選擇扭蛋機類型：</p>
+            <p class="text-xs text-amber-600 font-bold mb-6">⚠️ 注意：扭蛋無法使用代幣遊玩！</p>
+            
+            <div class="flex justify-center flex-wrap gap-3 mb-6">
+                <button onclick="selectGachaType('homework')" id="gacha-btn-homework" class="gacha-type-btn bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-2xl shadow border-2 border-emerald-600">📚 功課方面扭蛋機</button>
+                <button onclick="selectGachaType('service')" id="gacha-btn-service" class="gacha-type-btn bg-gray-100 text-gray-700 font-bold px-5 py-2.5 rounded-2xl shadow border-2 border-gray-300">🧹 班級服務扭蛋機</button>
+                <button onclick="selectGachaType('boardgame')" id="gacha-btn-boardgame" class="gacha-type-btn bg-gray-100 text-gray-700 font-bold px-5 py-2.5 rounded-2xl shadow border-2 border-gray-300">🎲 桌遊類扭蛋機</button>
+            </div>
+
+            <div class="bg-emerald-50 border-2 border-emerald-200 rounded-3xl p-6 max-w-xl mx-auto mb-6 relative">
+                <div class="flex justify-between items-center mb-4">
+                    <span id="currentGachaTitle" class="text-lg font-black text-emerald-800">目前選擇：功課方面扭蛋機</span>
+                    <button onclick="openExplainModal()" class="bg-white hover:bg-emerald-100 text-emerald-700 font-bold text-xs px-3 py-1.5 rounded-xl border border-emerald-300 shadow-sm transition-all">📖 解釋說明管理</button>
+                </div>
+
+                <div class="w-40 h-40 mx-auto bg-gradient-to-b from-pink-400 to-red-500 rounded-full flex items-center justify-center shadow-xl border-8 border-white mb-4 relative animate-pulse">
+                    <span class="text-6xl">🔮</span>
+                </div>
+                <button onclick="playGacha()" class="bg-purple-500 hover:bg-purple-600 text-white font-black text-lg px-8 py-3 rounded-2xl shadow-lg border-b-4 border-purple-700 active:translate-y-1 transition-all">轉這台扭蛋 (使用 1 張扭蛋卷)</button>
+                <div id="gachaResult" class="mt-4 text-xl font-bold text-emerald-700 h-10 flex items-center justify-center"></div>
+            </div>
+        </div>
+
+        <!-- 2. 爬梯子畫面 (消耗10代幣) -->
+        <div id="section-ladder" class="tab-content hidden text-center py-6">
+            <h2 class="text-2xl font-bold text-emerald-700 mb-2">🧗 獲得金幣大冒險 🧗</h2>
+            <p class="text-gray-500 mb-4">選擇 1~5 號路線爬梯子（每次消耗 10 代幣）！</p>
+            
+            <div id="ladderAnimBox" class="w-72 h-72 mx-auto bg-emerald-50 border-4 border-emerald-300 rounded-2xl mb-6 flex flex-col items-center justify-between p-4 relative overflow-hidden shadow-inner">
+                <div class="absolute inset-0 flex justify-around opacity-20 pointer-events-none">
+                    <div class="w-2 bg-emerald-700 h-full"></div>
+                    <div class="w-2 bg-emerald-700 h-full"></div>
+                    <div class="w-2 bg-emerald-700 h-full"></div>
+                    <div class="w-2 bg-emerald-700 h-full"></div>
+                    <div class="w-2 bg-emerald-700 h-full"></div>
+                </div>
+                <div class="text-xs font-bold text-emerald-600 bg-white/80 px-2 py-1 rounded-lg z-10">梯子頂端 🎁</div>
+                <div id="climberIcon" class="text-6xl transition-all duration-300 z-10">🧗‍♂️</div>
+                <div id="ladderStatusText" class="text-emerald-800 font-bold text-sm bg-white/90 px-3 py-1 rounded-xl shadow-sm z-10">請點選下方 5 條路開始！</div>
+            </div>
+
+            <div class="flex justify-center flex-wrap gap-2 mb-6">
+                <button onclick="playLadder(1)" class="ladder-btn bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-2.5 rounded-xl shadow-md border-b-4 border-blue-700">1號路</button>
+                <button onclick="playLadder(2)" class="ladder-btn bg-purple-500 hover:bg-purple-600 text-white font-bold px-4 py-2.5 rounded-xl shadow-md border-b-4 border-purple-700">2號路</button>
+                <button onclick="playLadder(3)" class="ladder-btn bg-pink-500 hover:bg-pink-600 text-white font-bold px-4 py-2.5 rounded-xl shadow-md border-b-4 border-pink-700">3號路</button>
+                <button onclick="playLadder(4)" class="ladder-btn bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2.5 rounded-xl shadow-md border-b-4 border-amber-700">4號路</button>
+                <button onclick="playLadder(5)" class="ladder-btn bg-teal-500 hover:bg-teal-600 text-white font-bold px-4 py-2.5 rounded-xl shadow-md border-b-4 border-teal-700">5號路</button>
+            </div>
+
+            <div class="max-w-md mx-auto bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 text-left shadow-sm">
+                <div class="text-sm font-bold text-amber-800 mb-2">🧗 獲得金幣大冒險可能獲得的獎品項目：</div>
+                <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside font-medium">
+                    <li>代幣 30 個（機率 10%）</li>
+                    <li>代幣 20 個（機率 20%）</li>
+                    <li>獎品金蛋（機率 35%）</li>
+                    <li>哇ㄛ，下次再來８～（機率 35%）</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 3. 比大小畫面 (消耗10代幣) -->
+        <div id="section-battle" class="tab-content hidden text-center py-6">
+            <h2 class="text-2xl font-bold text-emerald-700 mb-2">⚔️ 幸運數字比大小 (1-100) ⚔️</h2>
+            <p class="text-gray-500 mb-4">輸入 1~100 的數字與電腦對決（勝率 80%）！每次遊玩消耗 10 代幣。</p>
+            
+            <div class="flex justify-center items-center space-x-4 mb-6">
+                <div class="bg-emerald-50 border-4 border-emerald-300 rounded-2xl p-4 w-44 shadow-md">
+                    <div class="text-sm font-bold text-emerald-700 mb-1">你的自選數字</div>
+                    <input type="number" id="playerInputNum" min="1" max="100" placeholder="請輸入1-100" class="w-full text-center text-2xl font-black text-emerald-600 bg-white border-2 border-emerald-300 rounded-xl py-1 focus:outline-none">
+                </div>
+                <span class="text-3xl font-black text-gray-400">VS</span>
+                <div class="bg-rose-50 border-4 border-rose-300 rounded-2xl p-4 w-44 shadow-md">
+                    <div class="text-sm font-bold text-rose-700 mb-1">電腦數字</div>
+                    <div id="cpuNum" class="text-4xl font-black text-rose-600 h-11 flex items-center justify-center">?</div>
+                </div>
+            </div>
+            
+            <button onclick="playBattle()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xl px-8 py-3 rounded-2xl shadow-lg border-b-4 border-emerald-700 active:translate-y-1 transition-all">送出數字對決 (-10代幣)</button>
+            <div id="battleResult" class="mt-6 text-xl font-bold text-emerald-600 h-12 flex items-center justify-center"></div>
+
+            <div class="max-w-md mx-auto bg-blue-50 border-2 border-blue-200 rounded-2xl p-4 text-left shadow-sm mt-6">
+                <div class="text-sm font-bold text-blue-800 mb-2">⚔️ 比大小獲勝可能獲得的獎勵：</div>
+                <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside font-medium">
+                    <li>代幣 20 個（機率 30%）</li>
+                    <li>獎品金蛋（機率 35%）</li>
+                    <li>扭蛋卷一張（機率 40%）</li>
+                    <li>代幣 50 個（機率 3%）</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 4. 學生資訊與獎品兌換畫面 (已重構成 5 大區塊) -->
+        <div id="section-shop" class="tab-content hidden py-6">
+            <div class="flex justify-between items-center mb-6">
+                <a href="index.html" class="inline-block bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold px-4 py-2 rounded-xl text-sm transition-all">⬅️ 返回班級管理主頁</a>
+            </div>
+            
+            <h2 class="text-2xl font-bold text-emerald-700 mb-2 text-center">🛍️ 學生個人資訊與獎品兌換 🛍️</h2>
+            <p class="text-gray-500 mb-6 text-center">在此查看您的動物與代幣狀況，並使用代幣兌換心儀的獎品！</p>
+            
+            <!-- 學生詳細資訊卡片 -->
+            <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-5 mb-8 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="text-4xl bg-white p-3 rounded-2xl shadow-inner border border-emerald-200">🧑‍🎓</div>
+                    <div>
+                        <div id="infoStudentName" class="text-xl font-bold text-emerald-900">載入中...</div>
+                        <div class="text-sm text-emerald-700 mt-0.5">代幣計算：動物園成體數 × 5 + 額外獲得代幣</div>
+                    </div>
+                </div>
+                <div class="flex gap-3 text-center">
+                    <div class="bg-white px-4 py-2 rounded-xl border border-emerald-200 shadow-sm">
+                        <div class="text-xs text-gray-500 font-bold">動物園成體</div>
+                        <div id="infoPets" class="text-lg font-black text-indigo-600">0 隻</div>
+                    </div>
+                    <div class="bg-white px-4 py-2 rounded-xl border border-amber-200 shadow-sm">
+                        <div class="text-xs text-gray-500 font-bold">總可用代幣</div>
+                        <div id="infoCoins" class="text-lg font-black text-amber-600">0 枚</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 獎品兌換專區 -->
+            <h3 class="text-xl font-bold text-emerald-700 mb-4">🎁 獎品兌換專區</h3>
+            <div id="shopList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                <!-- 動態載入商品 -->
+            </div>
+
+            <!-- 第一區：直接兌換的獎品卷 -->
+            <h3 class="text-xl font-bold text-emerald-700 mb-3">🎟️ 第一區：直接兌換的獎品卷</h3>
+            <p class="text-xs text-gray-500 mb-3">💡 點擊卡片可輸入領取日期／獎品名稱並點亮黃燈標記已兌換！</p>
+            <div id="directCouponsArea" class="bg-emerald-50/60 border-2 border-dashed border-emerald-300 rounded-2xl p-4 min-h-[90px] flex flex-wrap gap-3 mb-8">
+                <!-- 動態載入直接兌換的獎品卷 -->
+            </div>
+
+            <!-- 第二區：扭蛋卷地方的獎品 -->
+            <h3 class="text-xl font-bold text-purple-700 mb-3">🔮 第二區：扭蛋卷地方的獎品</h3>
+            <p class="text-xs text-gray-500 mb-3">💡 透過三大扭蛋機抽中的獎品會顯示在這裡，點擊卡片可設定領取時間與名稱！</p>
+            <div id="gachaCouponsArea" class="bg-purple-50/60 border-2 border-dashed border-purple-300 rounded-2xl p-4 min-h-[90px] flex flex-wrap gap-3 mb-8">
+                <!-- 動態載入扭蛋獎品 -->
+            </div>
+
+            <!-- 第三區：爬梯子 -->
+            <h3 class="text-xl font-bold text-amber-700 mb-3">🧗 第三區：爬梯子獲得的獎品</h3>
+            <p class="text-xs text-gray-500 mb-3">💡 透過爬梯子獲得的金蛋獎品會顯示在這裡，點擊卡片可設定領取時間！</p>
+            <div id="ladderCouponsArea" class="bg-amber-50/60 border-2 border-dashed border-amber-300 rounded-2xl p-4 min-h-[90px] flex flex-wrap gap-3 mb-8">
+                <!-- 動態載入爬梯子獎品 -->
+            </div>
+
+            <!-- 第四區：比大小 -->
+            <h3 class="text-xl font-bold text-blue-700 mb-3">⚔️ 第四區：比大小獲得的獎品</h3>
+            <p class="text-xs text-gray-500 mb-3">💡 透過比大小獲勝獲得的獎品會顯示在這裡，點擊卡片可設定領取時間！</p>
+            <div id="battleCouponsArea" class="bg-blue-50/60 border-2 border-dashed border-blue-300 rounded-2xl p-4 min-h-[90px] flex flex-wrap gap-3 mb-8">
+                <!-- 動態載入比大小獎品 -->
+            </div>
+
+            <!-- 第五區：金幣累計 (代幣獲得紀錄) -->
+            <h3 class="text-xl font-bold text-yellow-700 mb-3">🪙 第五區：金幣累計 (代幣獲得紀錄)</h3>
+            <p class="text-xs text-gray-500 mb-3">💡 單純記錄金幣來源與獲得日期。</p>
+            <div id="myCoinLogs" class="bg-yellow-50/60 border-2 border-dashed border-yellow-300 rounded-2xl p-4 min-h-[90px] flex flex-wrap gap-3">
+                <!-- 動態載入代幣獲得歷程 -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 得獎特寫視窗 Modal -->
+    <div id="rewardPopupModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full border-4 border-amber-400 text-center shadow-2xl">
+            <div class="text-6xl mb-3">🎉</div>
+            <h3 class="text-2xl font-black text-emerald-700 mb-2">恭喜獲得大獎！</h3>
+            <div id="rewardPopupContent" class="text-xl font-bold text-amber-600 bg-amber-50 border-2 border-amber-200 rounded-2xl py-4 px-2 my-4 shadow-inner">
+                獎品名稱
+            </div>
+            <button onclick="closeRewardPopup()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black text-lg px-6 py-3 rounded-2xl shadow-md w-full transition-all">太棒了！收下</button>
+        </div>
     </div>
-  </div>
 
-  <!-- 寵物操作 Modal -->
-  <div id="petManageModal" class="modal-overlay">
-    <div class="modal-box" style="text-align:center;">
-      <h3 id="petModalTitle">寵物狀態</h3>
-      <div id="petManageView">
-        <div id="petModalEmoji" style="margin:10px 0;">🥚</div>
-        <h4 id="petModalName" style="color:#1e40af; margin-bottom:8px;">神秘的蛋 (第一階段：蛋)</h4>
-        
-        <div id="petModalProgressArea">
-          <div style="text-align:left; font-size:0.8rem; color:#64748b; margin-top:10px;">升級進度：<span id="petModalXpText" style="float:right;">15 / 20</span></div>
-          <div class="pet-progress-bg" style="height:12px; margin-bottom:20px;">
-            <div id="petModalProgressBar" class="pet-progress-fill"></div>
-          </div>
+    <!-- 扭蛋機解釋說明管理 Modal -->
+    <div id="explainModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-lg w-full border-4 border-emerald-300">
+            <h3 id="explainModalTitle" class="text-lg font-bold text-emerald-800 mb-3">📖 編輯獎品解釋說明</h3>
+            <div id="explainFieldsContainer" class="space-y-3 mb-4 max-h-60 overflow-y-auto pr-1"></div>
+            <div class="flex space-x-2">
+                <button onclick="saveExplanations()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl flex-1 shadow">儲存解釋</button>
+                <button onclick="closeExplainModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold px-4 py-2 rounded-xl">關閉</button>
+            </div>
         </div>
-
-        <div id="petModalCompleteArea" style="display:none; margin:20px 0;">
-          <p style="font-size:0.9rem; color:#15803d; margin-bottom:12px; font-weight:700;">🎉 恭喜！寵物已經圓滿長大了！</p>
-          <button class="btn-submit" style="background:#eab308; color:#fff;" onclick="moveToGarden()">
-            🏕️ 送進專屬寵物園並領養新蛋
-          </button>
-        </div>
-
-        <div id="petModalActionArea" style="display:flex; gap:10px; margin-bottom:15px;">
-          <button class="btn-submit" style="background:#10b981;" onclick="manualAddPetXp(1)">+1 獎勵分</button>
-          <button class="btn-submit" style="background:#059669;" onclick="manualAddPetXp(5)">+5 獎勵分</button>
-          <button class="btn-submit" style="background:#f8fafc; color:#ef4444; border:1px solid #fca5a5;" onclick="manualAddPetXp(-1)">-1 扣分</button>
-        </div>
-      </div>
-
-      <div id="petSelectView" style="display:none; text-align:left;">
-        <p style="font-size:0.9rem; margin-bottom:10px; color:#1e40af; font-weight:700;">請挑選一顆神秘的蛋來孵化：</p>
-        <div class="pet-select-grid" id="petSelectGrid">
-          <div class="pet-card" onclick="selectMysteryPet()"><div class="emoji" style="font-size:40px;">🥚</div><div class="name">純白之蛋</div></div>
-          <div class="pet-card" onclick="selectMysteryPet()"><div class="emoji" style="font-size:40px;">🎁</div><div class="name">驚喜禮盒</div></div>
-          <div class="pet-card" onclick="selectMysteryPet()"><div class="emoji" style="font-size:40px;">🔮</div><div class="name">神秘水晶</div></div>
-        </div>
-      </div>
-
-      <!-- 動物園與雙寵物配對兌換區 -->
-      <div id="petGardenView" style="display:none; text-align:left;">
-        <div id="gardenTicketSummary" class="ticket-summary-box"></div>
-        <p style="font-size:0.8rem; color:#64748b; margin-top:10px;"><i class="fa-solid fa-circle-info"></i> <strong>2隻成體配對兌換（扭蛋卷或10代幣）</strong>：點擊第1隻成體後，再點擊第2隻成體即可選擇獎勵（兩隻同時亮黃燈）。點擊已兌換的其中一隻可取消。</p>
-        <div class="garden-grid" id="gardenGrid"></div>
-      </div>
-
-      <div style="margin-top:20px; display:flex; flex-direction:column; gap:8px;">
-        <button class="btn-submit" style="background:#0ea5e9;" id="btnViewGarden" onclick="showPetGarden()">🌳 查看專屬動物園與獎勵兌換</button>
-        <div id="gardenTicketBadgeBelow" style="font-size:0.82rem; color:#b45309; font-weight:700; text-align:center;"></div>
-        
-        <div style="border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 4px;">
-          <button class="btn-submit" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; font-size:0.8rem; padding:8px;" onclick="resetSingleStudentPet()">
-            🗑️ 刪除/重設該生目前寵物 (重新抽蛋)
-          </button>
-        </div>
-
-        <button class="btn-submit" style="background:#94a3b8;" id="btnModalClose" onclick="closePetModal()">關閉視窗</button>
-      </div>
     </div>
-  </div>
 
-  <!-- 💡 雙寵物配對兌換選擇 Modal -->
-  <div id="rewardRedeemModal" class="modal-overlay" style="z-index:110;">
-    <div class="modal-box" style="max-width:380px; text-align:center;">
-      <h3 style="color:#b45309; margin-bottom:8px;"><i class="fa-solid fa-gift"></i> 2隻寵物配對兌換獎勵</h3>
-      <p style="font-size:0.85rem; color:#64748b; margin-bottom:14px;">請選擇您想兌換的項目：</p>
-      
-      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px;">
-        <button class="btn-submit" style="background:#10b981;" onclick="choosePairReward('ticket')">🎁 換扭蛋卷一張</button>
-        <button class="btn-submit" style="background:#d97706;" onclick="choosePairReward('coin')">🪙 換 10 個代幣</button>
-      </div>
-
-      <button class="btn-submit" style="background:#94a3b8;" onclick="closeRewardModal()">取消返回</button>
+    <!-- 統一卡片時間與名稱設定 Modal -->
+    <div id="couponModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full border-4 border-emerald-300 text-center">
+            <h3 id="couponModalTitle" class="text-lg font-bold text-emerald-800 mb-2">🎟️ 標記已兌換與領取時間</h3>
+            <p class="text-sm text-gray-500 mb-4">請輸入獎品名稱與領取時間：</p>
+            <input type="text" id="couponNameInput" placeholder="獎品名稱..." class="w-full border-2 border-emerald-300 rounded-xl px-3 py-2 text-center font-bold text-emerald-800 mb-3 focus:outline-none">
+            <input type="text" id="couponTimeInput" placeholder="輸入領取時間（例：今日下午）..." class="w-full border-2 border-emerald-300 rounded-xl px-3 py-2 text-center font-bold text-emerald-800 mb-4 focus:outline-none">
+            <div class="flex space-x-2">
+                <button onclick="confirmCouponModal()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2 rounded-xl flex-1 shadow">儲存並亮黃燈</button>
+                <button onclick="closeCouponModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold px-4 py-2 rounded-xl">取消</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script>
-    const DEFAULT_STUDENTS = [
-      "1號", "2號", "3號", "4號", "5號", "6號", "7號", "8號", "9號", "10號",
-      "11號", "12號", "13號", "14號", "15號", "16號", "17號", "18號", "19號", "20號",
-      "21號", "22號", "23號", "24號", "25號"
-    ];
+    <!-- 小獎品兌換專屬輸入名稱 Modal -->
+    <div id="customPrizeModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full border-4 border-emerald-300 text-center">
+            <h3 class="text-lg font-bold text-emerald-800 mb-2">🎁 獎品兌換</h3>
+            <p class="text-sm text-gray-500 mb-4">請輸入您想要兌換的獎品名稱：</p>
+            <input type="text" id="customPrizeInput" placeholder="輸入獎品名稱..." class="w-full border-2 border-emerald-300 rounded-xl px-3 py-2 text-center font-bold text-emerald-800 mb-4 focus:outline-none">
+            <div class="flex space-x-2">
+                <button onclick="confirmCustomBuy()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl flex-1 shadow">確認兌換</button>
+                <button onclick="closeCustomModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold px-4 py-2 rounded-xl">取消</button>
+            </div>
+        </div>
+    </div>
 
-    const INITIAL_PETS = {
-      1: { petId: 'cat_black', stage: 1, xp: 12 },
-      2: { petId: 'dog_shiba', stage: 1, xp: 11 },
-      3: { petId: 'turtle', stage: 1, xp: 11 },
-      4: { petId: 'dragon', stage: 1, xp: 10 },
-      5: { petId: 'parrot', stage: 1, xp: 10 },
-      6: { petId: 'penguin', stage: 1, xp: 11 },
-      7: { petId: 'fish', stage: 1, xp: 8 },
-      8: { petId: 'rabbit', stage: 1, xp: 9 },
-      9: { petId: 'panda', stage: 1, xp: 9 },
-      10: { petId: 'turtle', stage: 1, xp: 10 },
-      11: { petId: 'dragon', stage: 1, xp: 10 },
-      12: { petId: 'owl', stage: 1, xp: 10 },
-      13: { petId: 'dog_corgi', stage: 1, xp: 8 },
-      14: { petId: 'fish', stage: 1, xp: 10 },
-      15: { petId: 'cat_orange', stage: 1, xp: 11 },
-      16: { petId: 'dog_husky', stage: 1, xp: 10 },
-      17: { petId: 'fox', stage: 1, xp: 9 },
-      18: { petId: 'trex', stage: 1, xp: 11 },
-      19: { petId: 'cat_calico', stage: 1, xp: 10 },
-      20: { petId: 'dolphin', stage: 1, xp: 12 },
-      21: { petId: 'unicorn', stage: 1, xp: 11 },
-      22: { petId: 'lion', stage: 1, xp: 12 },
-      23: { petId: 'dog_poodle', stage: 1, xp: 6 },
-      24: { petId: 'cat_white', stage: 1, xp: 10 },
-      25: { petId: 'whale', stage: 1, xp: 10 }
-    };
+    <!-- 動態抽中獎品專屬輸入名稱 Modal -->
+    <div id="dynamicPrizeModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full border-4 border-emerald-300 text-center">
+            <h3 id="dynamicModalTitle" class="text-lg font-bold text-emerald-800 mb-2">🎁 獲得獎品</h3>
+            <p id="dynamicModalDesc" class="text-sm text-gray-500 mb-4">請輸入獎品名稱：</p>
+            <input type="text" id="dynamicPrizeInput" placeholder="輸入名稱..." class="w-full border-2 border-emerald-300 rounded-xl px-3 py-2 text-center font-bold text-emerald-800 mb-4 focus:outline-none">
+            <div class="flex space-x-2">
+                <button onclick="confirmDynamicPrize()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl flex-1 shadow">確定儲存</button>
+                <button onclick="closeDynamicModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold px-4 py-2 rounded-xl">取消</button>
+            </div>
+        </div>
+    </div>
 
-    const PET_CATALOG = [
-      { id: 'cat_black', name: '黑貓', stages: ['🥚', '🐱', '🐈‍⬛'], desc: '幸運黑貓' },
-      { id: 'cat_orange', name: '橘貓', stages: ['🥚', '🐱', '🐈'], desc: '圓滾大橘' },
-      { id: 'cat_calico', name: '三花貓', stages: ['🥚', '🐱', '🐾'], desc: '花紋三花' },
-      { id: 'cat_white', name: '純白貓', stages: ['🥚', '🐱', '🤍'], desc: '雪白波斯' },
-      { id: 'dog_shiba', name: '柴犬', stages: ['🥚', '🐶', '🐕'], desc: '赤毛柴犬' },
-      { id: 'dog_husky', name: '哈士奇', stages: ['🥚', '🐶', '🐺'], desc: '二哈雪橇' },
-      { id: 'dog_poodle', name: '貴賓狗', stages: ['🥚', '🐶', '🐩'], desc: '捲毛貴賓' },
-      { id: 'dog_corgi', name: '柯基犬', stages: ['🥚', '🐶', '🦊'], desc: '短腿柯基' },
-      { id: 'dog_golden', name: '黃金獵犬', stages: ['🥚', '🐶', '🦮'], desc: '溫柔金毛' },
-      { id: 'rabbit', name: '小白兔', stages: ['🥚', '🐰', '🐇'], desc: '可愛寵物' },
-      { id: 'hamster', name: '倉鼠', stages: ['🥚', '🐹', '🐹'], desc: '可愛寵物' },
-      { id: 'turtle', name: '烏龜', stages: ['🥚', '🐢', '🐢'], desc: '爬蟲類' },
-      { id: 'dragon', name: '飛龍', stages: ['🥚', '🦎', '🐉'], desc: '神話傳說' },
-      { id: 'unicorn', name: '獨角獸', stages: ['🥚', '🐴', '🦄'], desc: '神話傳說' },
-      { id: 'eagle', name: '金翅雀鷹', stages: ['🥚', '🐣', '🦅'], desc: '天空飛禽' },
-      { id: 'parrot', name: '金剛鸚鵡', stages: ['🥚', '🐤', '🦜'], desc: '天空飛禽' },
-      { id: 'owl', name: '貓頭鷹', stages: ['🥚', '🐥', '🦉'], desc: '天空飛禽' },
-      { id: 'penguin', name: '國王企鵝', stages: ['🥚', '🐧', '🐧'], desc: '極地冰原' },
-      { id: 'fish', name: '大白鯊', stages: ['🫧', '🐠', '🦈'], desc: '海洋世界' },
-      { id: 'dolphin', name: '海豚', stages: ['🫧', '🐟', '🐬'], desc: '海洋世界' },
-      { id: 'whale', name: '藍鯨', stages: ['🫧', '🐋', '🐳'], desc: '海洋世界' },
-      { id: 'trex', name: '霸王龍', stages: ['🥚', '🦎', '🦖'], desc: '史前恐龍' },
-      { id: 'bronto', name: '腕龍', stages: ['🥚', '🦎', '🦕'], desc: '史前恐龍' },
-      { id: 'panda', name: '大熊貓', stages: ['🥚', '🐼', '🐼'], desc: '野生動物' },
-      { id: 'lion', name: '萬獸獅王', stages: ['🥚', '🦁', '🦁'], desc: '野生動物' },
-      { id: 'koala', name: '無尾熊', stages: ['🥚', '🐨', '🐨'], desc: '野生動物' },
-      { id: 'fox', name: '赤狐', stages: ['🥚', '🦊', '🦊'], desc: '野生動物' }
-    ];
+    <!-- JavaScript 邏輯 -->
+    <script>
+        const DEFAULT_STUDENTS = [
+            "1號", "2號", "3號", "4號", "5號", "6號", "7號", "8號", "9號", "10號",
+            "11號", "12號", "13號", "14號", "15號", "16號", "17號", "18號", "19號", "20號",
+            "21號", "22號", "23號", "24號", "25號", "26號（測試用）"
+        ];
 
-    const PET_REQ = [20, 20, 15]; 
+        let storedStudents = JSON.parse(localStorage.getItem('cm309_students'));
+        let students = (storedStudents && storedStudents.length > 0) ? storedStudents : DEFAULT_STUDENTS;
 
-    // 💡 優先從 localStorage 讀取自訂座號
-    let storedStudents = JSON.parse(localStorage.getItem('cm309_students'));
-    let students = (storedStudents && storedStudents.length > 0) ? storedStudents : DEFAULT_STUDENTS;
+        let gameData = {};
+        let currentSeatIndex = 0; 
+        let firebaseDbUrl = localStorage.getItem('cm309_firebase_url') || "";
+        let pendingDynamicReward = null;
 
-    let sheetsWebhookUrl = localStorage.getItem('cm309_sheets_url') || "";
-    let firebaseDbUrl = localStorage.getItem('cm309_firebase_url') || "";
-    let announcements = JSON.parse(localStorage.getItem('cm309_announcements')) || [];
-    
-    let petState = JSON.parse(localStorage.getItem('cm309_pets')) || INITIAL_PETS;
-    let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
-    
-    let cleanBoxesAM = JSON.parse(localStorage.getItem('cm309_cleanBoxesAM')) || [
-      { id: 'am_1', title: '教室內', students: [] },
-      { id: 'am_2', title: '走廊', students: [] },
-      { id: 'am_3', title: '黑板', students: [] }
-    ];
-
-    let cleanBoxesPM = JSON.parse(localStorage.getItem('cm309_cleanBoxesPM')) || [
-      { id: 'pm_1', title: '拖地', students: [] },
-      { id: 'pm_2', title: '窗戶', students: [] },
-      { id: 'pm_3', title: '倒垃圾/資源回收', students: [] }
-    ];
-
-    let correctionBoxes = JSON.parse(localStorage.getItem('cm309_corrBoxes')) || [
-      { id: 'box_1', title: '國語甲本', students: [] },
-      { id: 'box_2', title: '數學習作', students: [] }
-    ];
-    let cleanlinessAssignment = JSON.parse(localStorage.getItem('cm309_cleanlinessAssign')) || {};
-    let cleanlinessAwarded = JSON.parse(localStorage.getItem('cm309_cleanlinessAwarded')) || {};
-    let attendanceState = JSON.parse(localStorage.getItem('cm309_attState')) || {}; 
-    let interactiveHwState = JSON.parse(localStorage.getItem('cm309_hwState')) || {}; 
-    let teethLampState = JSON.parse(localStorage.getItem('cm309_teethState')) || {};  
-    let mouthwashLampState = JSON.parse(localStorage.getItem('cm309_mwState')) || {}; 
-
-    let currentSelectedStudent = null;
-    let currentInteractiveMode = 'hw';
-    let clickTimeout = null;
-    let lastClickedSeat = null;
-    let syncDebounceTimer = null;
-    let firstSelectedPetIndex = null;
-    let selectedRedeemPair = null;
-
-    window.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('zh-TW');
-      document.getElementById('studentRosterInput').value = students.join('\n');
-      document.getElementById('sheetsApiUrlInput').value = sheetsWebhookUrl;
-      document.getElementById('firebaseDbUrlInput').value = firebaseDbUrl;
-
-      initCleanlinessSortables();
-      renderAllGrids();
-      updateCloudBadge();
-
-      if (firebaseDbUrl) {
-        fetchFromFirebase(true);
-      }
-    });
-
-    function switchTab(tabId) {
-      document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
-      if (activeBtn) activeBtn.classList.add('active');
-      window.scrollTo(0,0);
-      if(tabId === 'tab-pets') renderPetsGrid();
-    }
-
-    function renderAllGrids() {
-      renderAttendanceGrid();
-      renderInteractiveGrid();
-      const select = document.getElementById('recordStudentSelect');
-      select.innerHTML = '';
-      students.forEach((name, i) => { select.add(new Option(`${name}`, `${name}`)); });
-    }
-
-    function updateCloudBadge(status) {
-      const badge = document.getElementById('cloudStatus');
-      const text = document.getElementById('cloudStatusText');
-      badge.className = 'cloud-status';
-      
-      if (status === 'syncing') {
-        badge.classList.add('syncing');
-        text.textContent = '同步中...';
-      } else if (firebaseDbUrl) {
-        badge.classList.add('active');
-        text.textContent = 'Firebase 連線就緒';
-      } else {
-        text.textContent = '未連線 (點我設定)';
-      }
-    }
-
-    function manualTriggerSync() {
-      if (!firebaseDbUrl) switchTab('tab-settings');
-      else fetchFromFirebase(false);
-    }
-
-    function cleanFirebaseUrl(url) {
-      let u = url.trim();
-      if (u.endsWith('/')) u = u.slice(0, -1);
-      return u;
-    }
-
-    function saveFirebaseDbUrl() {
-      let url = document.getElementById('firebaseDbUrlInput').value.trim();
-      if (!url) return alert("請輸入 Firebase Realtime Database 網址！");
-      url = cleanFirebaseUrl(url);
-      firebaseDbUrl = url;
-      localStorage.setItem('cm309_firebase_url', url);
-      updateCloudBadge();
-      alert("✅ Firebase 網址已儲存！正在同步...");
-      fetchFromFirebase(false);
-    }
-
-    function syncToFirebase() {
-      localStorage.setItem('cm309_students', JSON.stringify(students));
-      localStorage.setItem('cm309_attState', JSON.stringify(attendanceState));
-      localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
-      localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState));
-      localStorage.setItem('cm309_mwState', JSON.stringify(mouthwashLampState));
-      localStorage.setItem('cm309_cleanBoxesAM', JSON.stringify(cleanBoxesAM));
-      localStorage.setItem('cm309_cleanBoxesPM', JSON.stringify(cleanBoxesPM));
-      localStorage.setItem('cm309_pets', JSON.stringify(petState));
-      localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
-      localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
-      localStorage.setItem('cm309_corrBoxes', JSON.stringify(correctionBoxes));
-      localStorage.setItem('cm309_cleanlinessAssign', JSON.stringify(cleanlinessAssignment));
-      localStorage.setItem('cm309_cleanlinessAwarded', JSON.stringify(cleanlinessAwarded));
-
-      if (!firebaseDbUrl) return;
-
-      clearTimeout(syncDebounceTimer);
-      updateCloudBadge('syncing');
-
-      syncDebounceTimer = setTimeout(() => {
-        const payload = {
-          attendanceState,
-          interactiveHwState,
-          teethLampState,
-          mouthwashLampState,
-          cleanBoxesAM,
-          cleanBoxesPM,
-          petState,
-          petCollection,
-          announcements,
-          correctionBoxes,
-          cleanlinessAssignment,
-          cleanlinessAwarded,
-          students
+        let gachaConfigs = JSON.parse(localStorage.getItem('cm309_gacha_configs')) || {
+            homework: {
+                title: "📚 功課方面扭蛋機",
+                items: [
+                    { name: "功課減半", prob: 35, desc: "當日指定功課量減半完成" },
+                    { name: "免抄聯絡簿3天", prob: 25, desc: "連續三天免抄班級聯絡簿" },
+                    { name: "可在遊憩區上課30分鐘", prob: 15, desc: "可在班級遊憩區自主上課30分鐘" },
+                    { name: "提早3分鐘下課", prob: 5, desc: "可以在導師課選擇提早下課（但必須先將東西整理好）" },
+                    { name: "代幣五個", prob: 25, desc: "直接獲得 5 枚代幣" }
+                ]
+            },
+            service: {
+                title: "🧹 班級服務扭蛋機",
+                items: [
+                    { name: "打掃豁免權一天", prob: 25, desc: "當日打掃工作免除一天" },
+                    { name: "午休免死金牌", prob: 10, desc: "午休時間可自由運用一次" },
+                    { name: "冷氣控制大師", prob: 15, desc: "解救悶熱的同學們" },
+                    { name: "午餐排第一", prob: 20, desc: "打菜與排隊享有第一順位權利" },
+                    { name: "代幣五個", prob: 30, desc: "直接獲得 5 枚代幣獎勵" }
+                ]
+            },
+            boardgame: {
+                title: "🎲 桌遊類扭蛋機",
+                items: [
+                    { name: "桌遊保管1日", prob: 25, desc: "獲得班級桌遊一日優先保管權" },
+                    { name: "可帶自己的桌遊", prob: 25, desc: "允許帶個人喜愛的桌遊到校與同學分享" },
+                    { name: "代幣五個", prob: 50, desc: "直接獲得 5 枚代幣獎勵" },
+                    { name: "和老師討論增加想玩的桌遊", prob: 3, desc: "可以和老師討論新增桌遊，在合理範圍內老師可增加該桌遊項目。" }
+                ]
+            }
         };
 
-        fetch(`${cleanFirebaseUrl(firebaseDbUrl)}/classroomData.json`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        })
-        .then(res => res.json())
-        .then(() => { updateCloudBadge(); })
-        .catch(err => {
-          console.error("Firebase 上傳失敗:", err);
-          updateCloudBadge();
-        });
-      }, 600);
-    }
+        let selectedGachaType = 'homework';
+        let activeCouponModalData = null;
 
-    function fetchFromFirebase(silent = false) {
-      if (!firebaseDbUrl) return;
-      updateCloudBadge('syncing');
-
-      fetch(`${cleanFirebaseUrl(firebaseDbUrl)}/classroomData.json`)
-        .then(res => res.json())
-        .then(data => {
-          if (data) {
-            if (data.students && data.students.length > 0) {
-              students = data.students;
-            } else {
-              students = DEFAULT_STUDENTS;
+        window.addEventListener('DOMContentLoaded', () => {
+            initApp();
+            if (firebaseDbUrl) {
+                fetchFromFirebase();
             }
-            attendanceState = data.attendanceState || {};
-            interactiveHwState = data.interactiveHwState || {};
-            teethLampState = data.teethLampState || {};
-            mouthwashLampState = data.mouthwashLampState || {};
-            if (data.cleanBoxesAM) cleanBoxesAM = data.cleanBoxesAM;
-            if (data.cleanBoxesPM) cleanBoxesPM = data.cleanBoxesPM;
+        });
+
+        function initApp() {
+            let select = document.getElementById('studentSelect');
+            select.innerHTML = '';
+            students.forEach((name, index) => {
+                let opt = document.createElement('option');
+                opt.value = index;
+                opt.textContent = name;
+                select.appendChild(opt);
+            });
+            getStudentGameData(getCurrentSeatNum());
+            updateView();
+        }
+
+        function getCurrentSeatNum() {
+            return currentSeatIndex + 1; 
+        }
+
+        function getStudentGameData(seatNum) {
+            gameData = JSON.parse(localStorage.getItem('cm309_game_data')) || {};
+            if (!gameData[seatNum]) {
+                gameData[seatNum] = { extraCoins: 0, directCoupons: [], gachaCoupons: [], ladderCoupons: [], battleCoupons: [], coinLogs: [] };
+            }
+            if (gameData[seatNum].tickets && gameData[seatNum].tickets.length > 0) {
+                gameData[seatNum].gachaCoupons = gameData[seatNum].gachaCoupons.concat(gameData[seatNum].tickets);
+                gameData[seatNum].tickets = [];
+            }
+            if (gameData[seatNum].specials && gameData[seatNum].specials.length > 0) {
+                gameData[seatNum].directCoupons = gameData[seatNum].directCoupons.concat(gameData[seatNum].specials);
+                gameData[seatNum].specials = [];
+            }
+
+            if (!gameData[seatNum].directCoupons) gameData[seatNum].directCoupons = [];
+            if (!gameData[seatNum].gachaCoupons) gameData[seatNum].gachaCoupons = [];
+            if (!gameData[seatNum].ladderCoupons) gameData[seatNum].ladderCoupons = [];
+            if (!gameData[seatNum].battleCoupons) gameData[seatNum].battleCoupons = [];
+            if (!gameData[seatNum].coinLogs) gameData[seatNum].coinLogs = [];
+            return gameData[seatNum];
+        }
+
+        function switchStudent() {
+            currentSeatIndex = parseInt(document.getElementById('studentSelect').value);
+            getStudentGameData(getCurrentSeatNum());
+            updateView();
+        }
+
+        function getAdultPetCount(seatNum) {
+            let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
+            let myAdultPets = petCollection[seatNum] || [];
+            return myAdultPets.length;
+        }
+
+        function getTotalCoins(seatNum) {
+            let petCount = getAdultPetCount(seatNum);
+            let gData = getStudentGameData(seatNum);
+            return (petCount * 5) + (gData.extraCoins || 0);
+        }
+
+        function useGachaTicket() {
+            let seatNum = getCurrentSeatNum();
+            let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
+            let myAdultPets = petCollection[seatNum] || [];
+
+            let foundIndex = myAdultPets.findIndex(p => p.redeemed && p.prize && p.prize.includes("扭蛋卷") && !p.gachaUsed);
+            if (foundIndex !== -1) {
+                myAdultPets[foundIndex].gachaUsed = true;
+                petCollection[seatNum] = myAdultPets;
+                localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
+                syncToFirebase();
+                return true;
+            }
+
+            let gData = getStudentGameData(seatNum);
+            let gachaTicketIdx = gData.gachaCoupons.findIndex(t => (t.name.includes("扭蛋卷") || t.name.includes("扭蛋")) && !t.isUsed);
+            if (gachaTicketIdx !== -1) {
+                gData.gachaCoupons.splice(gachaTicketIdx, 1);
+                saveGameData();
+                return true;
+            }
+
+            alert('您的背包中沒有可用的「扭蛋卷」！請先回到主頁面使用雙寵物兌換扭蛋卷，才能遊玩扭蛋機喔！');
+            return false;
+        }
+
+        function deductCoins(amount) {
+            let seatNum = getCurrentSeatNum();
+            let total = getTotalCoins(seatNum);
+            if (total < amount) return false;
+
+            let gData = getStudentGameData(seatNum);
+            let eCoins = gData.extraCoins || 0;
+
+            if (eCoins >= amount) {
+                gData.extraCoins = eCoins - amount;
+            } else {
+                let remainder = amount - eCoins;
+                gData.extraCoins = 0;
+                let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
+                let myAdultPets = petCollection[seatNum] || [];
+                
+                let petsToReduce = Math.ceil(remainder / 5);
+                myAdultPets.splice(0, petsToReduce);
+                petCollection[seatNum] = myAdultPets;
+                localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
+
+                let refund = (petsToReduce * 5) - remainder;
+                gData.extraCoins += refund;
+            }
+            saveGameData();
+            return true;
+        }
+
+        function saveGameData() {
+            let seatNum = getCurrentSeatNum();
+            gameData[seatNum] = getStudentGameData(seatNum);
+            localStorage.setItem('cm309_game_data', JSON.stringify(gameData));
+            syncToFirebase();
+        }
+
+        function updateView() {
+            let seatNum = getCurrentSeatNum();
+            let studentName = students[currentSeatIndex] || `${seatNum}號`;
+            let pCount = getAdultPetCount(seatNum);
+            let totalCoins = getTotalCoins(seatNum);
+
+            let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
+            let myAdultPets = petCollection[seatNum] || [];
+            let unspentHomeTickets = myAdultPets.filter(p => p.redeemed && p.prize && p.prize.includes("扭蛋卷") && !p.gachaUsed).length;
+            let gData = getStudentGameData(seatNum);
+            let unspentBagTickets = gData.gachaCoupons.filter(t => (t.name.includes("扭蛋卷") || t.name.includes("扭蛋")) && !t.isUsed).length;
+            let totalTickets = unspentHomeTickets + unspentBagTickets;
+
+            document.getElementById('studentTicketsCount').textContent = totalTickets;
+            document.getElementById('studentCoins').textContent = totalCoins;
+
+            document.getElementById('infoStudentName').textContent = studentName;
+            document.getElementById('infoPets').textContent = pCount + " 隻";
+            document.getElementById('infoCoins').textContent = totalCoins + " 枚";
+
+            renderShop();
+            renderCoupons('directCouponsArea', gData.directCoupons, 'direct');
+            renderCoupons('gachaCouponsArea', gData.gachaCoupons, 'gacha');
+            renderCoupons('ladderCouponsArea', gData.ladderCoupons, 'ladder');
+            renderCoupons('battleCouponsArea', gData.battleCoupons, 'battle');
+            renderCoinLogs();
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-emerald-500', 'text-white', 'shadow-md');
+                el.classList.add('bg-gray-100', 'text-gray-600');
+            });
+
+            document.getElementById('section-' + tabName).classList.remove('hidden');
+            let activeBtn = document.getElementById('tab-' + tabName);
+            activeBtn.classList.remove('bg-gray-100', 'text-gray-600');
+            activeBtn.classList.add('bg-emerald-500', 'text-white', 'shadow-md');
+        }
+
+        function showRewardPopup(prizeName) {
+            document.getElementById('rewardPopupContent').textContent = prizeName;
+            document.getElementById('rewardPopupModal').classList.remove('hidden');
+            confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
+        }
+
+        function closeRewardPopup() {
+            document.getElementById('rewardPopupModal').classList.add('hidden');
+        }
+
+        function selectGachaType(type) {
+            selectedGachaType = type;
+            document.querySelectorAll('.gacha-type-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-500', 'text-white', 'border-emerald-600');
+                btn.classList.add('bg-gray-100', 'text-gray-700', 'border-gray-300');
+            });
+            let activeBtn = document.getElementById('gacha-btn-' + type);
+            activeBtn.classList.remove('bg-gray-100', 'text-gray-700', 'border-gray-300');
+            activeBtn.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600');
+
+            document.getElementById('currentGachaTitle').textContent = `目前選擇：${gachaConfigs[type].title}`;
+        }
+
+        function openExplainModal() {
+            let conf = gachaConfigs[selectedGachaType];
+            document.getElementById('explainModalTitle').textContent = `📖 編輯 ${conf.title} 各項獎品解釋`;
+            let container = document.getElementById('explainFieldsContainer');
+            container.innerHTML = '';
+
+            conf.items.forEach((item, idx) => {
+                let div = document.createElement('div');
+                div.className = "bg-emerald-50/50 border border-emerald-200 rounded-xl p-3 flex flex-col gap-1";
+                div.innerHTML = `
+                    <span class="font-bold text-emerald-800 text-sm">獎品 ${idx+1}：${item.name}</span>
+                    <input type="text" id="explainInput_${idx}" value="${item.desc || ''}" placeholder="輸入獎品解釋說明..." class="w-full border border-emerald-300 rounded-lg px-2 py-1 text-xs bg-white focus:outline-none">
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('explainModal').classList.remove('hidden');
+        }
+
+        function closeExplainModal() {
+            document.getElementById('explainModal').classList.add('hidden');
+        }
+
+        function saveExplanations() {
+            let conf = gachaConfigs[selectedGachaType];
+            conf.items.forEach((item, idx) => {
+                let inputVal = document.getElementById(`explainInput_${idx}`).value.trim();
+                item.desc = inputVal;
+            });
+            localStorage.setItem('cm309_gacha_configs', JSON.stringify(gachaConfigs));
+            closeExplainModal();
+            alert("✅ 獎品解釋說明已成功儲存！");
+        }
+
+        function playGacha() {
+            let canPlay = useGachaTicket();
+            if (!canPlay) return;
+
+            let seatNum = getCurrentSeatNum();
+            let gData = getStudentGameData(seatNum);
+            let conf = gachaConfigs[selectedGachaType];
+
+            let totalProb = conf.items.reduce((sum, item) => sum + item.prob, 0);
+            let rand = Math.random() * totalProb;
+            let currentSum = 0;
+            let chosenItem = conf.items[0];
+
+            for (let item of conf.items) {
+                currentSum += item.prob;
+                if (rand <= currentSum) {
+                    chosenItem = item;
+                    break;
+                }
+            }
+
+            let rewardName = chosenItem.name;
+            if (rewardName.includes("代幣")) {
+                let match = rewardName.match(/\d+/);
+                let coinVal = match ? parseInt(match[0]) : 5;
+                gData.extraCoins += coinVal;
+                gData.coinLogs.unshift({ text: `${conf.title}獲得代幣 +${coinVal}`, date: new Date().toLocaleDateString() });
+                saveGameData();
+                document.getElementById('gachaResult').innerHTML = `🎉 恭喜抽中：<span class="text-amber-600 font-black">${rewardName}</span>！`;
+                showRewardPopup(rewardName);
+                updateView();
+            } else {
+                gData.gachaCoupons.push({ name: `${rewardName}`, date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
+                saveGameData();
+                document.getElementById('gachaResult').innerHTML = `🎉 恭喜抽中：<span class="text-amber-600 font-black">${rewardName}</span>！`;
+                showRewardPopup(rewardName);
+                updateView();
+            }
+        }
+
+        function playLadder(pathNum) {
+            let seatNum = getCurrentSeatNum();
+            if (getTotalCoins(seatNum) < 10) {
+                alert('代幣不足 10 枚！');
+                return;
+            }
+            deductCoins(10);
+            let gData = getStudentGameData(seatNum);
+
+            document.querySelectorAll('.ladder-btn').forEach(btn => btn.disabled = true);
+            let climber = document.getElementById('climberIcon');
+            let statusText = document.getElementById('ladderStatusText');
+
+            climber.classList.add('animate-climb');
+            statusText.textContent = `🧗 正在選擇路線 ${pathNum} 努力向上爬中...`;
+
+            setTimeout(() => {
+                climber.classList.remove('animate-climb');
+                document.querySelectorAll('.ladder-btn').forEach(btn => btn.disabled = false);
+
+                let outcomes = [
+                    { text: "代幣 30 個", type: "coin", val: 30, prob: 10 },
+                    { text: "代幣 20 個", type: "coin", val: 20, prob: 20 },
+                    { text: "獎品金蛋", type: "prize", prob: 35 },
+                    { text: "哇ㄛ，下次再來８～", type: "none", prob: 35 }
+                ];
+
+                let totalProb = outcomes.reduce((sum, o) => sum + o.prob, 0);
+                let rand = Math.random() * totalProb;
+                let currentSum = 0;
+                let chosen = outcomes[0];
+                for (let o of outcomes) {
+                    currentSum += o.prob;
+                    if (rand <= currentSum) {
+                        chosen = o;
+                        break;
+                    }
+                }
+
+                if (chosen.type === "coin") {
+                    gData.extraCoins += chosen.val;
+                    gData.coinLogs.unshift({ text: `獲得金幣大冒險獲得代幣 +${chosen.val}`, date: new Date().toLocaleDateString() });
+                    saveGameData();
+                    statusText.innerHTML = `✨ 路線 ${pathNum} 結果： <span class="text-amber-600 font-bold">${chosen.text}</span>`;
+                    showRewardPopup(chosen.text);
+                    updateView();
+                } else if (chosen.type === "prize") {
+                    pendingDynamicReward = { type: 'ladder', prefix: '' };
+                    document.getElementById('dynamicModalTitle').textContent = "👑 獲得金幣大冒險抽中獎品金蛋";
+                    document.getElementById('dynamicModalDesc').textContent = "請輸入獲得的小獎品名稱：";
+                    document.getElementById('dynamicPrizeInput').value = "";
+                    document.getElementById('dynamicPrizeModal').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('dynamicPrizeInput').focus(), 100);
+                } else {
+                    saveGameData();
+                    statusText.innerHTML = `✨ 路線 ${pathNum} 結果： <span class="text-amber-600 font-bold">${chosen.text}</span>`;
+                    showRewardPopup(chosen.text);
+                    updateView();
+                }
+            }, 1500);
+        }
+
+        function playBattle() {
+            let seatNum = getCurrentSeatNum();
+            if (getTotalCoins(seatNum) < 10) {
+                alert('代幣不足 10 枚！');
+                return;
+            }
+
+            let pInput = parseInt(document.getElementById('playerInputNum').value);
+            if (isNaN(pInput) || pInput < 1 || pInput > 100) {
+                alert('請先在欄位中輸入 1 到 100 之間的數字喔！');
+                return;
+            }
+
+            deductCoins(10);
+            let gData = getStudentGameData(seatNum);
+
+            let isWin = Math.random() < 0.80;
+            let cNum;
+            if (isWin) {
+                cNum = Math.floor(Math.random() * pInput) + 1;
+            } else {
+                cNum = Math.floor(Math.random() * (100 - pInput)) + pInput + 1;
+                if (cNum > 100) cNum = 100;
+            }
+
+            document.getElementById('cpuNum').textContent = cNum;
+            let resText = "";
+
+            if (pInput >= cNum) {
+                let battlePrizes = [
+                    { text: "代幣 20 個", type: "coin", val: 20, prob: 30 },
+                    { text: "獎品金蛋", type: "prize", prob: 35 },
+                    { text: "扭蛋卷一張", type: "ticket", prob: 40 },
+                    { text: "代幣 50 個", type: "coin", val: 50, prob: 3 }
+                ];
+                let totalP = battlePrizes.reduce((sum, p) => sum + p.prob, 0);
+                let randP = Math.random() * totalP;
+                let sumP = 0;
+                let wonPrize = battlePrizes[0];
+                for (let bp of battlePrizes) {
+                    sumP += bp.prob;
+                    if (randP <= sumP) {
+                        wonPrize = bp;
+                        break;
+                    }
+                }
+
+                if (wonPrize.type === "coin") {
+                    gData.extraCoins += wonPrize.val;
+                    gData.coinLogs.unshift({ text: `比大小獲勝獲得代幣 +${wonPrize.val}`, date: new Date().toLocaleDateString() });
+                    saveGameData();
+                    resText = `🎉 挑戰成功！贏了電腦，獲得：${wonPrize.text}！`;
+                    showRewardPopup(wonPrize.text);
+                    updateView();
+                } else if (wonPrize.type === "prize") {
+                    pendingDynamicReward = { type: 'battle', prefix: '' };
+                    document.getElementById('dynamicModalTitle').textContent = "👑 比大小獲得獎品金蛋";
+                    document.getElementById('dynamicModalDesc').textContent = "請輸入獲得的小獎品名稱：";
+                    document.getElementById('dynamicPrizeInput').value = "";
+                    document.getElementById('dynamicPrizeModal').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('dynamicPrizeInput').focus(), 100);
+                } else if (wonPrize.type === "ticket") {
+                    gData.battleCoupons.push({ name: "扭蛋卷", date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
+                    saveGameData();
+                    resText = `🎉 挑戰成功！贏了電腦，獲得：${wonPrize.text}！`;
+                    showRewardPopup(wonPrize.text);
+                    updateView();
+                }
+            } else {
+                deductCoins(5); 
+                resText = "😢 可惡輸給電腦了！代幣額外扣除 5 枚！";
+                showRewardPopup("比大小輸了 代幣 -5");
+                updateView();
+            }
+
+            document.getElementById('battleResult').textContent = resText;
+        }
+
+        function closeDynamicModal() {
+            document.getElementById('dynamicPrizeModal').classList.add('hidden');
+            pendingDynamicReward = null;
+        }
+
+        function confirmDynamicPrize() {
+            let val = document.getElementById('dynamicPrizeInput').value.trim();
+            if (!val) {
+                alert("請輸入名稱！");
+                return;
+            }
+            if (pendingDynamicReward) {
+                let seatNum = getCurrentSeatNum();
+                let gData = getStudentGameData(seatNum);
+                let fullName = pendingDynamicReward.prefix + val;
+                
+                if (pendingDynamicReward.type === 'ladder') {
+                    gData.ladderCoupons.push({ name: fullName, date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
+                } else if (pendingDynamicReward.type === 'battle') {
+                    gData.battleCoupons.push({ name: fullName, date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
+                }
+                
+                saveGameData();
+                closeDynamicModal();
+                showRewardPopup(fullName);
+                updateView();
+            }
+        }
+
+        function renderShop() {
+            let container = document.getElementById('shopList');
+            container.innerHTML = '';
             
-            if (data.petState && Object.keys(data.petState).length > 0) {
-              petState = data.petState;
-            }
-            if (data.petCollection && Object.keys(data.petCollection).length > 0) {
-              petCollection = data.petCollection;
-            }
-            announcements = data.announcements || [];
-            if (data.correctionBoxes) correctionBoxes = data.correctionBoxes;
-            cleanlinessAssignment = data.cleanlinessAssignment || {};
-            cleanlinessAwarded = data.cleanlinessAwarded || {};
+            const shopItems = [
+                { id: 'seat', name: "指定座位", cost: 50, icon: "🪑" },
+                { id: 'book', name: "免抄聯絡簿 3 天", cost: 40, icon: "📝" },
+                { id: 'hw', name: "作業減免", cost: 30, icon: "✂️" },
+                { id: 'gold_egg', name: "獎品金蛋", cost: 30, icon: "👑" },
+                { id: 'silver_egg', name: "獎品銀蛋", cost: 20, icon: "💎" },
+                { id: 'bronze_egg', name: "獎品銅蛋", cost: 10, icon: "🎁" }
+            ];
 
-            localStorage.setItem('cm309_students', JSON.stringify(students));
-            localStorage.setItem('cm309_attState', JSON.stringify(attendanceState));
-            localStorage.setItem('cm309_hwState', JSON.stringify(interactiveHwState));
-            localStorage.setItem('cm309_teethState', JSON.stringify(teethLampState));
-            localStorage.setItem('cm309_mwState', JSON.stringify(mouthwashLampState));
-            localStorage.setItem('cm309_cleanBoxesAM', JSON.stringify(cleanBoxesAM));
-            localStorage.setItem('cm309_cleanBoxesPM', JSON.stringify(cleanBoxesPM));
-            localStorage.setItem('cm309_pets', JSON.stringify(petState));
-            localStorage.setItem('cm309_pet_collection', JSON.stringify(petCollection));
-            localStorage.setItem('cm309_announcements', JSON.stringify(announcements));
-            localStorage.setItem('cm309_corrBoxes', JSON.stringify(correctionBoxes));
-            localStorage.setItem('cm309_cleanlinessAssign', JSON.stringify(cleanlinessAssignment));
-            localStorage.setItem('cm309_cleanlinessAwarded', JSON.stringify(cleanlinessAwarded));
-
-            renderAllGrids();
-            renderPetsGrid();
-            document.getElementById('studentRosterInput').value = students.join('\n');
-            updateCloudBadge();
-            if (!silent) alert("✅ 已成功從 Firebase 同步最新狀態！");
-          } else {
-            updateCloudBadge();
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          updateCloudBadge();
-        });
-    }
-
-    function emergencyRestoreGarden() {
-      if (confirm("確定要一鍵幫全班每個小朋友的動物園補回 1 隻成體動物嗎？")) {
-        students.forEach((name, i) => {
-          const seat = i + 1;
-          if (!petCollection[seat]) petCollection[seat] = [];
-          const randomPet = PET_CATALOG[Math.floor(Math.random() * PET_CATALOG.length)];
-          petCollection[seat].push({ petId: randomPet.id, prize: null, redeemed: false, pairId: null });
-        });
-        syncToFirebase();
-        if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
-        alert("✅ 已成功為全班每個小朋友的動物園補回 1 隻成體動物！");
-      }
-    }
-
-    function switchInteractiveMode(mode) {
-      currentInteractiveMode = mode;
-      document.querySelectorAll('#tab-interactive .form-chip').forEach(b => b.classList.remove('active'));
-      document.getElementById('btn-sub-' + mode).classList.add('active');
-
-      const title = document.getElementById('currentInteractiveTitleDisplay');
-      const grid = document.getElementById('interactiveGrid');
-      const corrSec = document.getElementById('correctionBoardSection');
-      const cleanSec = document.getElementById('cleanlinessBoardSection');
-      const kanban = document.getElementById('cleanKanban');
-
-      grid.style.display = 'none';
-      corrSec.style.display = 'none';
-      cleanSec.style.display = 'none';
-      kanban.style.display = 'none';
-
-      if (mode === 'hw') {
-        title.textContent = '目前項目：作業繳交';
-        grid.style.display = 'grid';
-      } else if (mode === 'correction') {
-        title.textContent = '目前項目：作業訂正追蹤 (10格換行，完成亮綠燈沉底)';
-        corrSec.style.display = 'block';
-        renderCorrectionBoard();
-      } else if (mode === 'cleanliness') {
-        title.textContent = '目前項目：整潔大師 (座位整潔評比)';
-        cleanSec.style.display = 'block';
-        renderCleanlinessBoard();
-      } else if (mode === 'clean') {
-        title.textContent = '目前項目：打掃工作 (早自修與環保時間上下區塊)';
-        kanban.style.display = 'block';
-        renderCleanBoards();
-      } else {
-        title.textContent = (mode === 'teeth' ? '目前項目：潔牙高手' : '目前項目：漱口水');
-        grid.style.display = 'grid';
-      }
-      renderInteractiveGrid();
-    }
-
-    function renderCleanBoards() {
-      const assignedSeats = new Set();
-      cleanBoxesAM.forEach(b => b.students.forEach(s => assignedSeats.add(String(s.seat))));
-      cleanBoxesPM.forEach(b => b.students.forEach(s => assignedSeats.add(String(s.seat))));
-
-      const poolShared = document.getElementById('cleanPoolShared');
-      poolShared.innerHTML = '';
-      students.forEach((name, i) => {
-        const id = String(i + 1);
-        if (!assignedSeats.has(id)) {
-          const tag = document.createElement('div');
-          tag.className = 'drag-tag';
-          tag.setAttribute('data-seat', id);
-          tag.setAttribute('data-name', name);
-          tag.textContent = `${name}`;
-          poolShared.appendChild(tag);
+            shopItems.forEach(item => {
+                let div = document.createElement('div');
+                div.className = "flex items-center justify-between p-4 bg-emerald-50 rounded-2xl border-2 border-emerald-200 shadow-sm";
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="text-3xl">${item.icon}</span>
+                        <div>
+                            <div class="font-bold text-gray-800">${item.name}</div>
+                            <div class="text-sm text-amber-600 font-bold">需代幣：${item.cost} 枚</div>
+                        </div>
+                    </div>
+                    <button onclick="handleBuy('${item.id}')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl shadow transition-all">兌換</button>
+                `;
+                container.appendChild(div);
+            });
         }
-      });
 
-      new Sortable(poolShared, {
-        group: { name: 'cleanGroupShared', pull: true, put: true },
-        animation: 150,
-        onAdd: function (evt) {
-          const seat = evt.item.getAttribute('data-seat');
-          evt.item.remove();
-          
-          let removed = false;
-          cleanBoxesAM.forEach(b => {
-            const idx = b.students.findIndex(s => String(s.seat) === String(seat));
-            if (idx !== -1) {
-              if (b.students[idx].done) addPetXp(seat, -1);
-              b.students.splice(idx, 1);
-              removed = true;
+        function handleBuy(itemId) {
+            let shopItems = [
+                { id: 'seat', name: "指定座位", cost: 50 },
+                { id: 'book', name: "免抄聯絡簿 3 天", cost: 40 },
+                { id: 'hw', name: "作業減免", cost: 30 },
+                { id: 'gold_egg', name: "獎品金蛋", cost: 30 },
+                { id: 'silver_egg', name: "獎品銀蛋", cost: 20 },
+                { id: 'bronze_egg', name: "獎品銅蛋", cost: 10 }
+            ];
+            let item = shopItems.find(i => i.id == itemId);
+            let seatNum = getCurrentSeatNum();
+            let total = getTotalCoins(seatNum);
+
+            if (total < item.cost) {
+                alert('您的代幣總數不夠兌換這個獎品喔！');
+                return;
             }
-          });
-          if (!removed) {
-            cleanBoxesPM.forEach(b => {
-              const idx = b.students.findIndex(s => String(s.seat) === String(seat));
-              if (idx !== -1) {
-                if (b.students[idx].done) addPetXp(seat, -1);
-                b.students.splice(idx, 1);
-              }
-            });
-          }
-          renderCleanBoards();
-          syncToFirebase();
-        }
-      });
 
-      const containerAM = document.getElementById('cleanBoxesContainerAM');
-      containerAM.innerHTML = '';
-      cleanBoxesAM.forEach((box, bIdx) => {
-        const col = document.createElement('div');
-        col.className = 'clean-col';
-        col.innerHTML = `
-          <div style="display:flex; gap:6px; margin-bottom:8px; align-items:center;">
-            <input type="text" class="form-control" style="font-weight:700; padding:4px 8px; font-size:0.9rem;" value="${box.title}" onchange="updateCleanBoxTitle('am', ${bIdx}, this.value)">
-            <button onclick="removeCleanBox('am', ${bIdx})" style="background:transparent; border:none; color:#ef4444; cursor:pointer; padding:4px;"><i class="fa-solid fa-trash-can"></i></button>
-          </div>
-          <div class="clean-list" id="clean-box-am-${box.id}"></div>
-        `;
-        containerAM.appendChild(col);
-
-        const listEl = col.querySelector(`#clean-box-am-${box.id}`);
-        box.students.forEach((st, sIdx) => {
-          const tag = document.createElement('div');
-          const isDone = !!st.done;
-          tag.className = `drag-tag ${isDone ? 'is-clean-done' : ''}`;
-          tag.setAttribute('data-seat', st.seat);
-          tag.setAttribute('data-name', st.name);
-          tag.innerHTML = `
-            <span onclick="toggleStudentCleanDone('am', ${bIdx}, ${sIdx})" style="cursor:pointer; display:inline-block; padding:0 2px;">
-              ${st.name}
-            </span>
-            <i class="fa-solid fa-xmark btn-remove-tag" onclick="removeStudentFromClean('am', ${bIdx}, ${sIdx})"></i>
-          `;
-          listEl.appendChild(tag);
-        });
-
-        new Sortable(listEl, {
-          group: { name: 'cleanGroupShared', pull: true, put: true },
-          animation: 150,
-          onAdd: function (evt) {
-            const seat = evt.item.getAttribute('data-seat');
-            const name = evt.item.getAttribute('data-name');
-            evt.item.remove();
-
-            cleanBoxesAM.forEach(b => {
-              const idx = b.students.findIndex(s => String(s.seat) === String(seat));
-              if (idx !== -1 && b !== box) {
-                if (b.students[idx].done) addPetXp(seat, -1);
-                b.students.splice(idx, 1);
-              }
-            });
-            cleanBoxesPM.forEach(b => {
-              const idx = b.students.findIndex(s => String(s.seat) === String(seat));
-              if (idx !== -1) {
-                if (b.students[idx].done) addPetXp(seat, -1);
-                b.students.splice(idx, 1);
-              }
-            });
-
-            if (!box.students.some(s => String(s.seat) === String(seat))) {
-              box.students.push({ seat, name, done: false });
-            }
-            renderCleanBoards();
-            syncToFirebase();
-          }
-        });
-      });
-
-      const containerPM = document.getElementById('cleanBoxesContainerPM');
-      containerPM.innerHTML = '';
-      cleanBoxesPM.forEach((box, bIdx) => {
-        const col = document.createElement('div');
-        col.className = 'clean-col';
-        col.innerHTML = `
-          <div style="display:flex; gap:6px; margin-bottom:8px; align-items:center;">
-            <input type="text" class="form-control" style="font-weight:700; padding:4px 8px; font-size:0.9rem;" value="${box.title}" onchange="updateCleanBoxTitle('pm', ${bIdx}, this.value)">
-            <button onclick="removeCleanBox('pm', ${bIdx})" style="background:transparent; border:none; color:#ef4444; cursor:pointer; padding:4px;"><i class="fa-solid fa-trash-can"></i></button>
-          </div>
-          <div class="clean-list" id="clean-box-pm-${box.id}"></div>
-        `;
-        containerPM.appendChild(col);
-
-        const listEl = col.querySelector(`#clean-box-pm-${box.id}`);
-        box.students.forEach((st, sIdx) => {
-          const tag = document.createElement('div');
-          const isDone = !!st.done;
-          tag.className = `drag-tag ${isDone ? 'is-clean-done' : ''}`;
-          tag.setAttribute('data-seat', st.seat);
-          tag.setAttribute('data-name', st.name);
-          tag.innerHTML = `
-            <span onclick="toggleStudentCleanDone('pm', ${bIdx}, ${sIdx})" style="cursor:pointer; display:inline-block; padding:0 2px;">
-              ${st.name}
-            </span>
-            <i class="fa-solid fa-xmark btn-remove-tag" onclick="removeStudentFromClean('pm', ${bIdx}, ${sIdx})"></i>
-          `;
-          listEl.appendChild(tag);
-        });
-
-        new Sortable(listEl, {
-          group: { name: 'cleanGroupShared', pull: true, put: true },
-          animation: 150,
-          onAdd: function (evt) {
-            const seat = evt.item.getAttribute('data-seat');
-            const name = evt.item.getAttribute('data-name');
-            evt.item.remove();
-
-            cleanBoxesPM.forEach(b => {
-              const idx = b.students.findIndex(s => String(s.seat) === String(seat));
-              if (idx !== -1 && b !== box) {
-                if (b.students[idx].done) addPetXp(seat, -1);
-                b.students.splice(idx, 1);
-              }
-            });
-            cleanBoxesAM.forEach(b => {
-              const idx = b.students.findIndex(s => String(s.seat) === String(seat));
-              if (idx !== -1) {
-                if (b.students[idx].done) addPetXp(seat, -1);
-                b.students.splice(idx, 1);
-              }
-            });
-
-            if (!box.students.some(s => String(s.seat) === String(seat))) {
-              box.students.push({ seat, name, done: false });
-            }
-            renderCleanBoards();
-            syncToFirebase();
-          }
-        });
-      });
-    }
-
-    function toggleStudentCleanDone(session, boxIdx, stIdx) {
-      const boxes = (session === 'am') ? cleanBoxesAM : cleanBoxesPM;
-      const studentObj = boxes[boxIdx].students[stIdx];
-      const wasDone = studentObj.done;
-      studentObj.done = !wasDone;
-
-      if (!wasDone) {
-        addPetXp(studentObj.seat, 1);
-      } else {
-        addPetXp(studentObj.seat, -1);
-      }
-
-      renderCleanBoards();
-      syncToFirebase();
-    }
-
-    function addCleanBox(session) {
-      const newId = session + '_' + Date.now();
-      if (session === 'am') {
-        cleanBoxesAM.push({ id: newId, title: '新早自修區域', students: [] });
-      } else {
-        cleanBoxesPM.push({ id: newId, title: '新環保時間區域', students: [] });
-      }
-      renderCleanBoards();
-      syncToFirebase();
-    }
-
-    function removeCleanBox(session, idx) {
-      const boxes = (session === 'am') ? cleanBoxesAM : cleanBoxesPM;
-      if (confirm(`確定刪除「${boxes[idx].title}」打掃區域嗎？`)) {
-        boxes.splice(idx, 1);
-        renderCleanBoards();
-        syncToFirebase();
-      }
-    }
-
-    function updateCleanBoxTitle(session, idx, val) {
-      const boxes = (session === 'am') ? cleanBoxesAM : cleanBoxesPM;
-      boxes[idx].title = val.trim() || '未命名區域';
-      syncToFirebase();
-    }
-
-    function removeStudentFromClean(session, boxIdx, stIdx) {
-      const boxes = (session === 'am') ? cleanBoxesAM : cleanBoxesPM;
-      const studentObj = boxes[boxIdx].students[stIdx];
-      if (studentObj.done) {
-        addPetXp(studentObj.seat, -1);
-      }
-      boxes[boxIdx].students.splice(stIdx, 1);
-      renderCleanBoards();
-      syncToFirebase();
-    }
-
-    function renderCorrectionBoard() {
-      const pool = document.getElementById('correctionPool');
-      pool.innerHTML = '';
-      students.forEach((name, i) => {
-        const id = i + 1;
-        const tag = document.createElement('div');
-        tag.className = 'drag-tag';
-        tag.setAttribute('data-seat', id);
-        tag.setAttribute('data-name', name);
-        tag.textContent = `${name}`;
-        pool.appendChild(tag);
-      });
-
-      new Sortable(pool, {
-        group: { name: 'corrGroup', pull: 'clone', put: false },
-        sort: false,
-        animation: 150
-      });
-
-      const boxesContainer = document.getElementById('correctionBoxesContainer');
-      boxesContainer.innerHTML = '';
-      correctionBoxes.forEach((box, bIdx) => {
-        box.students.sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1));
-
-        const col = document.createElement('div');
-        col.className = 'clean-col';
-        col.innerHTML = `
-          <div style="display:flex; gap:6px; margin-bottom:8px; align-items:center;">
-            <input type="text" class="form-control" style="font-weight:700; padding:4px 8px; font-size:0.9rem;" value="${box.title}" onchange="updateCorrectionBoxTitle(${bIdx}, this.value)">
-            <button onclick="removeCorrectionBox(${bIdx})" style="background:transparent; border:none; color:#ef4444; cursor:pointer; padding:4px;"><i class="fa-solid fa-trash-can"></i></button>
-          </div>
-          <div class="clean-list" id="corr-box-${box.id}"></div>
-        `;
-        boxesContainer.appendChild(col);
-
-        const listEl = col.querySelector(`#corr-box-${box.id}`);
-        box.students.forEach((st, sIdx) => {
-          const tag = document.createElement('div');
-          const isDone = !!st.done;
-          tag.className = `drag-tag ${isDone ? 'is-corrected' : ''}`;
-          tag.innerHTML = `
-            <span onclick="toggleStudentCorrDone(${bIdx}, ${sIdx})" style="cursor:pointer; display:inline-block; padding:0 2px;">
-              ${st.name}
-            </span>
-            <i class="fa-solid fa-xmark btn-remove-tag" onclick="removeStudentFromCorr(${bIdx}, ${sIdx})"></i>
-          `;
-          listEl.appendChild(tag);
-        });
-
-        new Sortable(listEl, {
-          group: { name: 'corrGroup', pull: true, put: true },
-          animation: 150,
-          onAdd: function (evt) {
-            const seat = evt.item.getAttribute('data-seat');
-            const name = evt.item.getAttribute('data-name');
-            evt.item.remove();
-            if (!box.students.some(s => s.seat == seat)) {
-              box.students.push({ seat, name, done: false });
-              renderCorrectionBoard();
-              syncToFirebase();
-            }
-          }
-        });
-      });
-    }
-
-    function toggleStudentCorrDone(boxIdx, stIdx) {
-      correctionBoxes[boxIdx].students[stIdx].done = !correctionBoxes[boxIdx].students[stIdx].done;
-      renderCorrectionBoard();
-      syncToFirebase();
-    }
-
-    function addCorrectionBox() {
-      const newId = 'box_' + Date.now();
-      correctionBoxes.push({ id: newId, title: '新作業項目', students: [] });
-      renderCorrectionBoard();
-      syncToFirebase();
-    }
-
-    function removeCorrectionBox(idx) {
-      if (confirm(`確定刪除「${correctionBoxes[idx].title}」分類框嗎？`)) {
-        correctionBoxes.splice(idx, 1);
-        renderCorrectionBoard();
-        syncToFirebase();
-      }
-    }
-
-    function updateCorrectionBoxTitle(idx, val) {
-      correctionBoxes[idx].title = val.trim() || '未命名作業';
-      syncToFirebase();
-    }
-
-    function removeStudentFromCorr(boxIdx, stIdx) {
-      correctionBoxes[boxIdx].students.splice(stIdx, 1);
-      renderCorrectionBoard();
-      syncToFirebase();
-    }
-
-    function initCleanlinessSortables() {
-      const zones = ['cleanlinessPool', 'zone-clean-tidy', 'zone-clean-chair', 'zone-clean-messy', 'zone-clean-bag', 'zone-clean-align'];
-      zones.forEach(zId => {
-        const el = document.getElementById(zId);
-        if (!el) return;
-        new Sortable(el, {
-          group: 'cleanlinessGroup',
-          animation: 150,
-          onEnd: function (evt) {
-            const seat = evt.item.getAttribute('data-seat');
-            const targetZone = evt.to.id;
-            cleanlinessAssignment[seat] = targetZone;
-
-            if (targetZone === 'zone-clean-tidy') {
-              if (!cleanlinessAwarded[seat]) {
-                addPetXp(seat, 1);
-                cleanlinessAwarded[seat] = true;
-              }
+            if (['gold_egg', 'silver_egg', 'bronze_egg'].includes(itemId)) {
+                document.getElementById('customPrizeModal').classList.remove('hidden');
+                document.getElementById('customPrizeInput').value = '';
+                document.getElementById('customPrizeInput').dataset.eggType = item.name;
+                setTimeout(() => document.getElementById('customPrizeInput').focus(), 100);
             } else {
-              if (cleanlinessAwarded[seat]) {
-                addPetXp(seat, -1);
-                delete cleanlinessAwarded[seat];
-              }
+                executeBuy(item.name, item.cost);
             }
-            syncToFirebase();
-          }
-        });
-      });
-    }
-
-    function renderCleanlinessBoard() {
-      const zones = ['cleanlinessPool', 'zone-clean-tidy', 'zone-clean-chair', 'zone-clean-messy', 'zone-clean-bag', 'zone-clean-align'];
-      zones.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = '';
-      });
-
-      students.forEach((name, i) => {
-        const id = i + 1;
-        const targetZone = cleanlinessAssignment[id] || 'cleanlinessPool';
-        const tag = document.createElement('div');
-        tag.className = 'drag-tag';
-        tag.setAttribute('data-seat', id);
-        tag.textContent = `${name}`;
-        
-        const zoneEl = document.getElementById(targetZone);
-        if (zoneEl) zoneEl.appendChild(tag);
-      });
-    }
-
-    function renderInteractiveGrid() {
-      if (currentInteractiveMode === 'clean' || currentInteractiveMode === 'correction' || currentInteractiveMode === 'cleanliness') return;
-      const container = document.getElementById('interactiveGrid'); container.innerHTML = '';
-      students.forEach((name, i) => {
-        const id = i+1; const div = document.createElement('div'); div.className = 'student-btn';
-        if(currentInteractiveMode === 'hw') {
-          const hw = interactiveHwState[id];
-          if(hw) div.classList.add(hw.lightClass);
-          div.innerHTML = `<div class="indicator-lamp"></div><span class="seat">${name}</span><span class="status">${hw ? hw.status : '未登記'}</span>`;
-          div.onclick = () => handleHwClick(id, name);
-        } else {
-          const isLit = (currentInteractiveMode === 'teeth' ? teethLampState[id] : mouthwashLampState[id]);
-          if(isLit) div.classList.add('is-lit');
-          div.innerHTML = `<div class="indicator-lamp"></div><span class="seat">${name}</span><span class="status">${isLit?'已完成':'未完成'}</span>`;
-          div.onclick = () => toggleLamp(id);
         }
-        container.appendChild(div);
-      });
-    }
 
-    function handleHwClick(seat, name) {
-      if (clickTimeout && lastClickedSeat === seat) {
-        clearTimeout(clickTimeout); clickTimeout = null; lastClickedSeat = null;
-        if(interactiveHwState[seat] && interactiveHwState[seat].lightClass === 'hw-green') addPetXp(seat, -1);
-        delete interactiveHwState[seat]; 
-        renderInteractiveGrid(); 
-        syncToFirebase();
-        return;
-      }
-      lastClickedSeat = seat;
-      clickTimeout = setTimeout(() => {
-        clickTimeout = null; lastClickedSeat = null; currentSelectedStudent = { seat, name };
-        document.getElementById('missingInputArea').style.display = 'none'; document.getElementById('hwMissingText').value = '';
-        document.getElementById('hwStatusModal').classList.add('active');
-      }, 250);
-    }
-    
-    function applyHwStatus(status, lightCls) {
-      const seat = currentSelectedStudent.seat; const oldState = interactiveHwState[seat];
-      const wasGreen = oldState && oldState.lightClass === 'hw-green'; const isGreen = lightCls === 'hw-green';
-      if (!wasGreen && isGreen) addPetXp(seat, 1);
-      if (wasGreen && !isGreen) addPetXp(seat, -1);
-      interactiveHwState[seat] = { status, lightClass: lightCls };
-      closeHwModal(); 
-      renderInteractiveGrid();
-      syncToFirebase();
-    }
-    
-    function resetSingleStudentHw() {
-      const seat = currentSelectedStudent.seat;
-      if(interactiveHwState[seat] && interactiveHwState[seat].lightClass === 'hw-green') addPetXp(seat, -1);
-      delete interactiveHwState[seat]; 
-      closeHwModal(); 
-      renderInteractiveGrid(); 
-      syncToFirebase();
-    }
-    function showMissingInput() { document.getElementById('missingInputArea').style.display = 'block'; }
-    function submitMissingHw() {
-      const txt = document.getElementById('hwMissingText').value.trim();
-      if(!txt) return alert("請輸入缺交項目！");
-      applyHwStatus(`缺項(${txt})`, 'hw-teal');
-    }
-    function closeHwModal() { document.getElementById('hwStatusModal').classList.remove('active'); }
-
-    function toggleLamp(seat) {
-      let isOn = false;
-      if (currentInteractiveMode === 'teeth') { teethLampState[seat] = !teethLampState[seat]; isOn = teethLampState[seat]; }
-      else if (currentInteractiveMode === 'mouthwash') { mouthwashLampState[seat] = !mouthwashLampState[seat]; isOn = mouthwashLampState[seat]; }
-      if (isOn) addPetXp(seat, 1); else addPetXp(seat, -1);
-      renderInteractiveGrid();
-      syncToFirebase();
-    }
-
-    function resetCurrentInteractive() {
-      if(confirm("確定重整當前項目的紀錄？（打掃工作只會清除亮燈，位置保留）")) {
-        if(currentInteractiveMode === 'hw') interactiveHwState = {};
-        else if(currentInteractiveMode === 'clean') {
-          cleanBoxesAM.forEach(b => b.students.forEach(s => {
-            if (s.done) addPetXp(s.seat, -1);
-            s.done = false;
-          }));
-          cleanBoxesPM.forEach(b => b.students.forEach(s => {
-            if (s.done) addPetXp(s.seat, -1);
-            s.done = false;
-          }));
-          renderCleanBoards();
+        function closeCustomModal() {
+            document.getElementById('customPrizeModal').classList.add('hidden');
         }
-        else if(currentInteractiveMode === 'teeth') teethLampState = {};
-        else if(currentInteractiveMode === 'mouthwash') mouthwashLampState = {};
-        else if(currentInteractiveMode === 'correction') {
-          correctionBoxes.forEach(b => b.students = []);
-          renderCorrectionBoard();
-        } else if(currentInteractiveMode === 'cleanliness') {
-          cleanlinessAssignment = {};
-          cleanlinessAwarded = {};
-          renderCleanlinessBoard();
+
+        function confirmCustomBuy() {
+            let customName = document.getElementById('customPrizeInput').value.trim();
+            let eggType = document.getElementById('customPrizeInput').dataset.eggType || "獎品";
+            if (!customName) {
+                alert('請輸入獎品名稱！');
+                return;
+            }
+            closeCustomModal();
+            let cost = 10;
+            if (eggType === "獎品金蛋") cost = 30;
+            else if (eggType === "獎品銀蛋") cost = 20;
+            else if (eggType === "獎品銅蛋") cost = 10;
+
+            executeBuy(`${eggType}：${customName}`, cost);
         }
-        renderInteractiveGrid();
-        syncToFirebase();
-      }
-    }
 
-    function uploadInteractiveBatch() {
-      let detailText = "";
-      if(currentInteractiveMode === 'hw') {
-        let stats = {"已繳交":0, "忘記帶回家":0, "未完成":0, "忘記帶來學校":0};
-        let missingList = [];
-        students.forEach((n,i) => {
-          const st = interactiveHwState[i+1] ? interactiveHwState[i+1].status : "未登記";
-          if(st.includes("缺項")) missingList.push(`${n}(${st})`);
-          else if(stats[st] !== undefined) stats[st]++;
-          else if(st !== "未登記") missingList.push(`${n}(${st})`);
-          if(["忘記帶回家", "未完成", "忘記帶來學校"].includes(st)) missingList.push(`${n}(${st})`);
-        });
-        detailText = `已繳交:${stats["已繳交"]}、缺/未帶:${missingList.length}。 ${missingList.length>0 ? '需追蹤:'+missingList.join('、') : ''}`;
-        sendToSheets({ category: "作業繳交(總表)", student: "全班", detail: detailText });
-      } else if(currentInteractiveMode === 'correction') {
-        let boxSummaries = correctionBoxes.map(b => {
-          let doneList = b.students.filter(s => s.done).map(s => s.name);
-          let undoneList = b.students.filter(s => !s.done).map(s => s.name);
-          return `${b.title} [已訂正:${doneList.join('、')||'無'}, 未訂正:${undoneList.join('、')||'無'}]`;
-        });
-        detailText = boxSummaries.join(' | ');
-        sendToSheets({ category: "作業訂正追蹤", student: "全班", detail: detailText });
-      } else if(currentInteractiveMode === 'cleanliness') {
-        let tidyStudents = students.filter((_, i) => cleanlinessAssignment[i+1] === 'zone-clean-tidy');
-        detailText = `整潔達標: ${tidyStudents.join('、') || '無'}`;
-        sendToSheets({ category: "整潔大師評比", student: "全班", detail: detailText });
-      } else if(currentInteractiveMode === 'clean') {
-        let amSummaries = cleanBoxesAM.map(b => {
-          let done = b.students.filter(s => s.done).map(s => s.name);
-          return `[早]${b.title}(${done.join('、')||'無'})`;
-        });
-        let pmSummaries = cleanBoxesPM.map(b => {
-          let done = b.students.filter(s => s.done).map(s => s.name);
-          return `[環]${b.title}(${done.join('、')||'無'})`;
-        });
-        detailText = [...amSummaries, ...pmSummaries].join(' | ');
-        sendToSheets({ category: "打掃工作(早自修與環保)", student: "全班", detail: detailText });
-      } else {
-        const actionMap = { teeth: "潔牙高手", mouthwash: "漱口水" };
-        let lamp = (currentInteractiveMode === 'teeth') ? teethLampState : mouthwashLampState;
-        let notDone = students.map((n,i)=>({id:i+1})).filter(s => !lamp[s.id]).map(s=>`${students[s.id-1]}`);
-        detailText = notDone.length > 0 ? `未完成: ${notDone.join('、')}` : '全員完成！';
-        sendToSheets({ category: actionMap[currentInteractiveMode], student: "全班", detail: detailText });
-      }
-      alert(`已彙整上傳至 Google 試算表！\n\n${detailText}`);
-    }
-
-    function renderAttendanceGrid() {
-      const container = document.getElementById('attendanceGrid'); container.innerHTML = '';
-      students.forEach((name, i) => {
-        const id = i+1; const st = attendanceState[id] || '出席'; let cls = '';
-        if(st==='出席') cls='att-present'; else if(st==='病假') cls='att-sick'; else if(st==='事假') cls='att-absent'; else cls='att-late';
-        container.innerHTML += `<div class="student-btn ${cls}" onclick="attendanceState[${id}] = ['出席','事假','病假','遲到'][ (['出席','事假','病假','遲到'].indexOf(attendanceState[${id}]||'出席')+1)%4 ]; renderAttendanceGrid(); syncToFirebase();">
-          <span class="seat">${name}</span><span class="status">${st}</span></div>`;
-      });
-    }
-    function resetAttendance() { if(confirm("確定重整為全數出席？")) { attendanceState = {}; renderAttendanceGrid(); syncToFirebase(); } }
-    function uploadAttendanceBatch() {
-      let abnormal = [], present = 0;
-      students.forEach((n, i) => { let st = attendanceState[i+1] || '出席'; if(st === '出席') present++; else abnormal.push(`${n}(${st})`); });
-      let txt = `應到${students.length}人，實到${present}人。${abnormal.length>0 ? '請假:'+abnormal.join('、') : '全班到齊！'}`;
-      sendToSheets({ category: "每日點名", student: "全班", detail: txt }); alert(`已上傳至 Google 試算表！\n${txt}`);
-    }
-
-    function addPetXp(seat, amount) {
-      let seatNum = parseInt(seat);
-      if (!petState[seatNum]) {
-        petState[seatNum] = { petId: 'cat_orange', stage: 1, xp: 0 };
-      }
-      let p = petState[seatNum];
-      if (p.stage > 3) return; 
-      p.xp += amount;
-      while (p.stage <= 3 && p.xp >= PET_REQ[p.stage - 1]) { 
-        p.xp -= PET_REQ[p.stage - 1]; 
-        p.stage++; 
-      }
-      if (p.xp < 0) { 
-        if (p.stage > 1) { 
-          p.stage--; 
-          p.xp = PET_REQ[p.stage - 1] + p.xp; 
-        } else { 
-          p.xp = 0; 
-        } 
-      }
-      if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
-      syncToFirebase();
-    }
-
-    function renderPetsGrid() {
-      const container = document.getElementById('petsGrid');
-      container.innerHTML = '';
-      students.forEach((name, i) => {
-        const id = i+1; 
-        if (!petState[id]) {
-          petState[id] = { petId: 'cat_orange', stage: 1, xp: 0 };
-        }
-        const p = petState[id];
-        const div = document.createElement('div');
-        div.className = 'student-btn pet-btn'; div.style.padding = '12px 8px';
-        
-        const cat = PET_CATALOG.find(c => c.id === p.petId) || PET_CATALOG[0];
-        const isMystery = p.stage === 1;
-        const isCompleted = p.stage > 3;
-        const emoji = isMystery ? '🥚' : (cat ? cat.stages[Math.min(p.stage - 1, 2)] : '🐱');
-        let stageName = isCompleted ? '圓滿成長' : (p.stage===1?'蛋':(p.stage===2?'幼體':'成體'));
-        let progressPercent = isCompleted ? 100 : Math.floor((p.xp / PET_REQ[p.stage - 1]) * 100);
-        
-        div.innerHTML = `<span class="seat">${name}</span><div class="pet-emoji s${p.stage}">${emoji}</div><div class="pet-progress-bg"><div class="pet-progress-fill" style="width:${progressPercent}%;"></div></div><div class="pet-info"><span>${stageName}</span><span>${isCompleted ? 'MAX' : p.xp}</span></div>`;
-        if (isCompleted) div.style.borderColor = '#eab308';
-
-        div.onclick = () => openPetModal(id, name);
-        container.appendChild(div);
-      });
-    }
-
-    function openPetModal(seat, name) {
-      currentSelectedStudent = { seat, name };
-      if (!petState[seat]) {
-        petState[seat] = { stage: 1, xp: 0, petId: 'cat_orange' };
-      }
-      const p = petState[seat];
-      document.getElementById('petModalTitle').textContent = `${name} 的寵物`;
-      const manageView = document.getElementById('petManageView');
-      const selectView = document.getElementById('petSelectView');
-      const gardenView = document.getElementById('petGardenView');
-      
-      if (!p.petId && p.stage === 1 && p.xp === 0) {
-        manageView.style.display = 'none';
-        selectView.style.display = 'block';
-        gardenView.style.display = 'none';
-        document.getElementById('btnViewGarden').style.display = 'none';
-        document.getElementById('btnModalClose').textContent = '關閉視窗';
-        document.getElementById('btnModalClose').onclick = closePetModal;
-      } else {
-        manageView.style.display = 'block';
-        selectView.style.display = 'none';
-        gardenView.style.display = 'none';
-        document.getElementById('btnViewGarden').style.display = 'block';
-        document.getElementById('btnModalClose').textContent = '關閉視窗';
-        document.getElementById('btnModalClose').onclick = closePetModal;
-
-        updateTicketBadgeBelow(seat);
-
-        const cat = PET_CATALOG.find(c => c.id === p.petId) || PET_CATALOG[0];
-        const isMystery = p.stage === 1;
-        const isCompleted = p.stage > 3;
-        document.getElementById('petModalEmoji').textContent = isMystery ? '🥚' : (cat ? cat.stages[Math.min(p.stage - 1, 2)] : '🐱');
-        document.getElementById('petModalEmoji').className = `pet-emoji s${Math.min(p.stage, 4)}`;
-        
-        let stageName = isCompleted ? '圓滿成長' : (p.stage===1?'第一階段：蛋':(p.stage===2?'第二階段：幼體':'第三階段：成體'));
-        let displayName = isMystery ? '神秘的蛋' : (cat ? cat.name : '未知寵物');
-        document.getElementById('petModalName').textContent = `${displayName} (${stageName})`;
-        
-        const progressArea = document.getElementById('petModalProgressArea');
-        const actionArea = document.getElementById('petModalActionArea');
-        const completeArea = document.getElementById('petModalCompleteArea');
-
-        if(isCompleted) {
-           progressArea.style.display = 'none'; actionArea.style.display = 'none'; completeArea.style.display = 'block';
-        } else {
-           progressArea.style.display = 'block'; actionArea.style.display = 'flex'; completeArea.style.display = 'none';
-           let req = PET_REQ[p.stage - 1];
-           document.getElementById('petModalXpText').textContent = `${p.xp} / ${req}`;
-           document.getElementById('petModalProgressBar').style.width = `${(p.xp/req)*100}%`;
-        }
-      }
-      document.getElementById('petManageModal').classList.add('active');
-    }
-
-    function resetSingleStudentPet() {
-      const seat = currentSelectedStudent.seat;
-      if (confirm(`確定要重設 ${currentSelectedStudent.name} 的目前寵物嗎？分數會歸零並重新抽蛋。`)) {
-        const randomPet = PET_CATALOG[Math.floor(Math.random() * PET_CATALOG.length)];
-        petState[seat] = { petId: randomPet.id, stage: 1, xp: 0 };
-        openPetModal(seat, currentSelectedStudent.name);
-        renderPetsGrid();
-        syncToFirebase();
-        alert("✅ 已成功將該生寵物與分數重設歸零！");
-      }
-    }
-
-    function updateTicketBadgeBelow(seat) {
-      const myPets = petCollection[seat] || [];
-      const adultCount = myPets.length;
-      const pairedCount = myPets.filter(item => item.redeemed).length / 2;
-      const badge = document.getElementById('gardenTicketBadgeBelow');
-      if (adultCount > 0) {
-        badge.innerHTML = `🌟 目前動物園成體：${adultCount} 隻 ｜ 已換獎勵：<strong style="color:#d97706; font-size:0.95rem;">${pairedCount} 組</strong>`;
-      } else {
-        badge.innerHTML = `🎟️ 培育 2 隻動物成體即可配對兌換獎勵！`;
-      }
-    }
-
-    function selectMysteryPet() {
-      const seat = currentSelectedStudent.seat;
-      const randomPet = PET_CATALOG[Math.floor(Math.random() * PET_CATALOG.length)];
-      petState[seat] = { petId: randomPet.id, stage: 1, xp: 0 };
-      openPetModal(seat, currentSelectedStudent.name); 
-      renderPetsGrid();
-      syncToFirebase();
-    }
-
-    function manualAddPetXp(points) { addPetXp(currentSelectedStudent.seat, points); openPetModal(currentSelectedStudent.seat, currentSelectedStudent.name); }
-    
-    function moveToGarden() {
-      const seat = currentSelectedStudent.seat; const p = petState[seat];
-      if(!petCollection[seat]) petCollection[seat] = [];
-      petCollection[seat].push({ petId: p.petId, prize: null, redeemed: false, pairId: null }); 
-      
-      petState[seat] = { petId: null, stage: 1, xp: 0 };
-      
-      openPetModal(seat, currentSelectedStudent.name); 
-      renderPetsGrid();
-      syncToFirebase();
-    }
-
-    function showPetGarden() {
-      document.getElementById('petManageView').style.display = 'none';
-      document.getElementById('petSelectView').style.display = 'none';
-      document.getElementById('petGardenView').style.display = 'block';
-      document.getElementById('btnViewGarden').style.display = 'none';
-      document.getElementById('gardenTicketBadgeBelow').style.display = 'none';
-      document.getElementById('petModalTitle').textContent = `${currentSelectedStudent.name} 的專屬動物園`;
-      document.getElementById('btnModalClose').textContent = '🔙 返回上一頁';
-      document.getElementById('btnModalClose').onclick = () => {
-        document.getElementById('gardenTicketBadgeBelow').style.display = 'block';
-        openPetModal(currentSelectedStudent.seat, currentSelectedStudent.name);
-      };
-
-      firstSelectedPetIndex = null;
-      renderPetGardenContent();
-    }
-
-    function renderPetGardenContent() {
-      const seat = currentSelectedStudent.seat;
-      const grid = document.getElementById('gardenGrid');
-      grid.innerHTML = '';
-      
-      let rawPets = petCollection[seat] || [];
-      const myPets = rawPets.map(p => typeof p === 'string' ? { petId: p, prize: null, redeemed: false, pairId: null } : p);
-      petCollection[seat] = myPets;
-
-      const adultCount = myPets.length;
-      const pairedCount = myPets.filter(item => item.redeemed).length / 2;
-
-      const summaryBox = document.getElementById('gardenTicketSummary');
-      summaryBox.innerHTML = `
-        <div>🦁 成體總數：<strong>${adultCount} 隻</strong></div>
-        <div style="font-size:1.0rem; color:#b45309;">🎁 已換獎勵：<strong>${pairedCount} 組</strong> (每2隻換1次)</div>
-      `;
-
-      if (myPets.length === 0) {
-        grid.innerHTML = '<p style="color:#64748b; text-align:center; grid-column:1/-1; padding:20px;">目前動物園空空如也，趕快培育第一隻成體動物吧！</p>';
-      } else {
-        myPets.forEach((item, idx) => {
-          const cat = PET_CATALOG.find(c => c.id === item.petId) || PET_CATALOG[0];
-          const isRedeemed = !!item.redeemed;
-          const isSelectedFirst = (firstSelectedPetIndex === idx);
-          
-          const div = document.createElement('div');
-          let itemClass = 'garden-item';
-          if (isRedeemed) itemClass += ' is-redeemed';
-          if (isSelectedFirst) itemClass += ' is-selected-first';
-          div.className = itemClass;
-
-          let statusHtml = '';
-          if (isSelectedFirst) {
-            statusHtml = `<div style="font-size:0.65rem; background:#2563eb; color:#fff; padding:2px 4px; border-radius:4px; margin-top:4px; font-weight:700;">點第2隻配對</div>`;
-          } else if (isRedeemed) {
-            statusHtml = `<div class="redeemed-badge" title="${item.prize || '已兌換'}">🎁 ${item.prize || '已換獎'}</div><button onclick="event.stopPropagation(); cancelPairRedeem(${idx})" style="background:#fee2e2; border:1px solid #fca5a5; color:#dc2626; border-radius:4px; font-size:0.6rem; padding:1px 4px; margin-top:2px; cursor:pointer; font-weight:700;">✕ 取消</button>`;
-          } else {
-            statusHtml = `<div style="font-size:0.65rem; color:#64748b; margin-top:4px;">(點擊配對)</div>`;
-          }
-
-          div.innerHTML = `
-            <div class="emoji">${cat ? cat.stages[2] : '🐾'}</div>
-            <div class="name">${cat ? cat.name : '神秘動物'}</div>
-            ${statusHtml}
-          `;
-
-          div.onclick = () => {
-            if (isRedeemed) {
-              if (confirm("要取消此組雙寵物兌換，讓這兩隻寵物恢復未兌換狀態嗎？")) {
-                cancelPairRedeem(idx);
-              }
-              return;
+        function executeBuy(prizeName, cost) {
+            let success = deductCoins(cost);
+            if (!success) {
+                alert('兌換扣款失敗！');
+                return;
             }
 
-            if (firstSelectedPetIndex === null) {
-              firstSelectedPetIndex = idx;
-              renderPetGardenContent();
-            } else if (firstSelectedPetIndex === idx) {
-              firstSelectedPetIndex = null;
-              renderPetGardenContent();
-            } else {
-              openRewardModal(firstSelectedPetIndex, idx);
+            let seatNum = getCurrentSeatNum();
+            let gData = getStudentGameData(seatNum);
+            gData.directCoupons.push({ name: prizeName, date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
+
+            saveGameData();
+            alert(`成功兌換【${prizeName}】！`);
+            updateView();
+        }
+
+        function renderCoupons(containerId, couponsArray, categoryName) {
+            let container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            if (!couponsArray || couponsArray.length === 0) {
+                container.innerHTML = '<span class="text-gray-400 text-sm">目前尚無相關紀錄。</span>';
+                return;
             }
-          };
 
-          grid.appendChild(div);
-        });
-      }
-    }
+            let sorted = [...couponsArray].sort((a, b) => {
+                let aUsed = !!a.isUsed ? 1 : 0;
+                let bUsed = !!b.isUsed ? 1 : 0;
+                return aUsed - bUsed;
+            });
 
-    function openRewardModal(idx1, idx2) {
-      selectedRedeemPair = { idx1, idx2 };
-      document.getElementById('rewardRedeemModal').classList.add('active');
-    }
+            sorted.forEach((item) => {
+                let originalIndex = couponsArray.indexOf(item);
+                let isUsed = !!item.isUsed;
+                let badge = document.createElement('div');
+                badge.className = `relative border-2 rounded-xl p-3 shadow-sm flex flex-col items-start transition-all cursor-pointer ${isUsed ? 'coupon-used border-yellow-400' : 'bg-white border-emerald-300'}`;
+                
+                badge.innerHTML = `
+                    <button onclick="event.stopPropagation(); deleteCoupon('${categoryName}', ${originalIndex})" class="absolute top-2 right-2 text-red-400 hover:text-red-600 font-bold text-xs bg-white/80 px-1.5 py-0.5 rounded-full border border-red-200">✕ 刪除</button>
+                    <span class="font-bold text-emerald-700 text-sm pr-12">🎫 ${item.name}</span>
+                    <div class="flex justify-between items-center w-full mt-2">
+                        <span class="text-[10px] text-gray-500">${item.timeStr ? '⏱️ 領用時間：' + item.timeStr : '日期：' + item.date}</span>
+                        <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${isUsed ? 'bg-amber-200 text-amber-800' : 'bg-gray-100 text-gray-500'}">
+                            ${isUsed ? '🟡 已領取/使用' : '⚪ 未領取(點我設定)'}
+                        </span>
+                    </div>
+                `;
 
-    function closeRewardModal() {
-      document.getElementById('rewardRedeemModal').classList.remove('active');
-      firstSelectedPetIndex = null;
-      selectedRedeemPair = null;
-    }
+                badge.onclick = () => {
+                    activeCouponModalData = { category: categoryName, index: originalIndex };
+                    document.getElementById('couponModal').classList.remove('hidden');
+                    document.getElementById('couponNameInput').value = item.name.includes("點擊") ? "" : item.name;
+                    document.getElementById('couponTimeInput').value = item.timeStr || "";
+                    setTimeout(() => document.getElementById('couponNameInput').focus(), 100);
+                };
 
-    function choosePairReward(type) {
-      const seat = currentSelectedStudent.seat;
-      const pets = petCollection[seat];
-      const { idx1, idx2 } = selectedRedeemPair;
-      const pairToken = 'pair_' + Date.now();
+                container.appendChild(badge);
+            });
+        }
 
-      let prizeDesc = "";
-      let gameData = JSON.parse(localStorage.getItem('cm309_game_data')) || {};
-      let gData = gameData[seat] || { extraCoins: 0, tickets: [], specials: [], coinLogs: [] };
-      if (!gameData[seat]) gameData[seat] = gData;
-      if (!gData.tickets) gData.tickets = [];
-      if (!gData.coinLogs) gData.coinLogs = [];
+        function closeCouponModal() {
+            document.getElementById('couponModal').classList.add('hidden');
+            activeCouponModalData = null;
+        }
 
-      if (type === 'ticket') {
-        prizeDesc = "扭蛋卷";
-        gData.tickets.push({ name: "扭蛋卷 (點擊設定名稱)", date: new Date().toLocaleDateString(), isUsed: false });
-      } else {
-        prizeDesc = "10個代幣";
-        gData.extraCoins += 10;
-        gData.coinLogs.unshift({ text: `動物園雙寵物兌換獲得代幣 +10`, date: new Date().toLocaleDateString() });
-      }
+        function confirmCouponModal() {
+            let nameVal = document.getElementById('couponNameInput').value.trim();
+            let timeVal = document.getElementById('couponTimeInput').value.trim();
+            if (!nameVal) {
+                alert('請輸入有效的獎品名稱！');
+                return;
+            }
+            let seatNum = getCurrentSeatNum();
+            let gData = getStudentGameData(seatNum);
 
-      pets[idx1].redeemed = true;
-      pets[idx1].prize = prizeDesc;
-      pets[idx1].pairId = pairToken;
+            if (activeCouponModalData !== null) {
+                let cat = activeCouponModalData.category;
+                let idx = activeCouponModalData.index;
+                let targetArr = null;
 
-      pets[idx2].redeemed = true;
-      pets[idx2].prize = prizeDesc;
-      pets[idx2].pairId = pairToken;
+                if (cat === 'direct') targetArr = gData.directCoupons;
+                else if (cat === 'gacha') targetArr = gData.gachaCoupons;
+                else if (cat === 'ladder') targetArr = gData.ladderCoupons;
+                else if (cat === 'battle') targetArr = gData.battleCoupons;
 
-      localStorage.setItem('cm309_game_data', JSON.stringify(gameData));
-      closeRewardModal();
-      renderPetGardenContent();
-      syncToFirebase();
-      alert(`✅ 雙寵物配對成功！已成功換取【${prizeDesc}】，兩隻寵物已同步亮黃燈！`);
-    }
+                if (targetArr && targetArr[idx]) {
+                    targetArr[idx].name = nameVal;
+                    targetArr[idx].timeStr = timeVal || "已兌換";
+                    targetArr[idx].isUsed = true;
+                    saveGameData();
+                    closeCouponModal();
+                    updateView();
+                    alert(`✅ 獎品已更新並點亮黃燈！`);
+                }
+            }
+        }
 
-    function cancelPairRedeem(index) {
-      const seat = currentSelectedStudent.seat;
-      const pets = petCollection[seat];
-      const targetPairId = pets[index].pairId;
+        function renderCoinLogs() {
+            let container = document.getElementById('myCoinLogs');
+            let seatNum = getCurrentSeatNum();
+            let gData = getStudentGameData(seatNum);
+            container.innerHTML = '';
 
-      if (!targetPairId) {
-        pets[index].redeemed = false;
-        pets[index].prize = null;
-      } else {
-        pets.forEach(p => {
-          if (p.pairId === targetPairId) {
-            p.redeemed = false;
-            p.prize = null;
-            p.pairId = null;
-          }
-        });
-      }
+            if (!gData.coinLogs || gData.coinLogs.length === 0) {
+                container.innerHTML = '<span class="text-gray-400 text-sm">目前尚無代幣獲得紀錄。</span>';
+                return;
+            }
 
-      firstSelectedPetIndex = null;
-      renderPetGardenContent();
-      syncToFirebase();
-      alert("✅ 已成功取消兌換，恢復未亮燈狀態！");
-    }
+            gData.coinLogs.forEach(log => {
+                let logBadge = document.createElement('div');
+                logBadge.className = "bg-white border border-amber-200 rounded-xl px-3 py-2 shadow-sm flex flex-col text-xs";
+                logBadge.innerHTML = `
+                    <span class="font-bold text-amber-800">🪙 ${log.text}</span>
+                    <span class="text-[10px] text-gray-400 mt-0.5">${log.date}</span>
+                `;
+                container.appendChild(logBadge);
+            });
+        }
 
-    function resetAllPets() {
-      if(confirm("⚠️ 警告：確定要刪除全班寵物與寵物園嗎？")) {
-        petState = {}; petCollection = {};
-        alert("✅ 全班寵物紀錄已清除！");
-        if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
-        syncToFirebase();
-      }
-    }
+    // 💡 修正：刪除券類時正確同步
+        function deleteCoupon(categoryName, index) {
+            let seatNum = getCurrentSeatNum();
+            let gData = getStudentGameData(seatNum);
+            if (confirm("確定要刪除這筆項目嗎？")) {
+                if (categoryName === 'direct') gData.directCoupons.splice(index, 1);
+                else if (categoryName === 'gacha') gData.gachaCoupons.splice(index, 1);
+                else if (categoryName === 'ladder') gData.ladderCoupons.splice(index, 1);
+                else if (categoryName === 'battle') gData.battleCoupons.splice(index, 1);
 
-    function closePetModal() { document.getElementById('petManageModal').classList.remove('active'); }
+                saveGameData();
+                updateView();
+            }
+        }
 
-    function handleRecordSubmit(e) {
-      e.preventDefault();
-      sendToSheets({ category: document.getElementById('recordType').value, student: document.getElementById('recordStudentSelect').value, detail: document.getElementById('recordDetail').value, followup: document.getElementById('recordFollowup').value });
-      alert('已上傳至試算表！'); e.target.reset();
-    }
-    function sendToSheets(payload) {
-      if(!sheetsWebhookUrl) return;
-      const data = { timestamp: new Date().toISOString(), timeDisplay: new Date().toLocaleString('zh-TW'), className: "三年九班", ...payload };
-      fetch(sheetsWebhookUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-    }
+        function fetchFromFirebase() {
+            if (!firebaseDbUrl) return;
+            fetch(`${firebaseDbUrl.trim().endsWith('/') ? firebaseDbUrl.trim().slice(0, -1) : firebaseDbUrl.trim()}/classroomData.json`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data) {
+                        if (data.students && data.students.length > 0) {
+                            students = data.students;
+                            localStorage.setItem('cm309_students', JSON.stringify(students));
+                        }
+                        if (data.petCollection) {
+                            localStorage.setItem('cm309_pet_collection', JSON.stringify(data.petCollection));
+                        }
+                        if (data.gameData) {
+                            localStorage.setItem('cm309_game_data', JSON.stringify(data.gameData));
+                            gameData = data.gameData;
+                        }
+                        initApp();
+                    }
+                })
+                .catch(err => console.error("Firebase 讀取失敗:", err));
+        }
 
-    // 💡 修正：儲存座號時立即存入 localStorage 並同步到 Firebase
-    function saveStudentRoster() {
-      const txt = document.getElementById('studentRosterInput').value.trim(); 
-      if(!txt) return;
-      students = txt.split('\n').map(s => s.trim()).filter(s => s.length > 0); 
-      localStorage.setItem('cm309_students', JSON.stringify(students));
-      renderAllGrids(); 
-      alert("✅ 座號設定已更新並儲存！");
-      syncToFirebase();
-    }
-
-    function saveSheetsUrl() { 
-      sheetsWebhookUrl = document.getElementById('sheetsApiUrlInput').value.trim(); 
-      localStorage.setItem('cm309_sheets_url', sheetsWebhookUrl); 
-      alert("試算表 Webhook 已儲存！"); 
-    }
-  </script>
+        function syncToFirebase() {
+            if (!firebaseDbUrl) return;
+            let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
+            let payload = {
+                students: students,
+                gameData: JSON.parse(localStorage.getItem('cm309_game_data')) || {},
+                petCollection: petCollection
+            };
+            fetch(`${firebaseDbUrl.trim().endsWith('/') ? firebaseDbUrl.trim().slice(0, -1) : firebaseDbUrl.trim()}/classroomData.json`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).catch(err => console.error("Firebase 同步失敗:", err));
+        }
+    </script>
 </body>
 </html>
