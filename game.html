@@ -49,7 +49,7 @@
     <!-- 主要功能區塊 -->
     <main class="w-full max-w-4xl bg-white shadow-xl rounded-3xl p-6 border-4 border-emerald-200 mb-8">
         
-        <!-- 導覽標籤 (精簡為三大扭蛋與兌換區) -->
+        <!-- 導覽標籤 (僅保留三大扭蛋機與獎品兌換) -->
         <div class="flex justify-center flex-wrap gap-2 mb-6 border-b-2 border-gray-100 pb-4">
             <button onclick="switchTab('gacha')" id="tab-gacha" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-base transition-all bg-emerald-500 text-white shadow-md">🎁 三大扭蛋機</button>
             <button onclick="switchTab('shop')" id="tab-shop" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-base transition-all bg-gray-100 text-gray-600 hover:bg-emerald-100">🛍️ 學生個人資訊與獎品兌換</button>
@@ -81,14 +81,14 @@
             </div>
         </div>
 
-        <!-- 2. 學生資訊與獎品兌換畫面 (已套用新價格與5大區塊) -->
+        <!-- 2. 學生資訊與獎品兌換畫面 (已套用您指定的價格) -->
         <div id="section-shop" class="tab-content hidden py-6">
             <div class="flex justify-between items-center mb-6">
                 <a href="index.html" class="inline-block bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold px-4 py-2 rounded-xl text-sm transition-all">⬅️ 返回班級管理主頁</a>
             </div>
             
             <h2 class="text-2xl font-bold text-emerald-700 mb-2 text-center">🛍️ 學生個人資訊與獎品兌換 🛍️</h2>
-            <p class="text-gray-500 mb-6 text-center">在此查看您的動物與代幣狀況，並使用代幣或累積動物成體兌換心儀的獎品！</p>
+            <p class="text-gray-500 mb-6 text-center">在此查看您的動物與代幣狀況，並使用代幣（或動物成體點數）兌換心儀的獎品！</p>
             
             <!-- 學生詳細資訊卡片 -->
             <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-5 mb-8 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -96,7 +96,7 @@
                     <div class="text-4xl bg-white p-3 rounded-2xl shadow-inner border border-emerald-200">🧑‍🎓</div>
                     <div>
                         <div id="infoStudentName" class="text-xl font-bold text-emerald-900">載入中...</div>
-                        <div class="text-sm text-emerald-700 mt-0.5">代幣計算：可用動物園成體數 × 5 + 額外獲得代幣</div>
+                        <div class="text-sm text-emerald-700 mt-0.5">代幣計算：可用動物成體數 × 5 + 額外獲得代幣</div>
                     </div>
                 </div>
                 <div class="flex gap-3 text-center">
@@ -111,7 +111,7 @@
                 </div>
             </div>
 
-            <!-- 獎品兌換專區 (已更新您要求的價格項目) -->
+            <!-- 獎品兌換專區 (指定座位50、免抄聯絡簿40、作業減免30、紅點大獎25、綠點獎勵15) -->
             <h3 class="text-xl font-bold text-emerald-700 mb-4">🎁 獎品兌換專區</h3>
             <div id="shopList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                 <!-- 動態載入商品 -->
@@ -127,16 +127,8 @@
             <p class="text-xs text-gray-500 mb-3">💡 透過三大扭蛋機抽中的獎品會顯示在這裡，點擊卡片可設定領取時間與名稱！</p>
             <div id="gachaCouponsArea" class="bg-purple-50/60 border-2 border-dashed border-purple-300 rounded-2xl p-4 min-h-[90px] flex flex-wrap gap-3 mb-8"></div>
 
-            <!-- 第三區：爬梯子 (保留歷史紀錄區塊) -->
-            <h3 class="text-xl font-bold text-amber-700 mb-3">🧗 第三區：爬梯子獲得的獎品</h3>
-            <div id="ladderCouponsArea" class="bg-amber-50/60 border-2 border-dashed border-amber-300 rounded-2xl p-4 min-h-[90px] flex flex-wrap gap-3 mb-8"></div>
-
-            <!-- 第四區：比大小 (保留歷史紀錄區塊) -->
-            <h3 class="text-xl font-bold text-blue-700 mb-3">⚔️ 第四區：比大小獲得的獎品</h3>
-            <div id="battleCouponsArea" class="bg-blue-50/60 border-2 border-dashed border-blue-300 rounded-2xl p-4 min-h-[90px] flex flex-wrap gap-3 mb-8"></div>
-
-            <!-- 第五區：金幣累計 (代幣獲得紀錄) -->
-            <h3 class="text-xl font-bold text-yellow-700 mb-3">🪙 第五區：金幣累計 (代幣獲得紀錄)</h3>
+            <!-- 第三區：金幣累計 (代幣獲得紀錄) -->
+            <h3 class="text-xl font-bold text-yellow-700 mb-3">🪙 第三區：金幣累計 (代幣獲得紀錄)</h3>
             <div id="myCoinLogs" class="bg-yellow-50/60 border-2 border-dashed border-yellow-300 rounded-2xl p-4 min-h-[90px] flex flex-wrap gap-3"></div>
         </div>
 
@@ -176,6 +168,19 @@
             <div class="flex space-x-2">
                 <button onclick="confirmCouponModal()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2 rounded-xl flex-1 shadow">儲存並亮黃燈</button>
                 <button onclick="closeCouponModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold px-4 py-2 rounded-xl">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 小獎品兌換專屬輸入名稱 Modal -->
+    <div id="customPrizeModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full border-4 border-emerald-300 text-center">
+            <h3 class="text-lg font-bold text-emerald-800 mb-2">🎁 獎品兌換</h3>
+            <p class="text-sm text-gray-500 mb-4">請輸入您想要兌換的獎品名稱：</p>
+            <input type="text" id="customPrizeInput" placeholder="輸入獎品名稱..." class="w-full border-2 border-emerald-300 rounded-xl px-3 py-2 text-center font-bold text-emerald-800 mb-4 focus:outline-none">
+            <div class="flex space-x-2">
+                <button onclick="confirmCustomBuy()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl flex-1 shadow">確認兌換</button>
+                <button onclick="closeCustomModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold px-4 py-2 rounded-xl">取消</button>
             </div>
         </div>
     </div>
@@ -257,12 +262,10 @@
         function getStudentGameData(seatNum) {
             gameData = JSON.parse(localStorage.getItem('cm309_game_data')) || {};
             if (!gameData[seatNum]) {
-                gameData[seatNum] = { extraCoins: 0, directCoupons: [], gachaCoupons: [], ladderCoupons: [], battleCoupons: [], coinLogs: [] };
+                gameData[seatNum] = { extraCoins: 0, directCoupons: [], gachaCoupons: [], coinLogs: [] };
             }
             if (!gameData[seatNum].directCoupons) gameData[seatNum].directCoupons = [];
             if (!gameData[seatNum].gachaCoupons) gameData[seatNum].gachaCoupons = [];
-            if (!gameData[seatNum].ladderCoupons) gameData[seatNum].ladderCoupons = [];
-            if (!gameData[seatNum].battleCoupons) gameData[seatNum].battleCoupons = [];
             if (!gameData[seatNum].coinLogs) gameData[seatNum].coinLogs = [];
             return gameData[seatNum];
         }
@@ -311,7 +314,6 @@
             return false;
         }
 
-        // 💡 智慧扣款：優先扣除額外代幣，不足時依序扣除動物園中的可用成體動物 (每隻折抵5代幣)
         function deductCoins(amount) {
             let seatNum = getCurrentSeatNum();
             let total = getTotalCoins(seatNum);
@@ -381,8 +383,6 @@
             renderShop();
             renderCoupons('directCouponsArea', gData.directCoupons, 'direct');
             renderCoupons('gachaCouponsArea', gData.gachaCoupons, 'gacha');
-            renderCoupons('ladderCouponsArea', gData.ladderCoupons, 'ladder');
-            renderCoupons('battleCouponsArea', gData.battleCoupons, 'battle');
             renderCoinLogs();
         }
 
@@ -496,7 +496,7 @@
             }
         }
 
-        // 💡 獎品區固定兌換項目 (包含您要求的 50, 40, 30, 25, 15 點數與名稱)
+        // 💡 獎品區固定兌換項目 (指定座位50、免抄聯絡簿40、作業減免30、紅點大獎25、綠點獎勵15)
         function renderShop() {
             let container = document.getElementById('shopList');
             container.innerHTML = '';
@@ -645,8 +645,6 @@
 
                 if (cat === 'direct') targetArr = gData.directCoupons;
                 else if (cat === 'gacha') targetArr = gData.gachaCoupons;
-                else if (cat === 'ladder') targetArr = gData.ladderCoupons;
-                else if (cat === 'battle') targetArr = gData.battleCoupons;
 
                 if (targetArr && targetArr[idx]) {
                     targetArr[idx].name = nameVal;
@@ -688,8 +686,6 @@
             if (confirm("確定要刪除這筆項目嗎？")) {
                 if (categoryName === 'direct') gData.directCoupons.splice(index, 1);
                 else if (categoryName === 'gacha') gData.gachaCoupons.splice(index, 1);
-                else if (categoryName === 'ladder') gData.ladderCoupons.splice(index, 1);
-                else if (categoryName === 'battle') gData.battleCoupons.splice(index, 1);
 
                 saveGameData();
                 updateView();
