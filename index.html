@@ -156,10 +156,6 @@
       background: #f0fdf4; border-color: #86efac; cursor: pointer; transition: all 0.2s; position: relative;
     }
     .garden-item:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-    .garden-item.is-selected-first {
-      border: 2px solid #2563eb !important; background: #eff6ff !important;
-      box-shadow: 0 0 12px rgba(37, 99, 235, 0.5) !important;
-    }
     .garden-item .emoji { font-size: 34px; }
     .garden-item .name { font-size: 0.75rem; font-weight: 700; color: #15803d; margin-top: 4px; }
     
@@ -441,7 +437,7 @@
     </div>
   </div>
 
-  <!-- 寵物操作 Modal (動物園已改為兩大獨立分區：可用成體與已兌換紀念區) -->
+  <!-- 寵物操作 Modal -->
   <div id="petManageModal" class="modal-overlay">
     <div class="modal-box" style="text-align:center;">
       <h3 id="petModalTitle">寵物狀態</h3>
@@ -459,7 +455,7 @@
         <div id="petModalCompleteArea" style="display:none; margin:20px 0;">
           <p style="font-size:0.9rem; color:#15803d; margin-bottom:12px; font-weight:700;">🎉 恭喜！寵物已經圓滿長大了！</p>
           <button class="btn-submit" style="background:#eab308; color:#fff;" onclick="moveToGarden()">
-            🏕️ 送進專屬動物園並領養新蛋
+            🏕️ 送進專屬寵物園並領養新蛋
           </button>
         </div>
 
@@ -479,12 +475,12 @@
         </div>
       </div>
 
-      <!-- 動物園與雙寵物配對兌換區 (分為可用區與已兌換區) -->
+      <!-- 動物園與專屬分區 (可用區與已兌換區) -->
       <div id="petGardenView" style="display:none; text-align:left;">
         <div id="gardenTicketSummary" class="ticket-summary-box"></div>
         
         <p style="font-size:0.8rem; color:#15803d; font-weight:700; margin-top:12px; margin-bottom:4px;">
-          <i class="fa-solid fa-sparkles"></i> <strong>【可用成體動物】</strong> (點擊2隻可配對換藍點獎勵或扭蛋卷)：
+          <i class="fa-solid fa-sparkles"></i> <strong>【可用成體動物】</strong> (點擊2隻可換藍點獎勵或扭蛋卷；或累積到獎品區換綠點/紅點)：
         </p>
         <div class="garden-grid" id="gardenGridAvailable"></div>
 
@@ -509,7 +505,7 @@
     </div>
   </div>
 
-  <!-- 💡 2隻成體動物兌換選擇 Modal -->
+  <!-- 💡 2隻成體動物兌換選擇 Modal (取消換金幣，僅保留藍點與扭蛋卷) -->
   <div id="rewardRedeemModal" class="modal-overlay" style="z-index:110;">
     <div class="modal-box" style="max-width:380px; text-align:center;">
       <h3 style="color:#b45309; margin-bottom:8px;"><i class="fa-solid fa-gift"></i> 2隻成體動物兌換</h3>
@@ -518,7 +514,6 @@
       <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px;">
         <button class="btn-submit" style="background:#10b981;" onclick="choosePairReward('blue_point')">🔵 換 1 個藍點獎勵</button>
         <button class="btn-submit" style="background:#8b5cf6;" onclick="choosePairReward('ticket')">🎁 換扭蛋卷一張</button>
-        <button class="btn-submit" style="background:#d97706;" onclick="choosePairReward('coin')">🪙 換 10 個代幣 (2隻×5)</button>
       </div>
 
       <button class="btn-submit" style="background:#94a3b8;" onclick="closeRewardModal()">取消返回</button>
@@ -631,7 +626,6 @@
     let clickTimeout = null;
     let lastClickedSeat = null;
     let syncDebounceTimer = null;
-    let firstSelectedPetId = null; // 用 petId 識別可用區動物
     let selectedRedeemPairIds = [];
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -1618,7 +1612,6 @@
         openPetModal(currentSelectedStudent.seat, currentSelectedStudent.name);
       };
 
-      firstSelectedPetId = null;
       selectedRedeemPairIds = [];
       renderPetGardenContent();
     }
@@ -1647,7 +1640,6 @@
         <div style="font-size:0.85rem; color:#b45309;">🎁 已兌換紀念：<strong>${redeemedPets.length} 隻</strong></div>
       `;
 
-      // 1. 渲染可用區
       if (availablePets.length === 0) {
         gridAvail.innerHTML = '<p style="color:#64748b; font-size:0.8rem; text-align:center; grid-column:1/-1; padding:10px;">目前沒有可用的成體動物，快去培育新寵物吧！</p>';
       } else {
@@ -1656,11 +1648,11 @@
           const isSelected = selectedRedeemPairIds.includes(item.uniqueId);
           
           const div = document.createElement('div');
-          div.className = `garden-item ${isSelected ? 'is-selected-first' : ''}`;
+          div.className = `garden-item ${isSelected ? 'border-2 border-blue-600 bg-blue-50' : ''}`;
           div.innerHTML = `
             <div class="emoji">${cat ? cat.stages[2] : '🐾'}</div>
             <div class="name">${cat ? cat.name : '神秘動物'}</div>
-            <div style="font-size:0.6rem; color:#2563eb; margin-top:2px; font-weight:700;">${isSelected ? '已點選(選2隻)' : '點擊選取'}</div>
+            <div style="font-size:0.6rem; color:#2563eb; margin-top:2px; font-weight:700;">${isSelected ? '已選取(2隻換獎)' : '點擊選取'}</div>
           `;
 
           div.onclick = () => {
@@ -1669,7 +1661,7 @@
               selectedRedeemPairIds.splice(idx, 1);
             } else {
               if (selectedRedeemPairIds.length >= 2) {
-                selectedRedeemPairIds.shift(); // 保持最多選兩隻
+                selectedRedeemPairIds.shift();
               }
               selectedRedeemPairIds.push(item.uniqueId);
             }
@@ -1685,7 +1677,6 @@
         });
       }
 
-      // 2. 渲染已兌換區
       if (redeemedPets.length === 0) {
         gridRedeemed.innerHTML = '<p style="color:#64748b; font-size:0.8rem; text-align:center; grid-column:1/-1; padding:10px;">尚無已兌換的動物。</p>';
       } else {
@@ -1729,13 +1720,8 @@
       } else if (type === 'ticket') {
         prizeDesc = "扭蛋卷";
         gData.gachaCoupons.push({ name: "扭蛋卷 (2隻動物兌換)", date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
-      } else {
-        prizeDesc = "10個代幣";
-        gData.extraCoins += 10;
-        gData.coinLogs.unshift({ text: `2隻動物兌換獲得代幣 +10`, date: new Date().toLocaleDateString() });
       }
 
-      // 將選中的兩隻寵物標記為已兌換，並移至已兌換區
       selectedRedeemPairIds.forEach(uid => {
         let pObj = pets.find(p => p.uniqueId === uid);
         if (pObj) {
