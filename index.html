@@ -516,7 +516,7 @@
     const DEFAULT_STUDENTS = [
       "1號", "2號", "3號", "4號", "5號", "6號", "7號", "8號", "9號", "10號",
       "11號", "12號", "13號", "14號", "15號", "16號", "17號", "18號", "19號", "20號",
-      "21號", "22號", "23號", "24號", "25號", "26號（測試用）" // 💡 已新增測試用角色
+      "21號", "22號", "23號", "24號", "25號", "26號（測試用）"
     ];
 
     const INITIAL_PETS = {
@@ -545,7 +545,7 @@
       23: { petId: 'dog_poodle', stage: 1, xp: 6 },
       24: { petId: 'cat_white', stage: 1, xp: 10 },
       25: { petId: 'whale', stage: 1, xp: 10 },
-      26: { petId: 'dog_golden', stage: 1, xp: 15 } // 💡 測試用角色的初始寵物
+      26: { petId: 'dog_golden', stage: 1, xp: 15 }
     };
 
     const PET_CATALOG = [
@@ -1756,7 +1756,7 @@
     }
 
     function resetAllPets() {
-      if(confirm("⚠️ 警告：確定要刪除全班寵物與寵物園嗎？")) {
+      if(confirm("⚠️ 警告:確定要刪除全班寵物與寵物園嗎？")) {
         petState = {}; petCollection = {};
         alert("✅ 全班寵物紀錄已清除！");
         if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
