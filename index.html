@@ -338,11 +338,15 @@
         <div class="card-title" style="justify-content: space-between;">
           <span><i class="fa-solid fa-paw text-secondary"></i> 班級神秘寵物樂園</span>
           <div style="display:flex; gap:6px;">
+            <!-- 💡 新增：全班加 1 分與全班扣 1 分按鈕 -->
             <button onclick="addAllStudentsXp(1)" style="background:#2563eb; color:#fff; border:none; padding:6px 12px; border-radius:8px; font-size:0.8rem; font-weight:700; cursor:pointer;">
               <i class="fa-solid fa-users"></i> 🌟 全班加 1 分
             </button>
+            <button onclick="addAllStudentsXp(-1)" style="background:#dc2626; color:#fff; border:none; padding:6px 12px; border-radius:8px; font-size:0.8rem; font-weight:700; cursor:pointer;">
+              <i class="fa-solid fa-users-slash"></i> 🌟 全班扣 1 分
+            </button>
             <button onclick="emergencyRestoreGarden()" style="background:#d97706; color:#fff; border:none; padding:6px 12px; border-radius:8px; font-size:0.8rem; font-weight:700; cursor:pointer;">
-              <i class="fa-solid fa-wand-magic-sparkles"></i> 一鍵幫全班動物園補回 1 隻成體
+              <i class="fa-solid fa-wand-magic-sparkles"></i> 一鍵補回 1 隻成體
             </button>
           </div>
         </div>
@@ -813,7 +817,7 @@
         addPetXp(seat, amount);
       });
       renderPetsGrid();
-      alert(`✅ 已成功為全班 ${students.length} 位學生每人加 ${amount} 分！`);
+      alert(`✅ 已成功為全班 ${students.length} 位學生每人${amount > 0 ? '加' : '扣'} ${Math.abs(amount)} 分！`);
     }
 
     function toggleAllCleanSession(session) {
@@ -1756,7 +1760,7 @@
     }
 
     function resetAllPets() {
-      if(confirm("⚠️ 警告:確定要刪除全班寵物與寵物園嗎？")) {
+      if(confirm("⚠️ 警告：確定要刪除全班寵物與寵物園嗎？")) {
         petState = {}; petCollection = {};
         alert("✅ 全班寵物紀錄已清除！");
         if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
