@@ -49,7 +49,7 @@
     <!-- 主要功能區塊 -->
     <main class="w-full max-w-4xl bg-white shadow-xl rounded-3xl p-6 border-4 border-emerald-200 mb-8">
         
-        <!-- 導覽標籤 (僅保留三大扭蛋機與獎品兌換) -->
+        <!-- 導覽標籤 -->
         <div class="flex justify-center flex-wrap gap-2 mb-6 border-b-2 border-gray-100 pb-4">
             <button onclick="switchTab('gacha')" id="tab-gacha" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-base transition-all bg-emerald-500 text-white shadow-md">🎁 三大扭蛋機</button>
             <button onclick="switchTab('shop')" id="tab-shop" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-base transition-all bg-gray-100 text-gray-600 hover:bg-emerald-100">🛍️ 學生個人資訊與獎品兌換</button>
@@ -81,14 +81,14 @@
             </div>
         </div>
 
-        <!-- 2. 學生資訊與獎品兌換畫面 (已套用您指定的價格) -->
+        <!-- 2. 學生資訊與獎品兌換畫面 -->
         <div id="section-shop" class="tab-content hidden py-6">
             <div class="flex justify-between items-center mb-6">
                 <a href="index.html" class="inline-block bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold px-4 py-2 rounded-xl text-sm transition-all">⬅️ 返回班級管理主頁</a>
             </div>
             
             <h2 class="text-2xl font-bold text-emerald-700 mb-2 text-center">🛍️ 學生個人資訊與獎品兌換 🛍️</h2>
-            <p class="text-gray-500 mb-6 text-center">在此查看您的動物與代幣狀況，並使用代幣（或動物成體點數）兌換心儀的獎品！</p>
+            <p class="text-gray-500 mb-6 text-center">在此查看您的動物與代幣狀況，並使用代幣或動物成體兌換心儀的獎品！</p>
             
             <!-- 學生詳細資訊卡片 -->
             <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-5 mb-8 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -288,6 +288,7 @@
             return (petCount * 5) + (gData.extraCoins || 0);
         }
 
+        // 💡 嚴格防護：檢查是否有扭蛋卷，沒有則直接阻擋不給扭
         function useGachaTicket() {
             let seatNum = getCurrentSeatNum();
             let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
@@ -458,7 +459,7 @@
 
         function playGacha() {
             let canPlay = useGachaTicket();
-            if (!canPlay) return;
+            if (!canPlay) return; // 💡 嚴格阻斷：沒有扭蛋卷絕對無法繼續
 
             let seatNum = getCurrentSeatNum();
             let gData = getStudentGameData(seatNum);
@@ -496,7 +497,6 @@
             }
         }
 
-        // 💡 獎品區固定兌換項目 (指定座位50、免抄聯絡簿40、作業減免30、紅點大獎25、綠點獎勵15)
         function renderShop() {
             let container = document.getElementById('shopList');
             container.innerHTML = '';
