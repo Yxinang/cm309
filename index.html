@@ -505,7 +505,7 @@
     </div>
   </div>
 
-  <!-- 💡 2隻成體動物兌換選擇 Modal (取消換金幣，僅保留藍點與扭蛋卷) -->
+  <!-- 💡 2隻成體動物兌換選擇 Modal (僅保留藍點與扭蛋卷) -->
   <div id="rewardRedeemModal" class="modal-overlay" style="z-index:110;">
     <div class="modal-box" style="max-width:380px; text-align:center;">
       <h3 style="color:#b45309; margin-bottom:8px;"><i class="fa-solid fa-gift"></i> 2隻成體動物兌換</h3>
@@ -527,67 +527,6 @@
       "21號", "22號", "23號", "24號", "25號", "26號（測試用）"
     ];
 
-    const INITIAL_PETS = {
-      1: { petId: 'cat_black', stage: 1, xp: 12 },
-      2: { petId: 'dog_shiba', stage: 1, xp: 11 },
-      3: { petId: 'turtle', stage: 1, xp: 11 },
-      4: { petId: 'dragon', stage: 1, xp: 10 },
-      5: { petId: 'parrot', stage: 1, xp: 10 },
-      6: { petId: 'penguin', stage: 1, xp: 11 },
-      7: { petId: 'fish', stage: 1, xp: 8 },
-      8: { petId: 'rabbit', stage: 1, xp: 9 },
-      9: { petId: 'panda', stage: 1, xp: 9 },
-      10: { petId: 'turtle', stage: 1, xp: 10 },
-      11: { petId: 'dragon', stage: 1, xp: 10 },
-      12: { petId: 'owl', stage: 1, xp: 10 },
-      13: { petId: 'dog_corgi', stage: 1, xp: 8 },
-      14: { petId: 'fish', stage: 1, xp: 10 },
-      15: { petId: 'cat_orange', stage: 1, xp: 11 },
-      16: { petId: 'dog_husky', stage: 1, xp: 10 },
-      17: { petId: 'fox', stage: 1, xp: 9 },
-      18: { petId: 'trex', stage: 1, xp: 11 },
-      19: { petId: 'cat_calico', stage: 1, xp: 10 },
-      20: { petId: 'dolphin', stage: 1, xp: 12 },
-      21: { petId: 'unicorn', stage: 1, xp: 11 },
-      22: { petId: 'lion', stage: 1, xp: 12 },
-      23: { petId: 'dog_poodle', stage: 1, xp: 6 },
-      24: { petId: 'cat_white', stage: 1, xp: 10 },
-      25: { petId: 'whale', stage: 1, xp: 10 },
-      26: { petId: 'dog_golden', stage: 1, xp: 15 }
-    };
-
-    const PET_CATALOG = [
-      { id: 'cat_black', name: '黑貓', stages: ['🥚', '🐱', '🐈‍⬛'], desc: '幸運黑貓' },
-      { id: 'cat_orange', name: '橘貓', stages: ['🥚', '🐱', '🐈'], desc: '圓滾大橘' },
-      { id: 'cat_calico', name: '三花貓', stages: ['🥚', '🐱', '🐾'], desc: '花紋三花' },
-      { id: 'cat_white', name: '純白貓', stages: ['🥚', '🐱', '🤍'], desc: '雪白波斯' },
-      { id: 'dog_shiba', name: '柴犬', stages: ['🥚', '🐶', '🐕'], desc: '赤毛柴犬' },
-      { id: 'dog_husky', name: '哈士奇', stages: ['🥚', '🐶', '🐺'], desc: '二哈雪橇' },
-      { id: 'dog_poodle', name: '貴賓狗', stages: ['🥚', '🐶', '🐩'], desc: '捲毛貴賓' },
-      { id: 'dog_corgi', name: '柯基犬', stages: ['🥚', '🐶', '🦊'], desc: '短腿柯基' },
-      { id: 'dog_golden', name: '黃金獵犬', stages: ['🥚', '🐶', '🦮'], desc: '溫柔金毛' },
-      { id: 'rabbit', name: '小白兔', stages: ['🥚', '🐰', '🐇'], desc: '可愛寵物' },
-      { id: 'hamster', name: '倉鼠', stages: ['🥚', '🐹', '🐹'], desc: '可愛寵物' },
-      { id: 'turtle', name: '烏龜', stages: ['🥚', '🐢', '🐢'], desc: '爬蟲類' },
-      { id: 'dragon', name: '飛龍', stages: ['🥚', '🦎', '🐉'], desc: '神話傳說' },
-      { id: 'unicorn', name: '獨角獸', stages: ['🥚', '🐴', '🦄'], desc: '神話傳說' },
-      { id: 'eagle', name: '金翅雀鷹', stages: ['🥚', '🐣', '🦅'], desc: '天空飛禽' },
-      { id: 'parrot', name: '金剛鸚鵡', stages: ['🥚', '🐤', '🦜'], desc: '天空飛禽' },
-      { id: 'owl', name: '貓頭鷹', stages: ['🥚', '🐥', '🦉'], desc: '天空飛禽' },
-      { id: 'penguin', name: '國王企鵝', stages: ['🥚', '🐧', '🐧'], desc: '極地冰原' },
-      { id: 'fish', name: '大白鯊', stages: ['🫧', '🐠', '🦈'], desc: '海洋世界' },
-      { id: 'dolphin', name: '海豚', stages: ['🫧', '🐟', '🐬'], desc: '海洋世界' },
-      { id: 'whale', name: '藍鯨', stages: ['🫧', '🐋', '🐳'], desc: '海洋世界' },
-      { id: 'trex', name: '霸王龍', stages: ['🥚', '🦎', '🦖'], desc: '史前恐龍' },
-      { id: 'bronto', name: '腕龍', stages: ['🥚', '🦎', '🦕'], desc: '史前恐龍' },
-      { id: 'panda', name: '大熊貓', stages: ['🥚', '🐼', '🐼'], desc: '野生動物' },
-      { id: 'lion', name: '萬獸獅王', stages: ['🥚', '🦁', '🦁'], desc: '野生動物' },
-      { id: 'koala', name: '無尾熊', stages: ['🥚', '🐨', '🐨'], desc: '野生動物' },
-      { id: 'fox', name: '赤狐', stages: ['🥚', '🦊', '🦊'], desc: '野生動物' }
-    ];
-
-    const PET_REQ = [20, 20, 15]; 
-
     let storedStudents = JSON.parse(localStorage.getItem('cm309_students'));
     let students = (storedStudents && storedStudents.length > 0) ? storedStudents : DEFAULT_STUDENTS;
 
@@ -595,7 +534,7 @@
     let firebaseDbUrl = localStorage.getItem('cm309_firebase_url') || "";
     let announcements = JSON.parse(localStorage.getItem('cm309_announcements')) || [];
     
-    let petState = JSON.parse(localStorage.getItem('cm309_pets')) || INITIAL_PETS;
+    let petState = JSON.parse(localStorage.getItem('cm309_pets')) || {};
     let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
     
     let cleanBoxesAM = JSON.parse(localStorage.getItem('cm309_cleanBoxesAM')) || [
@@ -901,7 +840,7 @@
         cleanSec.style.display = 'block';
         renderCleanlinessBoard();
       } else if (mode === 'clean') {
-        title.textContent = '目前項目：打掃工作 (早自修與環保時間上下區塊)';
+        title.textContent = '目前項目：打掃工作';
         kanban.style.display = 'block';
         renderCleanBoards();
       } else {
@@ -1388,6 +1327,7 @@
       }
     }
 
+    // 💡 簡化後的打掃工作上傳邏輯：不分早晚，直接彙整有掃的人與沒掃的人
     function uploadInteractiveBatch() {
       let detailText = "";
       if(currentInteractiveMode === 'hw') {
@@ -1415,16 +1355,28 @@
         detailText = `整潔達標: ${tidyStudents.join('、') || '無'}`;
         sendToSheets({ category: "整潔大師評比", student: "全班", detail: detailText });
       } else if(currentInteractiveMode === 'clean') {
-        let amSummaries = cleanBoxesAM.map(b => {
-          let done = b.students.filter(s => s.done).map(s => s.name);
-          return `[早]${b.title}(${done.join('、')||'無'})`;
+        let doneSet = new Set();
+        let assignedSet = new Set();
+        
+        [...cleanBoxesAM, ...cleanBoxesPM].forEach(b => {
+          b.students.forEach(s => {
+            assignedSet.add(String(s.seat));
+            if (s.done) doneSet.add(String(s.seat));
+          });
         });
-        let pmSummaries = cleanBoxesPM.map(b => {
-          let done = b.students.filter(s => s.done).map(s => s.name);
-          return `[環]${b.title}(${done.join('、')||'無'})`;
+
+        let doneNames = [];
+        let notDoneNames = [];
+        students.forEach((name, i) => {
+          const seatStr = String(i + 1);
+          if (assignedSet.has(seatStr)) {
+            if (doneSet.has(seatStr)) doneNames.push(name);
+            else notDoneNames.push(name);
+          }
         });
-        detailText = [...amSummaries, ...pmSummaries].join(' | ');
-        sendToSheets({ category: "打掃工作(早自修與環保)", student: "全班", detail: detailText });
+
+        detailText = `打掃應到:${assignedSet.size}人，已完成:${doneNames.length}人(${doneNames.join('、') || '無'})，未完成:${notDoneNames.length}人(${notDoneNames.join('、') || '無'})`;
+        sendToSheets({ category: "打掃工作紀錄", student: "全班", detail: detailText });
       } else {
         const actionMap = { teeth: "潔牙高手", mouthwash: "漱口水" };
         let lamp = (currentInteractiveMode === 'teeth') ? teethLampState : mouthwashLampState;
