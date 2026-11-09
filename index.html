@@ -1497,7 +1497,7 @@
         gardenView.style.display = 'none';
         document.getElementById('btnViewGarden').style.display = 'none';
         document.getElementById('btnModalClose').textContent = '關閉視窗';
-        document.getElementById('btnModalClose'].onclick = closePetModal;
+        document.getElementById('btnModalClose').onclick = closePetModal;
       } else {
         manageView.style.display = 'block';
         selectView.style.display = 'none';
@@ -1593,7 +1593,6 @@
       renderPetGardenContent();
     }
 
-    // 💡 渲染動物園專屬分區與 2 隻確認換 10 代幣按鈕
     function renderPetGardenContent() {
       const seat = currentSelectedStudent.seat;
       const gridAvail = document.getElementById('gardenGridAvailable');
@@ -1652,7 +1651,6 @@
         });
       }
 
-      // 如果剛好選了 2 隻，出現「確認兌換成 10 個代幣」按鈕
       if (selectedRedeemPairIds.length === 2) {
         confirmArea.innerHTML = `
           <button onclick="confirmExchangeTwoPets()" class="bg-amber-500 hover:bg-amber-600 text-white font-black text-sm px-6 py-2.5 rounded-xl shadow-lg border-b-4 border-amber-700 transition-all animate-bounce">
@@ -1678,7 +1676,6 @@
       }
     }
 
-    // 💡 確認將 2 隻動物換成 10 個代幣
     function confirmExchangeTwoPets() {
       const seat = currentSelectedStudent.seat;
       const pets = petCollection[seat];
