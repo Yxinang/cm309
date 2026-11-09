@@ -505,7 +505,7 @@
     </div>
   </div>
 
-  <!-- 💡 2隻成體動物兌換選擇 Modal (取消換金幣，僅保留藍點與扭蛋卷) -->
+  <!-- 💡 2隻成體動物兌換選擇 Modal (僅保留藍點與扭蛋卷) -->
   <div id="rewardRedeemModal" class="modal-overlay" style="z-index:110;">
     <div class="modal-box" style="max-width:380px; text-align:center;">
       <h3 style="color:#b45309; margin-bottom:8px;"><i class="fa-solid fa-gift"></i> 2隻成體動物兌換</h3>
@@ -526,35 +526,6 @@
       "11號", "12號", "13號", "14號", "15號", "16號", "17號", "18號", "19號", "20號",
       "21號", "22號", "23號", "24號", "25號", "26號（測試用）"
     ];
-
-    const INITIAL_PETS = {
-      1: { petId: 'cat_black', stage: 1, xp: 12 },
-      2: { petId: 'dog_shiba', stage: 1, xp: 11 },
-      3: { petId: 'turtle', stage: 1, xp: 11 },
-      4: { petId: 'dragon', stage: 1, xp: 10 },
-      5: { petId: 'parrot', stage: 1, xp: 10 },
-      6: { petId: 'penguin', stage: 1, xp: 11 },
-      7: { petId: 'fish', stage: 1, xp: 8 },
-      8: { petId: 'rabbit', stage: 1, xp: 9 },
-      9: { petId: 'panda', stage: 1, xp: 9 },
-      10: { petId: 'turtle', stage: 1, xp: 10 },
-      11: { petId: 'dragon', stage: 1, xp: 10 },
-      12: { petId: 'owl', stage: 1, xp: 10 },
-      13: { petId: 'dog_corgi', stage: 1, xp: 8 },
-      14: { petId: 'fish', stage: 1, xp: 10 },
-      15: { petId: 'cat_orange', stage: 1, xp: 11 },
-      16: { petId: 'dog_husky', stage: 1, xp: 10 },
-      17: { petId: 'fox', stage: 1, xp: 9 },
-      18: { petId: 'trex', stage: 1, xp: 11 },
-      19: { petId: 'cat_calico', stage: 1, xp: 10 },
-      20: { petId: 'dolphin', stage: 1, xp: 12 },
-      21: { petId: 'unicorn', stage: 1, xp: 11 },
-      22: { petId: 'lion', stage: 1, xp: 12 },
-      23: { petId: 'dog_poodle', stage: 1, xp: 6 },
-      24: { petId: 'cat_white', stage: 1, xp: 10 },
-      25: { petId: 'whale', stage: 1, xp: 10 },
-      26: { petId: 'dog_golden', stage: 1, xp: 15 }
-    };
 
     const PET_CATALOG = [
       { id: 'cat_black', name: '黑貓', stages: ['🥚', '🐱', '🐈‍⬛'], desc: '幸運黑貓' },
@@ -595,7 +566,7 @@
     let firebaseDbUrl = localStorage.getItem('cm309_firebase_url') || "";
     let announcements = JSON.parse(localStorage.getItem('cm309_announcements')) || [];
     
-    let petState = JSON.parse(localStorage.getItem('cm309_pets')) || INITIAL_PETS;
+    let petState = JSON.parse(localStorage.getItem('cm309_pets')) || {};
     let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
     
     let cleanBoxesAM = JSON.parse(localStorage.getItem('cm309_cleanBoxesAM')) || [
@@ -629,6 +600,15 @@
     let selectedRedeemPairIds = [];
 
     window.addEventListener('DOMContentLoaded', () => {
+      initializeAppState();
+    });
+
+    // 💡 新增：監聽頁面顯示事件，從 game.html 返回時自動重新渲染，解決不用按F5的問題
+    window.addEventListener('pageshow', (event) => {
+      initializeAppState();
+    });
+
+    function initializeAppState() {
       document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('zh-TW');
       document.getElementById('studentRosterInput').value = students.join('\n');
       document.getElementById('sheetsApiUrlInput').value = sheetsWebhookUrl;
@@ -641,7 +621,7 @@
       if (firebaseDbUrl) {
         fetchFromFirebase(true);
       }
-    });
+    }
 
     function switchTab(tabId) {
       document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
@@ -901,7 +881,7 @@
         cleanSec.style.display = 'block';
         renderCleanlinessBoard();
       } else if (mode === 'clean') {
-        title.textContent = '目前項目：打掃工作 (早自修與環保時間上下區塊)';
+        title.textContent = '目前項目：打掃工作';
         kanban.style.display = 'block';
         renderCleanBoards();
       } else {
@@ -1415,16 +1395,28 @@
         detailText = `整潔達標: ${tidyStudents.join('、') || '無'}`;
         sendToSheets({ category: "整潔大師評比", student: "全班", detail: detailText });
       } else if(currentInteractiveMode === 'clean') {
-        let amSummaries = cleanBoxesAM.map(b => {
-          let done = b.students.filter(s => s.done).map(s => s.name);
-          return `[早]${b.title}(${done.join('、')||'無'})`;
+        let doneSet = new Set();
+        let assignedSet = new Set();
+        
+        [...cleanBoxesAM, ...cleanBoxesPM].forEach(b => {
+          b.students.forEach(s => {
+            assignedSet.add(String(s.seat));
+            if (s.done) doneSet.add(String(s.seat));
+          });
         });
-        let pmSummaries = cleanBoxesPM.map(b => {
-          let done = b.students.filter(s => s.done).map(s => s.name);
-          return `[環]${b.title}(${done.join('、')||'無'})`;
+
+        let doneNames = [];
+        let notDoneNames = [];
+        students.forEach((name, i) => {
+          const seatStr = String(i + 1);
+          if (assignedSet.has(seatStr)) {
+            if (doneSet.has(seatStr)) doneNames.push(name);
+            else notDoneNames.push(name);
+          }
         });
-        detailText = [...amSummaries, ...pmSummaries].join(' | ');
-        sendToSheets({ category: "打掃工作(早自修與環保)", student: "全班", detail: detailText });
+
+        detailText = `打掃應到:${assignedSet.size}人，已完成:${doneNames.length}人(${doneNames.join('、') || '無'})，未完成:${notDoneNames.length}人(${notDoneNames.join('、') || '無'})`;
+        sendToSheets({ category: "打掃工作紀錄", student: "全班", detail: detailText });
       } else {
         const actionMap = { teeth: "潔牙高手", mouthwash: "漱口水" };
         let lamp = (currentInteractiveMode === 'teeth') ? teethLampState : mouthwashLampState;
@@ -1711,7 +1703,7 @@
 
       let prizeDesc = "";
       let gameData = JSON.parse(localStorage.getItem('cm309_game_data')) || {};
-      let gData = gameData[seat] || { extraCoins: 0, gachaCoupons: [], ladderCoupons: [], battleCoupons: [], directCoupons: [], coinLogs: [] };
+      let gData = gameData[seat] || { extraCoins: 0, gachaCoupons: [], directCoupons: [], coinLogs: [] };
       if (!gameData[seat]) gameData[seat] = gData;
 
       if (type === 'blue_point') {
