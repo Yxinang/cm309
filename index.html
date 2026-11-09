@@ -527,6 +527,36 @@
       "21號", "22號", "23號", "24號", "25號", "26號（測試用）"
     ];
 
+    const PET_CATALOG = [
+      { id: 'cat_black', name: '黑貓', stages: ['🥚', '🐱', '🐈‍⬛'], desc: '幸運黑貓' },
+      { id: 'cat_orange', name: '橘貓', stages: ['🥚', '🐱', '🐈'], desc: '圓滾大橘' },
+      { id: 'cat_calico', name: '三花貓', stages: ['🥚', '🐱', '🐾'], desc: '花紋三花' },
+      { id: 'cat_white', name: '純白貓', stages: ['🥚', '🐱', '🤍'], desc: '雪白波斯' },
+      { id: 'dog_shiba', name: '柴犬', stages: ['🥚', '🐶', '🐕'], desc: '赤毛柴犬' },
+      { id: 'dog_husky', name: '哈士奇', stages: ['🥚', '🐶', '🐺'], desc: '二哈雪橇' },
+      { id: 'dog_poodle', name: '貴賓狗', stages: ['🥚', '🐶', '🐩'], desc: '捲毛貴賓' },
+      { id: 'dog_corgi', name: '柯基犬', stages: ['🥚', '🐶', '🦊'], desc: '短腿柯基' },
+      { id: 'dog_golden', name: '黃金獵犬', stages: ['🥚', '🐶', '🦮'], desc: '溫柔金毛' },
+      { id: 'rabbit', name: '小白兔', stages: ['🥚', '🐰', '🐇'], desc: '可愛寵物' },
+      { id: 'hamster', name: '倉鼠', stages: ['🥚', '🐹', '🐹'], desc: '可愛寵物' },
+      { id: 'turtle', name: '烏龜', stages: ['🥚', '🐢', '🐢'], desc: '爬蟲類' },
+      { id: 'dragon', name: '飛龍', stages: ['🥚', '🦎', '🐉'], desc: '神話傳說' },
+      { id: 'unicorn', name: '獨角獸', stages: ['🥚', '🐴', '🦄'], desc: '神話傳說' },
+      { id: 'eagle', name: '金翅雀鷹', stages: ['🥚', '🐣', '🦅'], desc: '天空飛禽' },
+      { id: 'parrot', name: '金剛鸚鵡', stages: ['🥚', '🐤', '🦜'], desc: '天空飛禽' },
+      { id: 'owl', name: '貓頭鷹', stages: ['🥚', '🐥', '🦉'], desc: '天空飛禽' },
+      { id: 'penguin', name: '國王企鵝', stages: ['🥚', '🐧', '🐧'], desc: '極地冰原' },
+      { id: 'fish', name: '大白鯊', stages: ['🫧', '🐠', '🦈'], desc: '海洋世界' },
+      { id: 'dolphin', name: '海豚', stages: ['🫧', '🐟', '🐬'], desc: '海洋世界' },
+      { id: 'whale', name: '藍鯨', stages: ['🫧', '🐋', '🐳'], desc: '海洋世界' },
+      { id: 'trex', name: '霸王龍', stages: ['🥚', '🦎', '🦖'], desc: '史前恐龍' },
+      { id: 'bronto', name: '腕龍', stages: ['🥚', '🦎', '🦕'], desc: '史前恐龍' },
+      { id: 'panda', name: '大熊貓', stages: ['🥚', '🐼', '🐼'], desc: '野生動物' },
+      { id: 'lion', name: '萬獸獅王', stages: ['🥚', '🦁', '🦁'], desc: '野生動物' },
+      { id: 'koala', name: '無尾熊', stages: ['🥚', '🐨', '🐨'], desc: '野生動物' },
+      { id: 'fox', name: '赤狐', stages: ['🥚', '🦊', '🦊'], desc: '野生動物' }
+    ];
+
     let storedStudents = JSON.parse(localStorage.getItem('cm309_students'));
     let students = (storedStudents && storedStudents.length > 0) ? storedStudents : DEFAULT_STUDENTS;
 
@@ -1327,7 +1357,7 @@
       }
     }
 
-    // 💡 簡化後的打掃工作上傳邏輯：不分早晚，直接彙整有掃的人與沒掃的人
+    // 💡 簡化後的打掃工作上傳邏輯：不分早晚，直接彙整應到人數、已完成名單與未完成名單
     function uploadInteractiveBatch() {
       let detailText = "";
       if(currentInteractiveMode === 'hw') {
@@ -1663,7 +1693,7 @@
 
       let prizeDesc = "";
       let gameData = JSON.parse(localStorage.getItem('cm309_game_data')) || {};
-      let gData = gameData[seat] || { extraCoins: 0, gachaCoupons: [], ladderCoupons: [], battleCoupons: [], directCoupons: [], coinLogs: [] };
+      let gData = gameData[seat] || { extraCoins: 0, gachaCoupons: [], directCoupons: [], coinLogs: [] };
       if (!gameData[seat]) gameData[seat] = gData;
 
       if (type === 'blue_point') {
