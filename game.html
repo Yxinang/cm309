@@ -76,7 +76,7 @@
             </div>
         </div>
 
-        <!-- 2. 學生資訊與獎品兌換畫面 (已加上藍點獎勵10代幣) -->
+        <!-- 2. 學生資訊與獎品兌換畫面 (已加上紫點獎勵 5 代幣) -->
         <div id="section-shop" class="tab-content hidden py-6">
             <div class="flex justify-between items-center mb-6">
                 <a href="index.html" class="inline-block bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold px-4 py-2 rounded-xl text-sm transition-all">⬅️ 返回班級管理主頁</a>
@@ -106,7 +106,7 @@
                 </div>
             </div>
 
-            <!-- 獎品兌換專區 (指定座位50、免抄聯絡簿40、作業減免30、紅點大獎25、綠點獎勵15、藍點獎勵10) -->
+            <!-- 獎品兌換專區 (新增紫點獎勵 5 代幣) -->
             <h3 class="text-xl font-bold text-emerald-700 mb-4">🎁 獎品兌換專區</h3>
             <div id="shopList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8"></div>
 
@@ -280,7 +280,6 @@
             return (petCount * 5) + (gData.extraCoins || 0);
         }
 
-        // 💡 智慧扣款：優先扣除額外代幣，不足時自動扣除動物園可用成體動物 (每隻折抵5代幣)
         function deductCoins(amount) {
             let seatNum = getCurrentSeatNum();
             let total = getTotalCoins(seatNum);
@@ -338,7 +337,6 @@
             document.getElementById('infoPets').textContent = pCount + " 隻";
             document.getElementById('infoCoins').textContent = totalCoins + " 枚";
 
-            // 💡 動態控制扭蛋按鈕狀態：代幣小於 10 枚即鎖定按鈕
             let playBtn = document.getElementById('gachaPlayBtn');
             if (totalCoins < 10) {
                 playBtn.disabled = true;
@@ -427,7 +425,6 @@
             alert("✅ 獎品解釋說明已成功儲存！");
         }
 
-        // 💡 轉扭蛋：每次扣除 10 個代幣
         function playGacha() {
             let seatNum = getCurrentSeatNum();
             let totalCoins = getTotalCoins(seatNum);
@@ -481,7 +478,7 @@
             }
         }
 
-        // 💡 學生個人資訊與獎品兌換選單 (包含新增的藍點獎勵10代幣)
+        // 💡 獎品區兌換專區 (已新增 5 代幣換紫點獎勵)
         function renderShop() {
             let container = document.getElementById('shopList');
             container.innerHTML = '';
@@ -492,7 +489,8 @@
                 { id: 'hw', name: "作業減免", cost: 30, icon: "✂️" },
                 { id: 'red_prize', name: "紅點大獎", cost: 25, icon: "👑" },
                 { id: 'green_prize', name: "綠點獎勵", cost: 15, icon: "🌟" },
-                { id: 'blue_prize', name: "藍點獎勵", cost: 10, icon: "🔵" }
+                { id: 'blue_prize', name: "藍點獎勵", cost: 10, icon: "🔵" },
+                { id: 'purple_prize', name: "紫點獎勵", cost: 5, icon: "🟣" }
             ];
 
             shopItems.forEach(item => {
@@ -521,7 +519,7 @@
                 return;
             }
 
-            if (itemId === 'red_prize' || itemId === 'green_prize' || itemId === 'blue_prize') {
+            if (itemId === 'red_prize' || itemId === 'green_prize' || itemId === 'blue_prize' || itemId === 'purple_prize') {
                 document.getElementById('customPrizeModal').classList.remove('hidden');
                 document.getElementById('customPrizeInput').value = '';
                 document.getElementById('customPrizeInput').dataset.prizeType = itemName;
@@ -539,7 +537,7 @@
         function confirmCustomBuy() {
             let customName = document.getElementById('customPrizeInput').value.trim();
             let prizeType = document.getElementById('customPrizeInput').dataset.prizeType || "獎品";
-            let cost = parseInt(document.getElementById('customPrizeInput').dataset.cost || 10);
+            let cost = parseInt(document.getElementById('customPrizeInput').dataset.cost || 5);
             
             if (!customName) {
                 alert('請輸入獎品名稱！');
