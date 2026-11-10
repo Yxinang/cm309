@@ -136,10 +136,8 @@
     .opt-btn { padding: 12px; border-radius: 8px; border: 1.5px solid var(--border); background: #fff; text-align: left; font-size: 0.95rem; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px; }
 
     .pet-emoji { display: block; text-align: center; margin: 4px 0; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .pet-emoji.s1 { font-size: 24px; }
-    .pet-emoji.s2 { font-size: 32px; transform: scale(1.1); }
-    .pet-emoji.s3 { font-size: 46px; transform: scale(1.2); }
-    .pet-emoji.s4 { font-size: 46px; transform: scale(1.2); text-shadow: 0 0 15px #fde047; }
+    .pet-emoji.s1 { font-size: 28px; }
+    .pet-emoji.s2 { font-size: 46px; transform: scale(1.2); text-shadow: 0 0 15px #fde047; }
     .pet-btn:hover .pet-emoji { transform: translateY(-3px) scale(1.1); }
     .pet-progress-bg { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 6px; }
     .pet-progress-fill { height: 100%; background: #10b981; transition: width 0.4s ease-out; }
@@ -347,8 +345,8 @@
           </div>
         </div>
         <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:12px; line-height:1.5;">
-          一開始會隨機獲得神秘的蛋，升級後才會破殼揭曉真正品種！滿等後可送入個人專屬「寵物園」。<br>
-          <strong style="color:#2563eb;">成長階段 : 🥚 蛋(0-20分) ➔ 🐤 幼體(20-40分) ➔ 🦅 成體(40-55分)</strong>
+          一開始會隨機獲得神秘的蛋，升級後直接破殼揭曉品種！滿等後可送入個人專屬「動物園」。<br>
+          <strong style="color:#2563eb;">成長階段 : 🥚 蛋(0-20分) ➔ 🦅 成體(20-35分)</strong>
         </p>
         <div style="margin-bottom: 14px;">
           <a href="game.html" class="bg-emerald-500 text-white px-4 py-2 rounded-xl" style="display: inline-block; background-color: #10b981; color: white; padding: 8px 16px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.9rem;">🎮 點我去玩扭蛋與兌換獎品</a>
@@ -406,7 +404,7 @@
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-triangle-exclamation text-danger"></i> 進階資料清除</div>
         <button class="btn-submit" style="background:#ef4444;" onclick="resetAllPets()">
-          <i class="fa-solid fa-trash-can"></i> 一鍵刪除全班寵物與寵物園
+          <i class="fa-solid fa-trash-can"></i> 一鍵刪除全班寵物與動物園
         </button>
       </div>
     </section>
@@ -455,7 +453,7 @@
         <div id="petModalCompleteArea" style="display:none; margin:20px 0;">
           <p style="font-size:0.9rem; color:#15803d; margin-bottom:12px; font-weight:700;">🎉 恭喜！寵物已經圓滿長大了！</p>
           <button class="btn-submit" style="background:#eab308; color:#fff;" onclick="moveToGarden()">
-            🏕️ 送進專屬寵物園並領養新蛋
+            🏕️ 送進個人動物園並領養新蛋
           </button>
         </div>
 
@@ -475,23 +473,24 @@
         </div>
       </div>
 
-      <!-- 動物園與專屬分區 (可用區與已兌換區) -->
+      <!-- 動物園與專屬分區 (點選兩隻動物轉成10個代幣) -->
       <div id="petGardenView" style="display:none; text-align:left;">
         <div id="gardenTicketSummary" class="ticket-summary-box"></div>
         
         <p style="font-size:0.8rem; color:#15803d; font-weight:700; margin-top:12px; margin-bottom:4px;">
-          <i class="fa-solid fa-sparkles"></i> <strong>【可用成體動物】</strong> (點擊2隻可換藍點獎勵或扭蛋卷；或累積到獎品區換綠點/紅點)：
+          <i class="fa-solid fa-sparkles"></i> <strong>【可用成體動物】</strong> (點選 2 隻確認後移至已兌換區並轉成 10 個代幣)：
         </p>
         <div class="garden-grid" id="gardenGridAvailable"></div>
+        <div id="gardenConfirmActionArea" style="margin-top: 10px; text-align: center;"></div>
 
         <p style="font-size:0.8rem; color:#64748b; font-weight:700; margin-top:16px; margin-bottom:4px; border-top:1px dashed #cbd5e1; paddingTop:10px;">
-          <i class="fa-solid fa-box-archive"></i> <strong>【已兌換動物紀念區】</strong> (已換獎，不重複使用)：
+          <i class="fa-solid fa-box-archive"></i> <strong>【已兌換動物紀念區】</strong> (已換成代幣)：
         </p>
         <div class="garden-grid" id="gardenGridRedeemed"></div>
       </div>
 
       <div style="margin-top:20px; display:flex; flex-direction:column; gap:8px;">
-        <button class="btn-submit" style="background:#0ea5e9;" id="btnViewGarden" onclick="showPetGarden()">🌳 查看專屬動物園與獎勵兌換</button>
+        <button class="btn-submit" style="background:#0ea5e9;" id="btnViewGarden" onclick="showPetGarden()">🌳 查看專屬動物園與代幣兌換</button>
         <div id="gardenTicketBadgeBelow" style="font-size:0.82rem; color:#b45309; font-weight:700; text-align:center;"></div>
         
         <div style="border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 4px;">
@@ -505,21 +504,6 @@
     </div>
   </div>
 
-  <!-- 💡 2隻成體動物兌換選擇 Modal (僅保留藍點與扭蛋卷) -->
-  <div id="rewardRedeemModal" class="modal-overlay" style="z-index:110;">
-    <div class="modal-box" style="max-width:380px; text-align:center;">
-      <h3 style="color:#b45309; margin-bottom:8px;"><i class="fa-solid fa-gift"></i> 2隻成體動物兌換</h3>
-      <p style="font-size:0.85rem; color:#64748b; margin-bottom:14px;">請選擇您想兌換的項目：</p>
-      
-      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px;">
-        <button class="btn-submit" style="background:#10b981;" onclick="choosePairReward('blue_point')">🔵 換 1 個藍點獎勵</button>
-        <button class="btn-submit" style="background:#8b5cf6;" onclick="choosePairReward('ticket')">🎁 換扭蛋卷一張</button>
-      </div>
-
-      <button class="btn-submit" style="background:#94a3b8;" onclick="closeRewardModal()">取消返回</button>
-    </div>
-  </div>
-
   <script>
     const DEFAULT_STUDENTS = [
       "1號", "2號", "3號", "4號", "5號", "6號", "7號", "8號", "9號", "10號",
@@ -528,36 +512,28 @@
     ];
 
     const PET_CATALOG = [
-      { id: 'cat_black', name: '黑貓', stages: ['🥚', '🐱', '🐈‍⬛'], desc: '幸運黑貓' },
-      { id: 'cat_orange', name: '橘貓', stages: ['🥚', '🐱', '🐈'], desc: '圓滾大橘' },
-      { id: 'cat_calico', name: '三花貓', stages: ['🥚', '🐱', '🐾'], desc: '花紋三花' },
-      { id: 'cat_white', name: '純白貓', stages: ['🥚', '🐱', '🤍'], desc: '雪白波斯' },
-      { id: 'dog_shiba', name: '柴犬', stages: ['🥚', '🐶', '🐕'], desc: '赤毛柴犬' },
-      { id: 'dog_husky', name: '哈士奇', stages: ['🥚', '🐶', '🐺'], desc: '二哈雪橇' },
-      { id: 'dog_poodle', name: '貴賓狗', stages: ['🥚', '🐶', '🐩'], desc: '捲毛貴賓' },
-      { id: 'dog_corgi', name: '柯基犬', stages: ['🥚', '🐶', '🦊'], desc: '短腿柯基' },
-      { id: 'dog_golden', name: '黃金獵犬', stages: ['🥚', '🐶', '🦮'], desc: '溫柔金毛' },
-      { id: 'rabbit', name: '小白兔', stages: ['🥚', '🐰', '🐇'], desc: '可愛寵物' },
-      { id: 'hamster', name: '倉鼠', stages: ['🥚', '🐹', '🐹'], desc: '可愛寵物' },
-      { id: 'turtle', name: '烏龜', stages: ['🥚', '🐢', '🐢'], desc: '爬蟲類' },
-      { id: 'dragon', name: '飛龍', stages: ['🥚', '🦎', '🐉'], desc: '神話傳說' },
-      { id: 'unicorn', name: '獨角獸', stages: ['🥚', '🐴', '🦄'], desc: '神話傳說' },
-      { id: 'eagle', name: '金翅雀鷹', stages: ['🥚', '🐣', '🦅'], desc: '天空飛禽' },
-      { id: 'parrot', name: '金剛鸚鵡', stages: ['🥚', '🐤', '🦜'], desc: '天空飛禽' },
-      { id: 'owl', name: '貓頭鷹', stages: ['🥚', '🐥', '🦉'], desc: '天空飛禽' },
-      { id: 'penguin', name: '國王企鵝', stages: ['🥚', '🐧', '🐧'], desc: '極地冰原' },
-      { id: 'fish', name: '大白鯊', stages: ['🫧', '🐠', '🦈'], desc: '海洋世界' },
-      { id: 'dolphin', name: '海豚', stages: ['🫧', '🐟', '🐬'], desc: '海洋世界' },
-      { id: 'whale', name: '藍鯨', stages: ['🫧', '🐋', '🐳'], desc: '海洋世界' },
-      { id: 'trex', name: '霸王龍', stages: ['🥚', '🦎', '🦖'], desc: '史前恐龍' },
-      { id: 'bronto', name: '腕龍', stages: ['🥚', '🦎', '🦕'], desc: '史前恐龍' },
-      { id: 'panda', name: '大熊貓', stages: ['🥚', '🐼', '🐼'], desc: '野生動物' },
-      { id: 'lion', name: '萬獸獅王', stages: ['🥚', '🦁', '🦁'], desc: '野生動物' },
-      { id: 'koala', name: '無尾熊', stages: ['🥚', '🐨', '🐨'], desc: '野生動物' },
-      { id: 'fox', name: '赤狐', stages: ['🥚', '🦊', '🦊'], desc: '野生動物' }
+      { id: 'cat_black', name: '黑貓', stages: ['🥚', '🐈‍⬛'], desc: '幸運黑貓' },
+      { id: 'cat_orange', name: '橘貓', stages: ['🥚', '🐈'], desc: '圓滾大橘' },
+      { id: 'cat_calico', name: '三花貓', stages: ['🥚', '🐾'], desc: '花紋三花' },
+      { id: 'dog_shiba', name: '柴犬', stages: ['🥚', '🐕'], desc: '赤毛柴犬' },
+      { id: 'dog_husky', name: '哈士奇', stages: ['🥚', '🐺'], desc: '二哈雪橇' },
+      { id: 'rabbit', name: '小白兔', stages: ['🥚', '🐇'], desc: '可愛寵物' },
+      { id: 'turtle', name: '烏龜', stages: ['🥚', '🐢'], desc: '爬蟲類' },
+      { id: 'dragon', name: '飛龍', stages: ['🥚', '🐉'], desc: '神話傳說' },
+      { id: 'unicorn', name: '獨角獸', stages: ['🥚', '🦄'], desc: '神話傳說' },
+      { id: 'parrot', name: '金剛鸚鵡', stages: ['🥚', '🦜'], desc: '天空飛禽' },
+      { id: 'owl', name: '貓頭鷹', stages: ['🥚', '🦉'], desc: '天空飛禽' },
+      { id: 'penguin', name: '國王企鵝', stages: ['🥚', '🐧'], desc: '極地冰原' },
+      { id: 'fish', name: '大白鯊', stages: ['🫧', '🦈'], desc: '海洋世界' },
+      { id: 'dolphin', name: '海豚', stages: ['🫧', '🐬'], desc: '海洋世界' },
+      { id: 'whale', name: '藍鯨', stages: ['🫧', '🐳'], desc: '海洋世界' },
+      { id: 'trex', name: '霸王龍', stages: ['🥚', '🦖'], desc: '史前恐龍' },
+      { id: 'panda', name: '大熊貓', stages: ['🥚', '🐼'], desc: '野生動物' },
+      { id: 'lion', name: '萬獸獅王', stages: ['🥚', '🦁'], desc: '野生動物' }
     ];
 
-    const PET_REQ = [20, 20, 15]; 
+    // 💡 寵物成長階段改為：蛋 (0-20分) ➔ 成體 (20-35分)
+    const PET_REQ = [20, 15]; 
 
     let storedStudents = JSON.parse(localStorage.getItem('cm309_students'));
     let students = (storedStudents && storedStudents.length > 0) ? storedStudents : DEFAULT_STUDENTS;
@@ -603,7 +579,6 @@
       initializeAppState();
     });
 
-    // 💡 新增：監聽頁面顯示事件，從 game.html 返回時自動重新渲染，解決不用按F5的問題
     window.addEventListener('pageshow', (event) => {
       initializeAppState();
     });
@@ -1444,15 +1419,16 @@
       sendToSheets({ category: "每日點名", student: "全班", detail: txt }); alert(`已上傳至 Google 試算表！\n${txt}`);
     }
 
+    // 💡 寵物加分與升級邏輯 (蛋 ➔ 成體)
     function addPetXp(seat, amount) {
       let seatNum = parseInt(seat);
       if (!petState[seatNum]) {
         petState[seatNum] = { petId: 'cat_orange', stage: 1, xp: 0 };
       }
       let p = petState[seatNum];
-      if (p.stage > 3) return; 
+      if (p.stage > 2) return; 
       p.xp += amount;
-      while (p.stage <= 3 && p.xp >= PET_REQ[p.stage - 1]) { 
+      while (p.stage <= 2 && p.xp >= PET_REQ[p.stage - 1]) { 
         p.xp -= PET_REQ[p.stage - 1]; 
         p.stage++; 
       }
@@ -1482,9 +1458,9 @@
         
         const cat = PET_CATALOG.find(c => c.id === p.petId) || PET_CATALOG[0];
         const isMystery = p.stage === 1;
-        const isCompleted = p.stage > 3;
-        const emoji = isMystery ? '🥚' : (cat ? cat.stages[Math.min(p.stage - 1, 2)] : '🐱');
-        let stageName = isCompleted ? '圓滿成長' : (p.stage===1?'蛋':(p.stage===2?'幼體':'成體'));
+        const isCompleted = p.stage > 2;
+        const emoji = isMystery ? '🥚' : (cat ? cat.stages[1] : '🐱');
+        let stageName = isCompleted ? '成體' : '蛋';
         let progressPercent = isCompleted ? 100 : Math.floor((p.xp / PET_REQ[p.stage - 1]) * 100);
         
         div.innerHTML = `<span class="seat">${name}</span><div class="pet-emoji s${p.stage}">${emoji}</div><div class="pet-progress-bg"><div class="pet-progress-fill" style="width:${progressPercent}%;"></div></div><div class="pet-info"><span>${stageName}</span><span>${isCompleted ? 'MAX' : p.xp}</span></div>`;
@@ -1525,11 +1501,11 @@
 
         const cat = PET_CATALOG.find(c => c.id === p.petId) || PET_CATALOG[0];
         const isMystery = p.stage === 1;
-        const isCompleted = p.stage > 3;
-        document.getElementById('petModalEmoji').textContent = isMystery ? '🥚' : (cat ? cat.stages[Math.min(p.stage - 1, 2)] : '🐱');
-        document.getElementById('petModalEmoji').className = `pet-emoji s${Math.min(p.stage, 4)}`;
+        const isCompleted = p.stage > 2;
+        document.getElementById('petModalEmoji').textContent = isMystery ? '🥚' : (cat ? cat.stages[1] : '🐱');
+        document.getElementById('petModalEmoji').className = `pet-emoji s${Math.min(p.stage, 2)}`;
         
-        let stageName = isCompleted ? '圓滿成長' : (p.stage===1?'第一階段：蛋':(p.stage===2?'第二階段：幼體':'第三階段：成體'));
+        let stageName = isCompleted ? '成體 (滿等)' : '第一階段：蛋';
         let displayName = isMystery ? '神秘的蛋' : (cat ? cat.name : '未知寵物');
         document.getElementById('petModalName').textContent = `${displayName} (${stageName})`;
         
@@ -1565,7 +1541,7 @@
       const myPets = petCollection[seat] || [];
       const availablePets = myPets.filter(item => !item.redeemed);
       const badge = document.getElementById('gardenTicketBadgeBelow');
-      badge.innerHTML = `🌟 目前可用成體：${availablePets.length} 隻 (5代幣/隻)｜可累積到獎品區兌換綠點/紅點！`;
+      badge.innerHTML = `🌟 目前可用成體：${availablePets.length} 隻 (5代幣/隻)｜可選 2 隻換 10 代幣，或累積到獎品區！`;
     }
 
     function selectMysteryPet() {
@@ -1612,8 +1588,10 @@
       const seat = currentSelectedStudent.seat;
       const gridAvail = document.getElementById('gardenGridAvailable');
       const gridRedeemed = document.getElementById('gardenGridRedeemed');
+      const confirmArea = document.getElementById('gardenConfirmActionArea');
       gridAvail.innerHTML = '';
       gridRedeemed.innerHTML = '';
+      confirmArea.innerHTML = '';
       
       let rawPets = petCollection[seat] || [];
       const myPets = rawPets.map(p => {
@@ -1629,22 +1607,22 @@
       const summaryBox = document.getElementById('gardenTicketSummary');
       summaryBox.innerHTML = `
         <div>🦁 可用成體：<strong>${availablePets.length} 隻</strong></div>
-        <div style="font-size:0.85rem; color:#b45309;">🎁 已兌換紀念：<strong>${redeemedPets.length} 隻</strong></div>
+        <div style="font-size:0.85rem; color:#b45309;">🎁 已兌換區：<strong>${redeemedPets.length} 隻</strong></div>
       `;
 
       if (availablePets.length === 0) {
-        gridAvail.innerHTML = '<p style="color:#64748b; font-size:0.8rem; text-align:center; grid-column:1/-1; padding:10px;">目前沒有可用的成體動物，快去培育新寵物吧！</p>';
+        gridAvail.innerHTML = '<p style="color:#64748b; font-size:0.8rem; text-align:center; grid-column:1/-1; padding:10px;">目前沒有可用的成體動物。</p>';
       } else {
         availablePets.forEach((item) => {
           const cat = PET_CATALOG.find(c => c.id === item.petId) || PET_CATALOG[0];
           const isSelected = selectedRedeemPairIds.includes(item.uniqueId);
           
           const div = document.createElement('div');
-          div.className = `garden-item ${isSelected ? 'border-2 border-blue-600 bg-blue-50' : ''}`;
+          div.className = `garden-item ${isSelected ? 'border-2 border-blue-600 bg-blue-50 shadow-md' : ''}`;
           div.innerHTML = `
-            <div class="emoji">${cat ? cat.stages[2] : '🐾'}</div>
+            <div class="emoji">${cat ? cat.stages[1] : '🐾'}</div>
             <div class="name">${cat ? cat.name : '神秘動物'}</div>
-            <div style="font-size:0.6rem; color:#2563eb; margin-top:2px; font-weight:700;">${isSelected ? '已選取(2隻換獎)' : '點擊選取'}</div>
+            <div style="font-size:0.6rem; color:#2563eb; margin-top:2px; font-weight:700;">${isSelected ? '✅ 已選取' : '點擊選取'}</div>
           `;
 
           div.onclick = () => {
@@ -1657,16 +1635,19 @@
               }
               selectedRedeemPairIds.push(item.uniqueId);
             }
-
-            if (selectedRedeemPairIds.length === 2) {
-              openRewardModal();
-            } else {
-              renderPetGardenContent();
-            }
+            renderPetGardenContent();
           };
 
           gridAvail.appendChild(div);
         });
+      }
+
+      if (selectedRedeemPairIds.length === 2) {
+        confirmArea.innerHTML = `
+          <button onclick="confirmExchangeTwoPets()" class="bg-amber-500 hover:bg-amber-600 text-white font-black text-sm px-6 py-2.5 rounded-xl shadow-lg border-b-4 border-amber-700 transition-all animate-bounce">
+            ✨ 確認將選取的 2 隻動物移至兌換區，換取 10 個代幣！
+          </button>
+        `;
       }
 
       if (redeemedPets.length === 0) {
@@ -1677,7 +1658,7 @@
           const div = document.createElement('div');
           div.className = 'garden-item is-redeemed';
           div.innerHTML = `
-            <div class="emoji">${cat ? cat.stages[2] : '🐾'}</div>
+            <div class="emoji">${cat ? cat.stages[1] : '🐾'}</div>
             <div class="name">${cat ? cat.name : '神秘動物'}</div>
             <div class="redeemed-badge" title="${item.prize || '已兌換'}">🎁 ${item.prize || '已換獎'}</div>
           `;
@@ -1686,51 +1667,35 @@
       }
     }
 
-    function openRewardModal() {
-      document.getElementById('rewardRedeemModal').classList.add('active');
-    }
-
-    function closeRewardModal() {
-      document.getElementById('rewardRedeemModal').classList.remove('active');
-      selectedRedeemPairIds = [];
-      renderPetGardenContent();
-    }
-
-    function choosePairReward(type) {
+    function confirmExchangeTwoPets() {
       const seat = currentSelectedStudent.seat;
       const pets = petCollection[seat];
       if (selectedRedeemPairIds.length < 2) return;
 
-      let prizeDesc = "";
       let gameData = JSON.parse(localStorage.getItem('cm309_game_data')) || {};
       let gData = gameData[seat] || { extraCoins: 0, gachaCoupons: [], directCoupons: [], coinLogs: [] };
       if (!gameData[seat]) gameData[seat] = gData;
 
-      if (type === 'blue_point') {
-        prizeDesc = "藍點獎勵";
-        gData.directCoupons.push({ name: "藍點獎勵 (2隻動物兌換)", date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
-      } else if (type === 'ticket') {
-        prizeDesc = "扭蛋卷";
-        gData.gachaCoupons.push({ name: "扭蛋卷 (2隻動物兌換)", date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
-      }
+      gData.extraCoins += 10;
+      gData.coinLogs.unshift({ text: `動物園 2 隻動物兌換成代幣 +10`, date: new Date().toLocaleDateString() });
 
       selectedRedeemPairIds.forEach(uid => {
         let pObj = pets.find(p => p.uniqueId === uid);
         if (pObj) {
           pObj.redeemed = true;
-          pObj.prize = prizeDesc;
+          pObj.prize = "兌換 10 代幣";
         }
       });
 
       localStorage.setItem('cm309_game_data', JSON.stringify(gameData));
-      closeRewardModal();
+      selectedRedeemPairIds = [];
       renderPetGardenContent();
       syncToFirebase();
-      alert(`✅ 2隻動物配對成功！已成功換取【${prizeDesc}】，動物已移至「已兌換動物紀念區」！`);
+      alert(`✅ 2隻動物已成功移至兌換區，並增加 10 個代幣！`);
     }
 
     function resetAllPets() {
-      if(confirm("⚠️ 警告：確定要刪除全班寵物與寵物園嗎？")) {
+      if(confirm("⚠️ 警告: 確定要刪除全班寵物與動物園嗎？")) {
         petState = {}; petCollection = {};
         alert("✅ 全班寵物紀錄已清除！");
         if(document.getElementById('tab-pets').classList.contains('active')) renderPetsGrid();
