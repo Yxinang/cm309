@@ -76,7 +76,7 @@
             </div>
         </div>
 
-        <!-- 2. 學生資訊與獎品兌換畫面 (已加上紫點獎勵 5 代幣) -->
+        <!-- 2. 學生資訊與獎品兌換畫面 -->
         <div id="section-shop" class="tab-content hidden py-6">
             <div class="flex justify-between items-center mb-6">
                 <a href="index.html" class="inline-block bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold px-4 py-2 rounded-xl text-sm transition-all">⬅️ 返回班級管理主頁</a>
@@ -106,11 +106,11 @@
                 </div>
             </div>
 
-            <!-- 獎品兌換專區 (新增紫點獎勵 5 代幣) -->
+            <!-- 獎品兌換專區 -->
             <h3 class="text-xl font-bold text-emerald-700 mb-4">🎁 獎品兌換專區</h3>
             <div id="shopList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8"></div>
 
-            <!-- 第一區：直接兌換的獎品卷 -->
+            <!-- 第一區：直接兌換的獎品卷 (累積記錄兌換時間與名稱) -->
             <h3 class="text-xl font-bold text-emerald-700 mb-3">🎟️ 第一區：獎品兌換與領取紀錄</h3>
             <p class="text-xs text-gray-500 mb-3">💡 點擊卡片可輸入領取日期／名稱並點亮黃燈標記已兌換！</p>
             <div id="directCouponsArea" class="bg-emerald-50/60 border-2 border-dashed border-emerald-300 rounded-2xl p-4 min-h-[90px] flex flex-wrap gap-3 mb-8"></div>
@@ -478,7 +478,6 @@
             }
         }
 
-        // 💡 獎品區兌換專區 (已新增 5 代幣換紫點獎勵)
         function renderShop() {
             let container = document.getElementById('shopList');
             container.innerHTML = '';
