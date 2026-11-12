@@ -35,7 +35,7 @@
             </div>
             <div class="bg-amber-100 border-2 border-amber-300 px-4 py-1.5 rounded-xl flex items-center space-x-1 shadow-inner">
                 <span class="text-xl">🪙</span>
-                <span class="text-sm font-bold text-amber-800">可用代幣(動物數)：</span>
+                <span class="text-sm font-bold text-amber-800">可用代幣 (寵物×5)：</span>
                 <span id="studentCoins" class="text-lg font-black text-amber-600">0</span>
             </div>
         </div>
@@ -49,7 +49,7 @@
             <h2 class="text-xl font-bold text-emerald-700">🛍️ 獎品兌換專區</h2>
         </div>
         
-        <p class="text-gray-500 mb-6 text-center">動物園每擁有 1 隻成體動物即等於 1 個代幣，請在下方選擇您想兌換的獎品！</p>
+        <p class="text-gray-500 mb-6 text-center">動物園每擁有 1 隻成體動物即等於 5 個代幣，請在下方選擇您想兌換的獎品！</p>
         
         <!-- 學生詳細資訊卡片 -->
         <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-5 mb-8 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -57,12 +57,12 @@
                 <div class="text-4xl bg-white p-3 rounded-2xl shadow-inner border border-emerald-200">🧑‍🎓</div>
                 <div>
                     <div id="infoStudentName" class="text-xl font-bold text-emerald-900">載入中...</div>
-                    <div class="text-sm text-emerald-700 mt-0.5">代幣計算：動物園成體動物總數 = 可用代幣</div>
+                    <div class="text-sm text-emerald-700 mt-0.5">代幣計算：可用成體動物數 × 5 = 可用代幣</div>
                 </div>
             </div>
             <div class="flex gap-3 text-center">
                 <div class="bg-white px-4 py-2 rounded-xl border border-emerald-200 shadow-sm">
-                    <div class="text-xs text-gray-500 font-bold">成體動物數</div>
+                    <div class="text-xs text-gray-500 font-bold">可用成體動物</div>
                     <div id="infoPets" class="text-lg font-black text-indigo-600">0 隻</div>
                 </div>
                 <div class="bg-white px-4 py-2 rounded-xl border border-amber-200 shadow-sm">
@@ -95,12 +95,12 @@
         </div>
     </div>
 
-    <!-- 兌換輸入名稱專屬 Modal (只需輸入獎品內容) -->
+    <!-- 兌換輸入名稱專屬 Modal -->
     <div id="customPrizeModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full border-4 border-emerald-300 text-center">
             <h3 id="modalTitle" class="text-lg font-bold text-emerald-800 mb-2">🎁 獎品兌換</h3>
             <p class="text-sm text-gray-500 mb-4">請輸入您想要兌換的獎品內容：</p>
-            <input type="text" id="customPrizeInput" placeholder="例如: 貼紙、小禮物..." class="w-full border-2 border-emerald-300 rounded-xl px-3 py-2 text-center font-bold text-emerald-800 mb-4 focus:outline-none">
+            <input type="text" id="customPrizeInput" placeholder="輸入獎品內容..." class="w-full border-2 border-emerald-300 rounded-xl px-3 py-2 text-center font-bold text-emerald-800 mb-4 focus:outline-none">
             <div class="flex space-x-2">
                 <button onclick="confirmCustomBuy()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl flex-1 shadow">確認兌換</button>
                 <button onclick="closeCustomModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold px-4 py-2 rounded-xl">取消</button>
@@ -175,26 +175,33 @@
             updateView();
         }
 
-        // 💡 抓取動物園內「尚未兌換」的成體動物總數作為代幣
-        function getTotalCoins(seatNum) {
+        // 💡 抓取動物園內「尚未兌換」的成體動物總數
+        function getAvailablePetCount(seatNum) {
             let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
             let myPets = petCollection[seatNum] || [];
             return myPets.filter(p => !p.redeemed).length;
         }
 
-        // 💡 扣除動物園內的成體動物（每花 1 代幣 = 消耗 1 隻成體動物標記為 redeemed）
+        // 💡 核心計算：一隻寵物 = 5 個代幣
+        function getTotalCoins(seatNum) {
+            let petCount = getAvailablePetCount(seatNum);
+            return petCount * 5;
+        }
+
+        // 💡 扣除代幣：每 5 個代幣扣除 1 隻動物園中的成體動物標記為 redeemed
         function deductAnimalCoins(cost) {
             let seatNum = getCurrentSeatNum();
-            let availableCoins = getTotalCoins(seatNum);
-            if (availableCoins < cost) return false;
+            let totalCoins = getTotalCoins(seatNum);
+            if (totalCoins < cost) return false;
 
+            let petsToRedeem = Math.ceil(cost / 5);
             let petCollection = JSON.parse(localStorage.getItem('cm309_pet_collection')) || {};
             let myPets = petCollection[seatNum] || [];
             let available = myPets.filter(p => !p.redeemed);
 
             let redeemedCount = 0;
             for (let p of available) {
-                if (redeemedCount < cost) {
+                if (redeemedCount < petsToRedeem) {
                     p.redeemed = true;
                     p.prize = "代幣兌換扣除";
                     redeemedCount++;
@@ -217,20 +224,17 @@
         function updateView() {
             let seatNum = getCurrentSeatNum();
             let studentName = students[currentSeatIndex] || `${seatNum}號`;
+            let petCount = getAvailablePetCount(seatNum);
             let totalCoins = getTotalCoins(seatNum);
 
             document.getElementById('studentCoins').textContent = totalCoins;
             document.getElementById('infoStudentName').textContent = studentName;
-            document.getElementById('infoPets').textContent = totalCoins + " 隻";
+            document.getElementById('infoPets').textContent = petCount + " 隻";
             document.getElementById('infoCoins').textContent = totalCoins + " 枚";
 
             let gData = getStudentGameData(seatNum);
             renderShop(totalCoins);
             renderCoupons(gData.directCoupons);
-        }
-
-        function switchTab(tabName) {
-            // 保留單一標籤切換
         }
 
         function showRewardPopup(prizeName) {
@@ -243,7 +247,7 @@
             document.getElementById('rewardPopupModal').classList.add('hidden');
         }
 
-        // 💡 獎品兌換清單渲染 (紫點5、藍點10、綠點15、紅點25、作業減免30、免抄聯絡簿40、指定座位50)
+        // 💡 獎品兌換選項渲染 (紫點5、藍點10、綠點15、紅點25、作業減免30、免抄聯絡簿40、指定座位50)
         function renderShop(totalCoins) {
             let container = document.getElementById('shopList');
             container.innerHTML = '';
@@ -285,7 +289,6 @@
                 return;
             }
 
-            // 所有獎品按下後皆可自訂輸入獎品內容
             document.getElementById('customPrizeModal').classList.remove('hidden');
             document.getElementById('customPrizeInput').value = '';
             document.getElementById('customPrizeInput').dataset.prizeType = itemName;
@@ -311,7 +314,6 @@
             executeBuy(`${prizeType}：${customContent}`, cost);
         }
 
-        // 💡 執行代幣扣除與下方紀錄累計
         function executeBuy(fullPrizeName, cost) {
             let success = deductAnimalCoins(cost);
             if (!success) {
@@ -324,7 +326,6 @@
             
             let nowTimeStr = new Date().toLocaleString('zh-TW', { hour12: false, month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-            // 推進下方兌換區紀錄
             gData.directCoupons.push({ 
                 name: fullPrizeName, 
                 cost: cost, 
@@ -337,7 +338,6 @@
             updateView();
         }
 
-        // 💡 渲染下方兌換紀錄區 (顯示兌換時間、花費點數、獎品內容)
         function renderCoupons(couponsArray) {
             let container = document.getElementById('directCouponsArea');
             container.innerHTML = '';
