@@ -50,7 +50,7 @@
             <button onclick="switchTab('shop')" id="tab-shop" class="tab-btn px-4 py-2.5 rounded-2xl font-bold text-base transition-all bg-gray-100 text-gray-600 hover:bg-emerald-100">🛍️ 學生個人資訊與獎品兌換</button>
         </div>
 
-        <!-- 1. 三種扭蛋機畫面 (每次遊玩消耗 10 代幣) -->
+        <!-- 1. 三種扭蛋機畫面 -->
         <div id="section-gacha" class="tab-content text-center py-6">
             <h2 class="text-2xl font-bold text-emerald-700 mb-2">✨ 三大專屬扭蛋機 ✨</h2>
             <p class="text-gray-500 mb-2">每次遊玩需消耗 <span class="font-bold text-amber-600">10 個代幣</span>（動物園成體數 × 5），請選擇扭蛋機類型：</p>
@@ -269,14 +269,13 @@
             return myPets.filter(p => !p.redeemed).length;
         }
 
-        // 💡 核心代幣計算：動物園可用成體數 × 5 + 額外代幣
         function getTotalCoins(seatNum) {
             let petCount = getAvailablePetCount(seatNum);
             let gData = getStudentGameData(seatNum);
             return (petCount * 5) + (gData.extraCoins || 0);
         }
 
-        // 💡 確實扣除代幣（支援動物園成體與額外代幣的雙向扣款）
+        // 💡 堅固的代幣扣除機制：自動同步扣除動物園成體與額外代幣
         function deductCoins(amount) {
             let seatNum = getCurrentSeatNum();
             let total = getTotalCoins(seatNum);
@@ -301,7 +300,7 @@
                 for (let p of available) {
                     if (redeemedCount < petsToRedeem) {
                         p.redeemed = true;
-                        p.prize = "扭蛋/兌換扣除";
+                        p.prize = "代幣扣除";
                         redeemedCount++;
                     }
                 }
@@ -421,7 +420,7 @@
             alert("✅ 獎品解釋說明已成功儲存！");
         }
 
-        // 💡 修正：扭蛋遊玩時確實扣除 10 代幣，並將獎品紀錄寫入下方第二區
+        // 💡 轉扭蛋邏輯：確實扣除 10 代幣，並將獎品寫入第二區
         function playGacha() {
             let seatNum = getCurrentSeatNum();
             let totalCoins = getTotalCoins(seatNum);
@@ -467,7 +466,6 @@
                 showRewardPopup(rewardName);
                 updateView();
             } else {
-                // 確實推入第二區扭蛋獎品紀錄
                 gData.gachaCoupons.push({ name: `${conf.title}：${rewardName}`, date: nowTimeStr, timeStr: "", isUsed: false });
                 saveGameData();
                 document.getElementById('gachaResult').innerHTML = `🎉 恭喜抽中：<span class="text-amber-600 font-black">${rewardName}</span>！`;
