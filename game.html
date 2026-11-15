@@ -269,14 +269,14 @@
             return myPets.filter(p => !p.redeemed).length;
         }
 
-        // 💡 核心代幣計算：成體動物總數 × 5 = 可用代幣
+        // 💡 核心代幣計算：動物園可用成體數 × 5 + 額外代幣
         function getTotalCoins(seatNum) {
             let petCount = getAvailablePetCount(seatNum);
             let gData = getStudentGameData(seatNum);
             return (petCount * 5) + (gData.extraCoins || 0);
         }
 
-        // 💡 智慧扣款：優先扣除額外代幣，不足時自動扣除動物園成體（每隻折抵 5 代幣）
+        // 💡 確實扣除代幣（支援動物園成體與額外代幣的雙向扣款）
         function deductCoins(amount) {
             let seatNum = getCurrentSeatNum();
             let total = getTotalCoins(seatNum);
@@ -301,7 +301,7 @@
                 for (let p of available) {
                     if (redeemedCount < petsToRedeem) {
                         p.redeemed = true;
-                        p.prize = "代幣扣除";
+                        p.prize = "扭蛋/兌換扣除";
                         redeemedCount++;
                     }
                 }
@@ -334,7 +334,6 @@
             document.getElementById('infoPets').textContent = pCount + " 隻";
             document.getElementById('infoCoins').textContent = totalCoins + " 枚";
 
-            // 💡 動態控制扭蛋機按鈕：代幣小於 10 枚即鎖定
             let playBtn = document.getElementById('gachaPlayBtn');
             if (totalCoins < 10) {
                 playBtn.disabled = true;
@@ -422,6 +421,7 @@
             alert("✅ 獎品解釋說明已成功儲存！");
         }
 
+        // 💡 修正：扭蛋遊玩時確實扣除 10 代幣，並將獎品紀錄寫入下方第二區
         function playGacha() {
             let seatNum = getCurrentSeatNum();
             let totalCoins = getTotalCoins(seatNum);
@@ -456,6 +456,8 @@
             }
 
             let rewardName = chosenItem.name;
+            let nowTimeStr = new Date().toLocaleString('zh-TW', { hour12: false, month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
             if (rewardName.includes("代幣")) {
                 let match = rewardName.match(/\d+/);
                 let coinVal = match ? parseInt(match[0]) : 5;
@@ -465,7 +467,8 @@
                 showRewardPopup(rewardName);
                 updateView();
             } else {
-                gData.gachaCoupons.push({ name: `${rewardName}`, date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
+                // 確實推入第二區扭蛋獎品紀錄
+                gData.gachaCoupons.push({ name: `${conf.title}：${rewardName}`, date: nowTimeStr, timeStr: "", isUsed: false });
                 saveGameData();
                 document.getElementById('gachaResult').innerHTML = `🎉 恭喜抽中：<span class="text-amber-600 font-black">${rewardName}</span>！`;
                 showRewardPopup(rewardName);
@@ -473,7 +476,6 @@
             }
         }
 
-        // 💡 獎品區渲染 (支援紫點5、藍點10、綠點15、紅點25等)
         function renderShop(totalCoins) {
             let container = document.getElementById('shopList');
             container.innerHTML = '';
@@ -548,10 +550,12 @@
 
             let seatNum = getCurrentSeatNum();
             let gData = getStudentGameData(seatNum);
-            gData.directCoupons.push({ name: prizeName, date: new Date().toLocaleDateString(), timeStr: "", isUsed: false });
+            let nowTimeStr = new Date().toLocaleString('zh-TW', { hour12: false, month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+            gData.directCoupons.push({ name: prizeName, date: nowTimeStr, timeStr: "", isUsed: false });
 
             saveGameData();
-            alert(`成功兌換【${prizeName}】！`);
+            showRewardPopup(prizeName);
             updateView();
         }
 
