@@ -261,13 +261,11 @@
             updateView();
         }
 
-        // 💡 取得學生目前擁有的總代幣（來自管理區手動兌換累積的 extraCoins）
         function getTotalCoins(seatNum) {
             let gData = getStudentGameData(seatNum);
             return gData.extraCoins || 0;
         }
 
-        // 💡 扣除代幣
         function deductCoins(amount) {
             let seatNum = getCurrentSeatNum();
             let total = getTotalCoins(seatNum);
@@ -435,7 +433,6 @@
             }
         }
 
-        // 💡 獎品區渲染 (紫點5、藍點10、綠點15、紅點25、作業減免30、免抄聯絡簿40、指定座位50)
         function renderShop(totalCoins) {
             let container = document.getElementById('shopList');
             container.innerHTML = '';
