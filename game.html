@@ -239,6 +239,7 @@
                 opt.textContent = name;
                 select.appendChild(opt);
             });
+            currentSeatIndex = 0;
             getStudentGameData(getCurrentSeatNum());
             updateView();
         }
@@ -258,7 +259,8 @@
         }
 
         function switchStudent() {
-            currentSeatIndex = parseInt(document.getElementById('studentSelect').value);
+            let sel = document.getElementById('studentSelect');
+            currentSeatIndex = parseInt(sel.value) || 0;
             getStudentGameData(getCurrentSeatNum());
             updateView();
         }
@@ -275,7 +277,7 @@
             return (petCount * 5) + (gData.extraCoins || 0);
         }
 
-        // 💡 堅固的代幣扣除機制：自動同步扣除動物園成體與額外代幣
+        // 💡 絕對安全的扣款機制：強制扣除可用成體動物或額外代幣
         function deductCoins(amount) {
             let seatNum = getCurrentSeatNum();
             let total = getTotalCoins(seatNum);
@@ -420,7 +422,7 @@
             alert("✅ 獎品解釋說明已成功儲存！");
         }
 
-        // 💡 轉扭蛋邏輯：確實扣除 10 代幣，並將獎品寫入第二區
+        // 💡 轉扭蛋觸發函式
         function playGacha() {
             let seatNum = getCurrentSeatNum();
             let totalCoins = getTotalCoins(seatNum);
@@ -474,6 +476,7 @@
             }
         }
 
+        // 💡 渲染獎品兌換選項
         function renderShop(totalCoins) {
             let container = document.getElementById('shopList');
             container.innerHTML = '';
@@ -539,6 +542,7 @@
             executeBuy(`${prizeType}：${customName}`, cost);
         }
 
+        // 💡 執行獎品兌換
         function executeBuy(prizeName, cost) {
             let success = deductCoins(cost);
             if (!success) {
