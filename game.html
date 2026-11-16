@@ -211,7 +211,7 @@
                     { name: "桌遊保管1日", prob: 25, desc: "獲得班級桌遊一日優先保管權" },
                     { name: "可帶自己的桌遊", prob: 25, desc: "允許帶個人喜愛的桌遊到校與同學分享" },
                     { name: "代幣五個", prob: 40, desc: "直接獲得 5 枚代幣獎勵" },
-                    { name: "和老師討論增加想玩的桌遊", prob: 3, desc: "可以和老師討論新增桌遊，在合理範圍內老師可增加該桌遊項目。" }
+                    { name: "和老師討論增加想玩的桌遊", prob: 3, desc: "可以電子或口頭討論新增桌遊" }
                 ]
             }
         };
@@ -236,8 +236,16 @@
                 select.appendChild(opt);
             });
             currentSeatIndex = 0;
-            getStudentGameData(getCurrentSeatNum());
+            loadGameDataForAll();
             updateView();
+        }
+
+        function loadGameDataForAll() {
+            gameData = JSON.parse(localStorage.getItem('cm309_game_data')) || {};
+            let seatNum = getCurrentSeatNum();
+            if (!gameData[seatNum]) {
+                gameData[seatNum] = { extraCoins: 0, directCoupons: [], gachaCoupons: [] };
+            }
         }
 
         function getCurrentSeatNum() {
@@ -245,7 +253,6 @@
         }
 
         function getStudentGameData(seatNum) {
-            gameData = JSON.parse(localStorage.getItem('cm309_game_data')) || {};
             if (!gameData[seatNum]) {
                 gameData[seatNum] = { extraCoins: 0, directCoupons: [], gachaCoupons: [] };
             }
@@ -257,29 +264,30 @@
         function switchStudent() {
             let sel = document.getElementById('studentSelect');
             currentSeatIndex = parseInt(sel.value) || 0;
-            getStudentGameData(getCurrentSeatNum());
             updateView();
         }
 
+        // 💡 取得目前座號學生的可用代幣總數
         function getTotalCoins(seatNum) {
             let gData = getStudentGameData(seatNum);
-            return gData.extraCoins || 0;
+            return parseInt(gData.extraCoins) || 0;
         }
 
+        // 💡 確實扣除代幣並即時更新存檔
         function deductCoins(amount) {
             let seatNum = getCurrentSeatNum();
             let total = getTotalCoins(seatNum);
             if (total < amount) return false;
 
             let gData = getStudentGameData(seatNum);
-            gData.extraCoins -= amount;
+            gData.extraCoins = total - amount;
+            
             saveGameData();
             return true;
         }
 
         function saveGameData() {
             let seatNum = getCurrentSeatNum();
-            gameData[seatNum] = getStudentGameData(seatNum);
             localStorage.setItem('cm309_game_data', JSON.stringify(gameData));
             syncToFirebase();
         }
@@ -380,6 +388,7 @@
             alert("✅ 獎品解釋說明已成功儲存！");
         }
 
+        // 💡 轉扭蛋：確實扣除 10 代幣，並將獎品寫入第二區紀錄
         function playGacha() {
             let seatNum = getCurrentSeatNum();
             let totalCoins = getTotalCoins(seatNum);
@@ -433,6 +442,7 @@
             }
         }
 
+        // 💡 獎品區渲染
         function renderShop(totalCoins) {
             let container = document.getElementById('shopList');
             container.innerHTML = '';
@@ -498,6 +508,7 @@
             executeBuy(`${prizeType}：${customName}`, cost);
         }
 
+        // 💡 執行獎品兌換：扣除代幣並即時寫入第一區紀錄
         function executeBuy(prizeName, cost) {
             let success = deductCoins(cost);
             if (!success) {
