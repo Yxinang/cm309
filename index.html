@@ -464,12 +464,13 @@
         </div>
       </div>
 
+      <!-- 💡 三選一換蛋畫面：採用不同的可愛圖示與名稱 -->
       <div id="petSelectView" style="display:none; text-align:center;">
         <p style="font-size:1.05rem; margin-bottom:14px; color:#1e40af; font-weight:700;">🎉 恭喜成體畢業！請從下方隨機三顆神祕蛋中挑選一顆孵化：</p>
         <div class="pet-select-grid" id="petSelectGrid"></div>
       </div>
 
-      <!-- 個人動物園分區 (點選成體動物轉換成代幣，1隻=5代幣，換過後不返回不消失於紀念區) -->
+      <!-- 個人動物園分區 -->
       <div id="petGardenView" style="display:none; text-align:left;">
         <div id="gardenTicketSummary" class="ticket-summary-box"></div>
         
@@ -531,6 +532,14 @@
       { id: 'bird_bluemagpie', name: '臺灣藍鵲', stages: ['🥚', '🐦'], desc: '長尾山娘' },
       { id: 'flower_sunflower', name: '向日葵', stages: ['🌱', '🌻'], desc: '朝氣蓬勃陽光花' },
       { id: 'tree_cypress', name: '紅檜神木', stages: ['🌱', '🌲'], desc: '千年守護神木' }
+    ];
+
+    const EGG_CHOICES_TEMPLATE = [
+      { emoji: '🥚', name: '白玉神祕蛋' },
+      { emoji: '🎁', name: '驚喜寶箱蛋' },
+      { emoji: '🔮', name: '夢幻水晶蛋' },
+      { emoji: '🌟', name: '閃亮金光蛋' },
+      { emoji: '🍀', name: '幸運草魔蛋' }
     ];
 
     const PET_REQ = [20, 20]; 
@@ -1536,6 +1545,7 @@
       badge.innerHTML = `🌟 可點選換代幣成體：${availablePets.length} 隻 (1隻 = 5代幣)`;
     }
 
+    // 💡 隨機三選一換蛋：從不同的範本中隨機挑選 3 個不同的圖示與名稱
     function openGachaSelection() {
       const seat = currentSelectedStudent.seat;
       const p = petState[seat];
@@ -1547,20 +1557,22 @@
       document.getElementById('petSelectView').style.display = 'block';
       document.getElementById('btnViewGarden').style.display = 'none';
 
-      let shuffled = [...PET_CATALOG].sort(() => 0.5 - Math.random());
-      let choices = shuffled.slice(0, 3);
+      let shuffledTemplates = [...EGG_CHOICES_TEMPLATE].sort(() => 0.5 - Math.random());
+      let chosenEggs = shuffledTemplates.slice(0, 3);
+      let shuffledPets = [...PET_CATALOG].sort(() => 0.5 - Math.random());
 
       let grid = document.getElementById('petSelectGrid');
       grid.innerHTML = '';
-      choices.forEach(pet => {
+      chosenEggs.forEach((egg, idx) => {
+        let assignedPet = shuffledPets[idx];
         let card = document.createElement('div');
         card.className = 'pet-card';
         card.innerHTML = `
-          <div class="emoji">🥚</div>
-          <div class="name">神秘神祕蛋</div>
+          <div class="emoji">${egg.emoji}</div>
+          <div class="name">${egg.name}</div>
           <div style="font-size:0.7rem; color:#64748b; margin-top:2px;">點擊孵化</div>
         `;
-        card.onclick = () => confirmGachaEgg(seat, pet.id);
+        card.onclick = () => confirmGachaEgg(seat, assignedPet.id);
         grid.appendChild(card);
       });
     }
