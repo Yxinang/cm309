@@ -115,7 +115,11 @@
       justify-content: center; align-items: center; gap: 6px; cursor: grab; user-select: none; transition: all 0.15s;
       text-align: center;
     }
-    .drag-tag .btn-remove-tag { color: #ef4444; cursor: pointer; font-size: 0.75rem; margin-left: 2px; }
+    .drag-tag .btn-remove-tag {
+      color: #ef4444; cursor: pointer; font-size: 0.8rem; padding: 2px 4px;
+      border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .drag-tag .btn-remove-tag:hover { background: #fee2e2; color: #b91c1c; }
     
     .drag-tag.is-corrected, .drag-tag.is-clean-done {
       background: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important;
@@ -248,7 +252,7 @@
         <div id="correctionBoardSection" style="display:none;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
             <p style="font-size:0.85rem; color:#64748b;">
-              <i class="fa-solid fa-circle-info"></i> 每 10 格換行。<strong>點擊座號亮綠燈表示完成，並自動沉底</strong>。
+              <i class="fa-solid fa-circle-info"></i> 每 10 格換行。<strong>點擊座號亮綠燈表示完成，並自動沉底</strong>；點擊右側 <strong>✕</strong> 可刪除該筆訂正座號。
             </p>
             <button class="btn-upload" style="background:#2563eb; font-size:0.8rem; padding:5px 12px;" onclick="addCorrectionBox()"><i class="fa-solid fa-plus"></i> 新增訂正分類框</button>
           </div>
@@ -464,13 +468,11 @@
         </div>
       </div>
 
-      <!-- 💡 三選一換蛋畫面：採用不同的可愛圖示與名稱 -->
       <div id="petSelectView" style="display:none; text-align:center;">
         <p style="font-size:1.05rem; margin-bottom:14px; color:#1e40af; font-weight:700;">🎉 恭喜成體畢業！請從下方隨機三顆神祕蛋中挑選一顆孵化：</p>
         <div class="pet-select-grid" id="petSelectGrid"></div>
       </div>
 
-      <!-- 個人動物園分區 -->
       <div id="petGardenView" style="display:none; text-align:left;">
         <div id="gardenTicketSummary" class="ticket-summary-box"></div>
         
@@ -1124,6 +1126,7 @@
       const boxesContainer = document.getElementById('correctionBoxesContainer');
       boxesContainer.innerHTML = '';
       correctionBoxes.forEach((box, bIdx) => {
+        if (!Array.isArray(box.students)) box.students = [];
         box.students.sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1));
 
         const col = document.createElement('div');
@@ -1131,7 +1134,7 @@
         col.innerHTML = `
           <div style="display:flex; gap:6px; margin-bottom:8px; align-items:center;">
             <input type="text" class="form-control" style="font-weight:700; padding:4px 8px; font-size:0.9rem;" value="${box.title}" onchange="updateCorrectionBoxTitle(${bIdx}, this.value)">
-            <button onclick="removeCorrectionBox(${bIdx})" style="background:transparent; border:none; color:#ef4444; cursor:pointer; padding:4px;"><i class="fa-solid fa-trash-can"></i></button>
+            <button type="button" onclick="removeCorrectionBox(${bIdx})" style="background:transparent; border:none; color:#ef4444; cursor:pointer; padding:4px;" title="刪除此分類框"><i class="fa-solid fa-trash-can"></i></button>
           </div>
           <div class="clean-list" id="corr-box-${box.id}"></div>
         `;
@@ -1142,12 +1145,31 @@
           const tag = document.createElement('div');
           const isDone = !!st.done;
           tag.className = `drag-tag ${isDone ? 'is-corrected' : ''}`;
-          tag.innerHTML = `
-            <span onclick="toggleStudentCorrDone(${bIdx}, ${sIdx})" style="cursor:pointer; display:inline-block; padding:0 2px;">
-              ${st.name}
-            </span>
-            <i class="fa-solid fa-xmark btn-remove-tag" onclick="removeStudentFromCorr(${bIdx}, ${sIdx})"></i>
-          `;
+          
+          const labelSpan = document.createElement('span');
+          labelSpan.textContent = st.name;
+          labelSpan.style.cursor = 'pointer';
+          labelSpan.style.padding = '0 2px';
+          labelSpan.onclick = (e) => {
+            e.stopPropagation();
+            toggleStudentCorrDone(bIdx, sIdx);
+          };
+
+          const removeBtn = document.createElement('button');
+          removeBtn.type = 'button';
+          removeBtn.className = 'btn-remove-tag';
+          removeBtn.style.background = 'transparent';
+          removeBtn.style.border = 'none';
+          removeBtn.title = `移除 ${st.name}`;
+          removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+          removeBtn.onclick = (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            removeStudentFromCorr(bIdx, sIdx);
+          };
+
+          tag.appendChild(labelSpan);
+          tag.appendChild(removeBtn);
           listEl.appendChild(tag);
         });
 
@@ -1158,7 +1180,7 @@
             const seat = evt.item.getAttribute('data-seat');
             const name = evt.item.getAttribute('data-name');
             evt.item.remove();
-            if (!box.students.some(s => s.seat == seat)) {
+            if (!box.students.some(s => String(s.seat) === String(seat))) {
               box.students.push({ seat, name, done: false });
               renderCorrectionBoard();
               syncToFirebase();
@@ -1169,6 +1191,7 @@
     }
 
     function toggleStudentCorrDone(boxIdx, stIdx) {
+      if (!correctionBoxes[boxIdx] || !correctionBoxes[boxIdx].students[stIdx]) return;
       correctionBoxes[boxIdx].students[stIdx].done = !correctionBoxes[boxIdx].students[stIdx].done;
       renderCorrectionBoard();
       syncToFirebase();
@@ -1182,6 +1205,7 @@
     }
 
     function removeCorrectionBox(idx) {
+      if (!correctionBoxes[idx]) return;
       if (confirm(`確定刪除「${correctionBoxes[idx].title}」分類框嗎？`)) {
         correctionBoxes.splice(idx, 1);
         renderCorrectionBoard();
@@ -1190,12 +1214,15 @@
     }
 
     function updateCorrectionBoxTitle(idx, val) {
+      if (!correctionBoxes[idx]) return;
       correctionBoxes[idx].title = val.trim() || '未命名作業';
       syncToFirebase();
     }
 
     function removeStudentFromCorr(boxIdx, stIdx) {
-      correctionBoxes[idx].students.splice(stIdx, 1);
+      if (!correctionBoxes[boxIdx] || !Array.isArray(correctionBoxes[boxIdx].students)) return;
+      if (stIdx < 0 || stIdx >= correctionBoxes[boxIdx].students.length) return;
+      correctionBoxes[boxIdx].students.splice(stIdx, 1);
       renderCorrectionBoard();
       syncToFirebase();
     }
@@ -1545,7 +1572,6 @@
       badge.innerHTML = `🌟 可點選換代幣成體：${availablePets.length} 隻 (1隻 = 5代幣)`;
     }
 
-    // 💡 隨機三選一換蛋：從不同的範本中隨機挑選 3 個不同的圖示與名稱
     function openGachaSelection() {
       const seat = currentSelectedStudent.seat;
       const p = petState[seat];
